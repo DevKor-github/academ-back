@@ -32,19 +32,11 @@ public class LoginService
         // 이메일 중복 체크
         profileRepository.findByEmail(dto.getEmail())
                 .ifPresent(user -> {
-                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail() + "\"는 이미 사용 중입니다.");
+                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail() + "는 이미 사용 중입니다.");
                 });
 
         // DTO -> Entity 변환
-        Profile profile = Profile.builder()
-                .email(dto.getEmail())
-                .password(encoder.encode(dto.getPassword()))
-                .username(dto.getUsername())
-                .studentId(dto.getStudentId())
-                .grade(dto.getGrade())
-                .semester(dto.getSemester())
-                .department(dto.getDepartment())
-                .build();
+        Profile profile = dto.toEntity();
 
         // 해당 Entity를 데이터베이스에 저장
         profileRepository.save(profile);
