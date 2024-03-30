@@ -1,4 +1,4 @@
-# 데이터베이스(MySQL) 연동
+## 데이터베이스(MySQL) 연동
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -13,4 +13,14 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        format_sql: true
+        format_sql: true  # JPA 로그 이쁘게 구조화
+
+## JPA 로깅 설정
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug        # 디버그 레벨로 쿼리 출력
+        orm:
+          jdbc:
+            bind: trace   # 쿼리의 파라미터 출력

@@ -13,13 +13,14 @@ public class Profile
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long id;
 
-    @Column private String email;
-    @Column private String password;
-    @Column private String username;
-    @Column private String studentId;
-    @Column private int grade;
-    @Column private int semester;
-    @Column private String department;
+    @Column(nullable = false) private String email;
+    @Column(nullable = false) private String password;
+    @Column(nullable = false) private String username;
+    @Column(nullable = false) private String studentId;
+    @Column(nullable = false) private int grade;
+    @Column(nullable = false) private int semester;
+    @Column(nullable = false) private String department;
 }

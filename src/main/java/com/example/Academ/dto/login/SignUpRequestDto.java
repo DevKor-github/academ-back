@@ -17,4 +17,17 @@ public class SignUpRequestDto
     private int grade;
     private int semester;
     private String department;
+
+    public Profile toEntity()
+    {
+        return Profile.builder()
+                .email(email)
+                .password(password)
+                .username(username)
+                .studentId(studentId)
+                .grade(grade)
+                .semester(semester)
+                .department(department)
+                .build();
+    };
 }

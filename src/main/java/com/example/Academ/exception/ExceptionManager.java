@@ -13,6 +13,6 @@ public class ExceptionManager
     public ResponseEntity<String> appExceptionHandler(AppException e)
     {
         return ResponseEntity.status(e.getErrorCode().getHttpStatus())
-                .body(e.getErrorCode() + ": \"" + e.getMessage());
+                .body(e.getErrorCode() + ": " + e.getMessage());
     }
 }
