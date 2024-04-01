@@ -21,8 +21,9 @@ public class SecurityConfig
                 .httpBasic(HttpBasicConfigurer::disable)
                 .csrf(CsrfConfigurer::disable)
                 .cors(Customizer.withDefaults())
+                .securityMatcher("/admin/**")
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/login", "/api/login/signup").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

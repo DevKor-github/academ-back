@@ -1,8 +1,11 @@
 package com.example.Devkor_project.controller;
 
+import com.example.Devkor_project.dto.LoginRequestDto;
 import com.example.Devkor_project.dto.SignUpRequestDto;
 import com.example.Devkor_project.service.LoginService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,11 +23,29 @@ public class LoginController
     @Autowired
     private LoginService loginService;
 
-    // 로그인
-    @PostMapping()
-    public ResponseEntity<String> login()
+    /*
+        < 로그인 Controller >
+        LoginRequestDto를 받아서 service로 예외를 확인합니다.
+        (해당 이메일로 생성된 계정이 존재하는지, 비밀번호가 일치하는지 확인)
+        예외가 발생하지 않으면 세션을
+    */
+    @PostMapping("")
+    public ResponseEntity<String> login(@RequestBody LoginRequestDto dto,
+                                        HttpServletRequest request)
     {
-        return null;
+        log.info("hello");
+        // 에러 여부 확인
+        loginService.login(dto);
+
+        // 세션 발행
+        HttpSession session = request.getSession();
+        session.setAttribute("email", dto.getEmail());
+        if (dto.isSaved())
+            session.setMaxInactiveInterval(1800);
+        else
+            session.setMaxInactiveInterval(1800000);
+
+        return ResponseEntity.status(HttpStatus.OK).body("로그인이 정상적으로 수행되었습니다.");
     }
 
     /*

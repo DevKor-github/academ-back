@@ -3,12 +3,11 @@ package com.example.Devkor_project.controller;
 import com.example.Devkor_project.dto.SignUpRequestDto;
 import com.example.Devkor_project.entity.Profile;
 import com.example.Devkor_project.exception.AppException;
-import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +34,16 @@ class LoginControllerTest {
             "test"
     );
 
+    /*
+    ============================================
+        회원가입 테스트
+    ============================================
+    */
+
     // 회원가입 성공 시뮬레이션 테스트
     @Test
     @Transactional
+    @DisplayName("회원가입 성공")
     void signUp_success()
     {
         // 예상
@@ -77,4 +83,10 @@ class LoginControllerTest {
         // 비교하여 검증
         assertEquals(expectedResult, actualResult);
     }
+
+    /*
+    ============================================
+        로그인 테스트
+    ============================================
+    */
 }

@@ -1,4 +1,15 @@
 package com.example.Devkor_project.dto;
 
-public class LoginRequestDto {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
+
+@AllArgsConstructor
+@ToString
+@Getter
+public class LoginRequestDto
+{
+    private String email;
+    private String password;
+    private boolean isSaved;
 }
