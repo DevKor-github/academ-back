@@ -6,6 +6,7 @@ import com.example.Devkor_project.service.LoginService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,13 +28,12 @@ public class LoginController
         < 로그인 Controller >
         LoginRequestDto를 받아서 service로 예외를 확인합니다.
         (해당 이메일로 생성된 계정이 존재하는지, 비밀번호가 일치하는지 확인)
-        예외가 발생하지 않으면 세션을
+        예외가 발생하지 않으면 세션을 발행합니다.
     */
     @PostMapping("")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDto dto,
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequestDto dto,
                                         HttpServletRequest request)
     {
-        log.info("hello");
         // 에러 여부 확인
         loginService.login(dto);
 
@@ -55,7 +55,7 @@ public class LoginController
         해당 이메일이 사용 중이지 않으면, 회원가입 성공 메시지(201 Created)를 반환합니다.
     */
     @PostMapping("/signup")
-    public ResponseEntity<String> signUp(@RequestBody SignUpRequestDto dto)
+    public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequestDto dto)
     {
         loginService.signUp(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body("회원가입을 성공하였습니다.");

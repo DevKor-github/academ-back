@@ -1,92 +1,102 @@
 package com.example.Devkor_project.controller;
 
-import com.example.Devkor_project.dto.SignUpRequestDto;
-import com.example.Devkor_project.entity.Profile;
-import com.example.Devkor_project.exception.AppException;
-import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
+@AutoConfigureMockMvc
+@Nested
+@DisplayName("LoginController 테스트")
 class LoginControllerTest {
 
     @Autowired
-    LoginController loginController;
+    private MockMvc mockMvc;
 
-    @Autowired
-    ProfileRepository profileRepository;
+    // Arrange
+    String signUpRequestJson = "{" +
+            "\"email\":\"test@gmail.com\"," +
+            "\"password\":\"test\"," +
+            "\"username\":\"test\"," +
+            "\"studentId\":\"0000000000\"," +
+            "\"grade\":1," +
+            "\"semester\":1," +
+            "\"department\":\"test\"" +
+            "}";
 
-    // 테스트용 DTO
-    SignUpRequestDto testDto = new SignUpRequestDto(
-            "test@gmail.com",
-            "test",
-            "test",
-            "0000000000",
-            1,
-            1,
-            "test"
-    );
+    String loginRequestJson = "{" +
+            "\"email\":\"test@gmail.com\"," +
+            "\"password\":\"test\"," +
+            "\"isSaved\":true" +
+            "}";
 
-    /*
-    ============================================
-        회원가입 테스트
-    ============================================
-    */
+    @Nested
+    @DisplayName("로그인 테스트")
+    class LoginTest {
 
-    // 회원가입 성공 시뮬레이션 테스트
-    @Test
-    @Transactional
-    @DisplayName("회원가입 성공")
-    void signUp_success()
-    {
-        // 예상
-        ResponseEntity<String> expectedResult = ResponseEntity.status(HttpStatus.CREATED).body("회원가입을 성공하였습니다.");
+        @Test
+        @Transactional
+        @DisplayName("로그인 성공 테스트")
+        public void testLogin_success() throws Exception {
 
-        // 실제
-        ResponseEntity<String> actualResult = loginController.signUp(testDto);
+            // Act & Assert
+            mockMvc.perform(post("/api/login/signup")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(signUpRequestJson));
 
-        // 비교하여 검증
-        assertEquals(expectedResult, actualResult);
+            mockMvc.perform(post("/api/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(loginRequestJson))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("로그인이 정상적으로 수행되었습니다."))
+                    .andDo(print());
+
+        }
     }
 
-    // 회원가입 실패 시뮬레이션 테스트 (이메일 중복)
-    @Test
-    @Transactional
-    void signUp_failure()
-    {
-        // 테스트용 DTO를 Entity로 변환 후, 데이터베이스에 저장
-        Profile profile = testDto.toEntity();
-        profileRepository.save(profile);
+    @Nested
+    @DisplayName("회원가입 테스트")
+    class SignUpTest {
 
-        // 예상
-        ResponseEntity<String> expectedResult = ResponseEntity.status(HttpStatus.BAD_REQUEST).body("EMAIL_DUPLICATED: test@gmail.com는 이미 사용 중입니다.");
+        @Test
+        @Transactional
+        @DisplayName("회원가입 성공 테스트")
+        public void signUpTest_success() throws Exception {
 
-        // 실제
-        ResponseEntity<String> actualResult;
-        try
-        {
-            actualResult = loginController.signUp(testDto);
+            // Act & Assert
+            mockMvc.perform(post("/api/login/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(signUpRequestJson))
+                    .andExpect(status().isCreated())
+                    .andExpect(content().string("회원가입을 성공하였습니다."))
+                    .andDo(print());
         }
-        catch (AppException e)
-        {
-            actualResult = ResponseEntity.status(e.getErrorCode().getHttpStatus())
-                    .body(e.getErrorCode() + ": " + e.getMessage());;
-        }
+        @Test
+        @Transactional
+        @DisplayName("회원가입 실패 테스트 (중복된 요청)")
+        public void signUpTest_failure() throws Exception {
 
-        // 비교하여 검증
-        assertEquals(expectedResult, actualResult);
+            // Act & Assert
+            mockMvc.perform(post("/api/login/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(signUpRequestJson));
+
+            mockMvc.perform(post("/api/login/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(signUpRequestJson))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("EMAIL_DUPLICATED: " + "test@gmail.com" + "는 이미 사용 중입니다."))
+                    .andDo(print());
+        }
     }
 
-    /*
-    ============================================
-        로그인 테스트
-    ============================================
-    */
 }

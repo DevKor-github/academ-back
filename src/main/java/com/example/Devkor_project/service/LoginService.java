@@ -33,7 +33,7 @@ public class LoginService
     {
         // 이메일에 해당하는 계정 존재 여부 체크
         Profile profile = profileRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_Not_Found, dto.getEmail() + "에 해당하는 계정이 존재하지 않습니다."));
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_PASSWORD, "비밀번호가 일치하지 않습니다."));
 
         // 비밀번호 체크
         if(!encoder.matches(dto.getPassword(), profile.getPassword()))
