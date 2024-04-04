@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode
 {
     EMAIL_DUPLICATED(HttpStatus.BAD_REQUEST, ""),
-    INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "");
+    INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, ""),
+    UNEXPECTED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, ""),
+    EMAIL_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "");
 
     private HttpStatus httpStatus;
     private String message;
