@@ -46,7 +46,7 @@ class LoginControllerTest {
         @Test
         @Transactional
         @DisplayName("로그인 성공 테스트")
-        public void testLogin_success() throws Exception {
+        public void loginTest_success() throws Exception {
 
             // Act & Assert
             mockMvc.perform(post("/api/login/signup")

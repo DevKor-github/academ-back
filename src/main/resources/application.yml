@@ -16,6 +16,7 @@ spring:
     properties:
       hibernate:
         format_sql: true  # JPA 로그 이쁘게 구조화
+  ## Google SMTP server
   mail:
     host: smtp.gmail.com
     port: 587

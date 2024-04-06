@@ -1,11 +1,14 @@
 package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.EmailAuthenticationRequestDto;
+import com.example.Devkor_project.dto.EmailCheckRequestDto;
 import com.example.Devkor_project.dto.LoginRequestDto;
 import com.example.Devkor_project.dto.SignUpRequestDto;
+import com.example.Devkor_project.entity.Code;
 import com.example.Devkor_project.entity.Profile;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
+import com.example.Devkor_project.repository.AuthenticationCodeRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -18,6 +21,9 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Random;
 
 @Service
@@ -25,6 +31,8 @@ public class LoginService
 {
     @Autowired
     private ProfileRepository profileRepository;
+    @Autowired
+    private AuthenticationCodeRepository authenticationCodeRepository;
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -87,8 +95,10 @@ public class LoginService
         < 이메일 인증번호 발송 Service >
         EmailAuthenticationRequestDto를 받아서
         이메일로 랜덤하게 생성된 인증번호(8자리)를 전송합니다.
+        또한, 이메일-인증번호를 데이터베이스에 저장합니다.
     */
-    public String sendAuthenticationNumber(EmailAuthenticationRequestDto dto)
+    @Transactional
+    public void sendAuthenticationNumber(EmailAuthenticationRequestDto dto)
     {
         // 인증번호 생성
         Random random = new Random();
@@ -111,13 +121,50 @@ public class LoginService
             mimeMessageHelper.setText(templateEngine.process("sendNumber", context), true);  // 메일 내용
             javaMailSender.send(mimeMessage);
 
-            return authenticationNumber;
+            // 이미 인증번호가 발송된 이메일인 경우, 데이터베이스에서 인증번호 정보 삭제
+            Code code = authenticationCodeRepository.findByEmail(dto.getEmail()).orElse(null);
+            if(code != null)
+            {
+                authenticationCodeRepository.delete(code);
+            }
+
+            // 인증번호를 데이터베이스에 저장
+            code = Code.builder()
+                    .email(dto.getEmail())
+                    .code(authenticationNumber)
+                    .createdAt(LocalDate.now())
+                    .build();
+
+            authenticationCodeRepository.save(code);
         }
         catch (AppException e) {
             throw new AppException(ErrorCode.UNEXPECTED_ERROR, dto.getEmail() + "예기치 못한 에러가 발생하였습니다.");
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /*
+        < 이메일 인증번호 확인 Service >
+        EmailCheckRequestDto를 받아서
+        해당 이메일이 사용 중이거나 해당 이메일로 발송된 인증번호가 없는 경우, 예외를 발생시키고,
+        그렇지 않으면, 인증번호가 맞는지에 대한 boolean 값을 반환합니다.
+    */
+    @Transactional
+    public boolean checkAuthenticationNumber(EmailCheckRequestDto dto)
+    {
+        // 이메일 중복 체크
+        profileRepository.findByEmail(dto.getEmail())
+                .ifPresent(user -> {
+                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail() + "는 이미 사용 중입니다.");
+                });
+
+        // 해당 이메일로 발송된 인증번호가 있는지 체크
+        Code code = authenticationCodeRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.UNEXPECTED_ERROR, "예기치 못한 에러가 발생하였습니다."));
+
+        // 요청으로 받은 인증번호와 데이터베이스에 저장되어있는 인증번호를 비교
+        return Objects.equals(dto.getAuthenticationCode(), code.getCode());
     }
 
     /*

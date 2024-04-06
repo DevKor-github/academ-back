@@ -1,8 +1,11 @@
 package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.dto.EmailAuthenticationRequestDto;
+import com.example.Devkor_project.dto.EmailCheckRequestDto;
 import com.example.Devkor_project.dto.LoginRequestDto;
 import com.example.Devkor_project.dto.SignUpRequestDto;
+import com.example.Devkor_project.exception.AppException;
+import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.service.LoginService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,8 +41,11 @@ public class LoginController
         // 에러 여부 확인
         loginService.login(dto);
 
+        // 기존의 세션 파기
+        request.getSession().invalidate();
+
         // 세션 발행
-        HttpSession session = request.getSession();
+        HttpSession session = request.getSession(true);
         session.setAttribute("email", dto.getEmail());
         if (dto.isSaved())
             session.setMaxInactiveInterval(1800);
@@ -65,15 +71,33 @@ public class LoginController
     /*
         < 이메일 인증번호 발송 Controller >
         EmailAuthenticationRequestDto를 받아서
-        인증번호 이메일 전송에 성공한 경우, 인증번호에 100을 더한 숫자(200 OK)를 반환하고,
+        인증번호 이메일 전송에 성공한 경우, 이메일 주소(200 OK)를 반환하고,
         인증번호 이메일 전송에 실패한 경우, 실패 메시지(500 Internal Server Error)를 반환합니다.
     */
     @PostMapping("/email-authentication")
-    public ResponseEntity<Integer> sendAuthenticationNumber(@Valid @RequestBody EmailAuthenticationRequestDto dto)
+    public ResponseEntity<String> sendAuthenticationNumber(@Valid @RequestBody EmailAuthenticationRequestDto dto)
     {
-        String authenticationNumber = loginService.sendAuthenticationNumber(dto);
-        int number = Integer.parseInt(authenticationNumber) + 100;
-        return ResponseEntity.status(HttpStatus.OK).body(number);
+        loginService.sendAuthenticationNumber(dto);
+        return ResponseEntity.status(HttpStatus.OK).body(dto.getEmail());
+    }
+
+    /*
+        < 인증번호 확인 Controller >
+        EmailCheckRequestDto를 받아서
+        인증번호가 맞는 경우, 이메일 주소(200 OK)를 반환하고,
+        해당 이메일이 사용 중일 경우, 실패 메시지(400 Bad Request)를 반환하고,
+        해당 이메일로 발송된 인증번호가 없는 경우, 실패 메시지(500 Internal Server Error)를 반환하고,
+        인증번호가 틀린 경우, 실패 메시지(401 Unauthorized)를 반환합니다.
+    */
+    @PostMapping("/email-check")
+    public ResponseEntity<String> checkAuthenticationNumber(@Valid @RequestBody EmailCheckRequestDto dto)
+    {
+        boolean isRight = loginService.checkAuthenticationNumber(dto);
+
+        if(isRight)
+            return ResponseEntity.status(HttpStatus.OK).body(dto.getEmail());
+        else
+            throw new AppException(ErrorCode.INVALID_CODE, "인증번호가 일치하지 않습니다.");
     }
 
     /*
@@ -88,5 +112,7 @@ public class LoginController
         loginService.resetPassword(dto);
         return ResponseEntity.status(HttpStatus.OK).body("비밀번호가 성공적으로 초기화되었습니다.");
     }
+
+
 
 }
