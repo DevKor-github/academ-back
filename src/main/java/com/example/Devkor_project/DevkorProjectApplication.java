@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@EnableScheduling
+@EnableScheduling	// SchedulerService를 위한 Annotation
 public class DevkorProjectApplication {
 
 	public static void main(String[] args) {

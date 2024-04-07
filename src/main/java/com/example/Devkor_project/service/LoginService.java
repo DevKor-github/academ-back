@@ -12,6 +12,8 @@ import com.example.Devkor_project.repository.AuthenticationCodeRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -44,12 +46,10 @@ public class LoginService
     SpringTemplateEngine templateEngine;
 
     /*
-        < 로그인 Service >
-        이메일이 해당하는 계정이 존재하지 않을 경우,
-        비밀번호가 일치하지 않을 경우에 대해서 예외를 발생시킵니다.
+        < 로그인 서비스 >
     */
     @Transactional
-    public void login(LoginRequestDto dto)
+    public void login(LoginRequestDto dto, HttpServletRequest request)
     {
         // 이메일에 해당하는 계정 존재 여부 체크
         Profile profile = profileRepository.findByEmail(dto.getEmail())
@@ -59,13 +59,37 @@ public class LoginService
         if(!encoder.matches(dto.getPassword(), profile.getPassword()))
             throw new AppException(ErrorCode.INVALID_PASSWORD, "비밀번호가 일치하지 않습니다.");
 
+        // 기존의 세션 파기
+        request.getSession().invalidate();
+
+        // 세션 발행
+        HttpSession session = request.getSession(true);
+        session.setAttribute("email", dto.getEmail());
+        if (dto.isSaved())
+            session.setMaxInactiveInterval(1800);
+        else
+            session.setMaxInactiveInterval(1800000);
     }
 
     /*
-        < 회원가입 Service >
-        SignUpRequestDto를 받아서
-        해당 이메일이 사용 중일 경우, 예외를 발생시키고,
-        해당 이메일이 사용 중이지 않으면, 데이터베이스에 프로필 정보를 저장합니다.
+        < 로그아웃 서비스 >
+    */
+    @Transactional
+    public void logout(HttpServletRequest request)
+    {
+        // 세션 파기
+        try{
+            HttpSession session = request.getSession(false);
+            if(session != null)
+                session.invalidate();
+        }
+        catch (AppException e) {
+            throw new AppException(ErrorCode.UNEXPECTED_ERROR, "예기치 못한 에러가 발생하였습니다.");
+        }
+    }
+
+    /*
+        < 회원가입 서비스 >
     */
     @Transactional
     public void signUp(SignUpRequestDto dto)
@@ -92,10 +116,7 @@ public class LoginService
     }
 
     /*
-        < 이메일 인증번호 발송 Service >
-        EmailAuthenticationRequestDto를 받아서
-        이메일로 랜덤하게 생성된 인증번호(8자리)를 전송합니다.
-        또한, 이메일-인증번호를 데이터베이스에 저장합니다.
+        < 이메일 인증번호 발송 서비스 >
     */
     @Transactional
     public void sendAuthenticationNumber(EmailAuthenticationRequestDto dto)
@@ -138,17 +159,14 @@ public class LoginService
             authenticationCodeRepository.save(code);
         }
         catch (AppException e) {
-            throw new AppException(ErrorCode.UNEXPECTED_ERROR, dto.getEmail() + "예기치 못한 에러가 발생하였습니다.");
+            throw new AppException(ErrorCode.UNEXPECTED_ERROR, "예기치 못한 에러가 발생하였습니다.");
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
     }
 
     /*
-        < 이메일 인증번호 확인 Service >
-        EmailCheckRequestDto를 받아서
-        해당 이메일이 사용 중이거나 해당 이메일로 발송된 인증번호가 없는 경우, 예외를 발생시키고,
-        그렇지 않으면, 인증번호가 맞는지에 대한 boolean 값을 반환합니다.
+        < 이메일 인증번호 확인 서비스 >
     */
     @Transactional
     public boolean checkAuthenticationNumber(EmailCheckRequestDto dto)
@@ -168,10 +186,7 @@ public class LoginService
     }
 
     /*
-        < 임시 비밀번호 발급 Service >
-        EmailAuthenticationRequestDto를 받아서
-        해당 이메일에 해당하는 계정이 존재하지 않는 경우, 예외를 발생시키고,
-        그렇지 않다면, 임시 비밀번호(10자리)를 이메일로 전송합니다.
+        < 임시 비밀번호 발급 서비스 >
     */
     public void resetPassword(EmailAuthenticationRequestDto dto)
     {

@@ -24,6 +24,8 @@ public class SecurityConfig
 
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/login/**").permitAll()   // 해당 요청은 모든 사용자에게 접근 권한 허용
+                        .requestMatchers("/api/logout/**").permitAll()   // 해당 요청은 모든 사용자에게 접근 권한 허용
+                        .requestMatchers("/api/signup/**").permitAll()   // 해당 요청은 모든 사용자에게 접근 권한 허용
                         .anyRequest().authenticated()   // 그 외의 요청은 인증된 사용자에게만 접근 권한 허용
                 )
 
