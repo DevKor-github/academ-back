@@ -8,7 +8,7 @@ import com.example.Devkor_project.entity.Code;
 import com.example.Devkor_project.entity.Profile;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
-import com.example.Devkor_project.repository.AuthenticationCodeRepository;
+import com.example.Devkor_project.repository.CodeRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -24,7 +24,6 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Random;
 
@@ -34,7 +33,7 @@ public class LoginService
     @Autowired
     private ProfileRepository profileRepository;
     @Autowired
-    private AuthenticationCodeRepository authenticationCodeRepository;
+    private CodeRepository codeRepository;
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -65,10 +64,12 @@ public class LoginService
         // 세션 발행
         HttpSession session = request.getSession(true);
         session.setAttribute("email", dto.getEmail());
+        session.setAttribute("role", profile.getRole());
         if (dto.isSaved())
             session.setMaxInactiveInterval(1800);
         else
             session.setMaxInactiveInterval(1800000);
+
     }
 
     /*
@@ -109,6 +110,8 @@ public class LoginService
                 .grade(dto.getGrade())
                 .semester(dto.getSemester())
                 .department(dto.getDepartment())
+                .role("USER")
+                .point(0)
                 .build();
 
         // 해당 Entity를 데이터베이스에 저장
@@ -143,10 +146,10 @@ public class LoginService
             javaMailSender.send(mimeMessage);
 
             // 이미 인증번호가 발송된 이메일인 경우, 데이터베이스에서 인증번호 정보 삭제
-            Code code = authenticationCodeRepository.findByEmail(dto.getEmail()).orElse(null);
+            Code code = codeRepository.findByEmail(dto.getEmail()).orElse(null);
             if(code != null)
             {
-                authenticationCodeRepository.delete(code);
+                codeRepository.delete(code);
             }
 
             // 인증번호를 데이터베이스에 저장
@@ -156,7 +159,7 @@ public class LoginService
                     .createdAt(LocalDate.now())
                     .build();
 
-            authenticationCodeRepository.save(code);
+            codeRepository.save(code);
         }
         catch (AppException e) {
             throw new AppException(ErrorCode.UNEXPECTED_ERROR, "예기치 못한 에러가 발생하였습니다.");
@@ -178,7 +181,7 @@ public class LoginService
                 });
 
         // 해당 이메일로 발송된 인증번호가 있는지 체크
-        Code code = authenticationCodeRepository.findByEmail(dto.getEmail())
+        Code code = codeRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.UNEXPECTED_ERROR, "예기치 못한 에러가 발생하였습니다."));
 
         // 요청으로 받은 인증번호와 데이터베이스에 저장되어있는 인증번호를 비교
