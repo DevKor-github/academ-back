@@ -23,4 +23,7 @@ public class Profile
     @Column(nullable = false) private int grade;
     @Column(nullable = false) private int semester;
     @Column(nullable = false) private String department;
+    @Column(nullable = false) private int point;
+
+    @Column(nullable = false) private String role;
 }

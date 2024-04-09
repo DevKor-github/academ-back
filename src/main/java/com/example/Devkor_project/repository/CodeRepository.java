@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDate;
 import java.util.Optional;
 
-public interface AuthenticationCodeRepository extends JpaRepository<Code, Long>
+public interface CodeRepository extends JpaRepository<Code, Long>
 {
     Optional<Code> findByEmail(String email);
 

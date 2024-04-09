@@ -1,6 +1,6 @@
 package com.example.Devkor_project.service;
 
-import com.example.Devkor_project.repository.AuthenticationCodeRepository;
+import com.example.Devkor_project.repository.CodeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ import java.time.LocalDate;
 public class SchedulerService
 {
     @Autowired
-    private AuthenticationCodeRepository authenticationCodeRepository;
+    private CodeRepository codeRepository;
 
 
     @Transactional
@@ -28,6 +28,6 @@ public class SchedulerService
     @Scheduled(cron = "0 0 12 * * *")
     public void autoDeleteCode()
     {
-        authenticationCodeRepository.deleteOldCode(LocalDate.now().minusDays(1));
+        codeRepository.deleteOldCode(LocalDate.now().minusDays(1));
     }
 }
