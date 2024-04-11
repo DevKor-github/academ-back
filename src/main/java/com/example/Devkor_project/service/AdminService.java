@@ -2,15 +2,11 @@ package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.entity.Course;
 import com.example.Devkor_project.repository.CourseRepository;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +41,8 @@ public class AdminService
                 for(Map<String, String> course : dataList)
                 {
                     Course information = Course.builder()
-                            .id(idIndex)
+                            .courseId(idIndex)
+                            .courseCode(course.get("cour_cd"))
                             .graduateSchool(graduateSchool)
                             .department(department)
                             .year(course.get("year"))
@@ -61,7 +58,6 @@ public class AdminService
 
                     idIndex++;
                 }
-
             }
         }
     }

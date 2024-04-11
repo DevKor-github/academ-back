@@ -13,8 +13,9 @@ import lombok.*;
 public class Course
 {
     @Id
-    private Long id;
+    private Long courseId;
 
+    @Column(nullable = false) private String courseCode;
     @Column(nullable = false) private String graduateSchool;
     @Column(nullable = false) private String department;
     @Column(nullable = false) private String year;

@@ -13,7 +13,9 @@ public enum ErrorCode
     INVALID_CODE(HttpStatus.UNAUTHORIZED, ""),
     UNEXPECTED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, ""),
     EMAIL_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, ""),
-    NO_AUTHORITY(HttpStatus.UNAUTHORIZED, "");
+    NO_AUTHORITY(HttpStatus.UNAUTHORIZED, ""),
+    SHORT_SEARCH_WORD(HttpStatus.BAD_REQUEST, ""),
+    NO_RESULT(HttpStatus.NOT_FOUND, "");
 
     private final HttpStatus httpStatus;
     private final String message;
