@@ -32,6 +32,7 @@ public class LoginService
 {
     @Autowired
     private ProfileRepository profileRepository;
+
     @Autowired
     private CodeRepository codeRepository;
 
@@ -65,10 +66,10 @@ public class LoginService
         HttpSession session = request.getSession(true);
         session.setAttribute("email", dto.getEmail());
         session.setAttribute("role", profile.getRole());
-        if (dto.isSaved())
-            session.setMaxInactiveInterval(1800);
-        else
-            session.setMaxInactiveInterval(1800000);
+        if (dto.isSaved()) {
+            session.setMaxInactiveInterval(60 * 60 * 24 * 30);  // 30일
+        } else
+            session.setMaxInactiveInterval(60 * 60 * 24);       // 24시간
 
     }
 
@@ -140,7 +141,7 @@ public class LoginService
             context.setVariable("authenticationNumber", authenticationNumber);
 
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-            mimeMessageHelper.setTo(dto.getEmail());    // 메일 수신자
+            mimeMessageHelper.setTo(dto.getEmail() + "@korea.ac.kr");    // 메일 수신자
             mimeMessageHelper.setSubject("Academ 인증 번호");   // 메일 제목
             mimeMessageHelper.setText(templateEngine.process("sendNumber", context), true);  // 메일 내용
             javaMailSender.send(mimeMessage);

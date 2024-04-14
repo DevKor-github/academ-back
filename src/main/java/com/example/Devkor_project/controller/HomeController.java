@@ -14,6 +14,7 @@ import org.hibernate.annotations.Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,7 +35,7 @@ public class HomeController
     /*
         강의 검색 컨트롤러
     */
-    @PostMapping("/api/search")
+    @GetMapping("/api/search")
     public ResponseEntity<List<CourseDto>> searchCourse(@Valid @RequestBody SearchCourseRequestDto dto,
                                              HttpServletRequest request)
     {
