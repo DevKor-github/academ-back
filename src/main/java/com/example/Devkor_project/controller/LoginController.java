@@ -30,7 +30,7 @@ public class LoginController
         해당 이메일의 계정이 존재하지 않거나, 비밀번호가 일치하지 않는 경우: 실패 메시지(401) 응답
         예외가 발생하지 않는 경우: 세션 발행 후, 성공 메시지(200) 응답
     */
-    @PostMapping("/api/login")
+    @GetMapping("/api/login")
     public ResponseEntity<String> login(@Valid @RequestBody LoginRequestDto dto,
                                         HttpServletRequest request)
     {
@@ -84,7 +84,7 @@ public class LoginController
         해당 이메일로 발송된 인증번호가 없는 경우: 실패 메시지(500) 응답
         인증번호가 틀린 경우: 실패 메시지(401) 응답
     */
-    @PostMapping("/api/signup/email-check")
+    @GetMapping("/api/signup/email-check")
     public ResponseEntity<String> checkAuthenticationNumber(@Valid @RequestBody EmailCheckRequestDto dto)
     {
         boolean isRight = loginService.checkAuthenticationNumber(dto);
@@ -108,7 +108,5 @@ public class LoginController
         loginService.resetPassword(dto);
         return ResponseEntity.status(HttpStatus.OK).body("비밀번호가 성공적으로 초기화되었습니다.");
     }
-
-
 
 }
