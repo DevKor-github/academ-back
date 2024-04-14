@@ -4,6 +4,7 @@ import com.example.Devkor_project.dto.LoginRequestDto;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.service.AdminService;
+import com.example.Devkor_project.service.CheckAuthorityService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -27,15 +28,8 @@ public class AdminController
     @Autowired
     AdminService adminService;
 
-    // ADMIN 권한인지 체크하는 메서드
-    void checkAuthority(HttpServletRequest request)
-    {
-        HttpSession session = request.getSession(false);
-        if(session == null)
-            throw new AppException(ErrorCode.NO_AUTHORITY, "권한이 없습니다.");
-        else if(!Objects.equals(session.getAttribute("role").toString(), "ADMIN"))
-            throw new AppException(ErrorCode.NO_AUTHORITY, "ADMIN 권한이 필요합니다.");
-    }
+    @Autowired
+    CheckAuthorityService checkAuthorityService;
 
     /*
         < 대학원 강의 데이터베이스 초기화 컨트톨러 >
@@ -47,7 +41,8 @@ public class AdminController
     public ResponseEntity<String> initCourseDatabase(@Valid @RequestBody Map<String,Object> data,
                                         HttpServletRequest request)
     {
-        checkAuthority(request);
+        // ADMIN 권한인지 확인
+        checkAuthorityService.checkAuthority(request, "ADMIN");
 
         adminService.initCourseDatabase(data);
 
