@@ -1,6 +1,5 @@
 package com.example.Devkor_project.service;
 
-import com.example.Devkor_project.dto.LoginRequestDto;
 import com.example.Devkor_project.dto.SignUpRequestDto;
 import com.example.Devkor_project.entity.Profile;
 import com.example.Devkor_project.exception.AppException;
@@ -10,18 +9,23 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Nested
+@AutoConfigureMockMvc
 class LoginServiceTest {
 
     // Arrange
+    @Autowired
+    private MockMvc mockMvc;
 
     @Autowired
     LoginService loginService;

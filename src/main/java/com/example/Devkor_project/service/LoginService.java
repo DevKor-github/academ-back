@@ -2,7 +2,6 @@ package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.EmailAuthenticationRequestDto;
 import com.example.Devkor_project.dto.EmailCheckRequestDto;
-import com.example.Devkor_project.dto.LoginRequestDto;
 import com.example.Devkor_project.dto.SignUpRequestDto;
 import com.example.Devkor_project.entity.Code;
 import com.example.Devkor_project.entity.Profile;
@@ -12,8 +11,6 @@ import com.example.Devkor_project.repository.CodeRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -46,51 +43,6 @@ public class LoginService
     SpringTemplateEngine templateEngine;
 
     /*
-        < 로그인 서비스 >
-    */
-    @Transactional
-    public void login(LoginRequestDto dto, HttpServletRequest request)
-    {
-        // 이메일에 해당하는 계정 존재 여부 체크
-        Profile profile = profileRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_PASSWORD, "비밀번호가 일치하지 않습니다."));
-
-        // 비밀번호 체크
-        if(!encoder.matches(dto.getPassword(), profile.getPassword()))
-            throw new AppException(ErrorCode.INVALID_PASSWORD, "비밀번호가 일치하지 않습니다.");
-
-        // 기존의 세션 파기
-        request.getSession().invalidate();
-
-        // 세션 발행
-        HttpSession session = request.getSession(true);
-        session.setAttribute("email", dto.getEmail());
-        session.setAttribute("role", profile.getRole());
-        if (dto.isSaved()) {
-            session.setMaxInactiveInterval(60 * 60 * 24 * 30);  // 30일
-        } else
-            session.setMaxInactiveInterval(60 * 60 * 24);       // 24시간
-
-    }
-
-    /*
-        < 로그아웃 서비스 >
-    */
-    @Transactional
-    public void logout(HttpServletRequest request)
-    {
-        // 세션 파기
-        try{
-            HttpSession session = request.getSession(false);
-            if(session != null)
-                session.invalidate();
-        }
-        catch (AppException e) {
-            throw new AppException(ErrorCode.UNEXPECTED_ERROR, "예기치 못한 에러가 발생하였습니다.");
-        }
-    }
-
-    /*
         < 회원가입 서비스 >
     */
     @Transactional
@@ -111,7 +63,7 @@ public class LoginService
                 .grade(dto.getGrade())
                 .semester(dto.getSemester())
                 .department(dto.getDepartment())
-                .role("USER")
+                .role("ROLE_USER") // Role auto mapping
                 .point(0)
                 .build();
 

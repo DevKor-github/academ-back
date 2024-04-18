@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+</head>
+<body>
+<h1>Home Page</h1>
+<nav>
+    <a th:href="@{/login}" th:text="${username == null ? 'Login' : ''}" th:if="${username == null}">Login</a>
+    <a th:href="@{/logout}" th:text="${username != null ? 'Logout' : ''}" th:if="${username != null}">Logout</a>
+    <a th:href="@{/mypage}" th:text="${role == 'ROLE_USER' ? 'User' : ''}">User</a>
+    <a th:href="@{/admin}" th:text="${role == 'ROLE_ADMIN' ? 'Admin' : ''}">Admin</a>
+</nav>
+<div th:if="${message}">
+    <p th:text="${message}"></p>
+</div>
+<div th:if="${username}">
+    <p th:text="'Welcome, ' + ${username}"></p>
+    <p th:text="'Your role is ' + ${role}"></p>
+</div>
+</body>
+</html>

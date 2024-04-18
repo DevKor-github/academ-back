@@ -12,10 +12,15 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: update # update 수정 필요
     properties:
       hibernate:
         format_sql: true  # JPA 로그 이쁘게 구조화
+  security:
+    user:
+      name: kk@kk
+      password: kkkk
+
   ## Google SMTP server
   mail:
     host: smtp.gmail.com
@@ -39,3 +44,9 @@ logging:
         orm:
           jdbc:
             bind: trace   # 쿼리의 파라미터 출력
+
+### 서버 세션 관리
+server:
+  servlet:
+    session:
+      timeout: 60m

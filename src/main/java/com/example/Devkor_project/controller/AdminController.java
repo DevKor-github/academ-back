@@ -1,13 +1,9 @@
 package com.example.Devkor_project.controller;
 
-import com.example.Devkor_project.dto.LoginRequestDto;
-import com.example.Devkor_project.exception.AppException;
-import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.service.AdminService;
 import com.example.Devkor_project.service.CheckAuthorityService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 @RestController

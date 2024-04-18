@@ -2,14 +2,11 @@ package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.dto.EmailAuthenticationRequestDto;
 import com.example.Devkor_project.dto.EmailCheckRequestDto;
-import com.example.Devkor_project.dto.LoginRequestDto;
 import com.example.Devkor_project.dto.SignUpRequestDto;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.service.LoginService;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,32 +20,6 @@ public class LoginController
 {
     @Autowired
     private LoginService loginService;
-
-    /*
-        < 로그인 컨트롤러 >
-        LoginRequestDto를 받아서
-        해당 이메일의 계정이 존재하지 않거나, 비밀번호가 일치하지 않는 경우: 실패 메시지(401) 응답
-        예외가 발생하지 않는 경우: 세션 발행 후, 성공 메시지(200) 응답
-    */
-    @GetMapping("/api/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequestDto dto,
-                                        HttpServletRequest request)
-    {
-        loginService.login(dto, request);
-        return ResponseEntity.status(HttpStatus.OK).body("로그인이 정상적으로 수행되었습니다.");
-    }
-
-    /*
-        < 로그아웃 컨트롤러 >
-        문제 없이 로그아웃에 성공한 경우: 세션 파기 후, 성공 메시지(200) 응답
-        세션 파기 도중 예외가 발생한 경우: 실패 메시지(500) 응답
-    */
-    @GetMapping("/api/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request)
-    {
-        loginService.logout(request);
-        return ResponseEntity.status(HttpStatus.OK).body("로그아웃이 정상적으로 수행되었습니다.");
-    }
 
     /*
         < 회원가입 컨트롤러 >
