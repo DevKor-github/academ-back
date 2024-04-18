@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails {
-    private Profile profile;
+    private final Profile profile;
 
     // 생성자 주입 방식
     public CustomUserDetails(Profile profile) {
