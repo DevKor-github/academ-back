@@ -17,9 +17,7 @@ public class AdminService
     @Autowired
     CourseRepository courseRepository;
 
-    /*
-        < 대학원 강의 데이터베이스 초기화 서비스 >
-    */
+    /* 대학원 강의 데이터베이스 초기화 서비스 */
     @Transactional
     @SuppressWarnings("unchecked")  // Object가 Map 형식이 아닐 수도 있다는 경고 무시
     public void initCourseDatabase(Map<String,Object> data)
@@ -41,7 +39,7 @@ public class AdminService
                 for(Map<String, String> course : dataList)
                 {
                     Course information = Course.builder()
-                            .courseId(idIndex)
+                            .course_id(idIndex)
                             .courseCode(course.get("cour_cd"))
                             .graduateSchool(graduateSchool)
                             .department(department)

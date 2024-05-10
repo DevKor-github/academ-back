@@ -13,7 +13,7 @@ import lombok.*;
 public class Course
 {
     @Id
-    private Long courseId;
+    private Long course_id;
 
     @Column(nullable = false) private String courseCode;
     @Column(nullable = false) private String graduateSchool;
