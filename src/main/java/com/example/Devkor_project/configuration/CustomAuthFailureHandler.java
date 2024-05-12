@@ -8,24 +8,25 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-public class CustomAuthFailureHandler implements AuthenticationFailureHandler {
-    private final String DEFAULT_FAILURE_URL = "/login?error";
+@Component
+public class CustomAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        String ErrorMsg = null;
+        String errorCode = null;
 
-        if (exception instanceof BadCredentialsException || exception instanceof InternalAuthenticationServiceException) {
-            ErrorMsg = "Invalid username or password";
-        } else if (exception instanceof DisabledException) {
-            // User 비활성화 시 메시지 (현재 사용 안함)
-        } else {
-            ErrorMsg = "Unknown error. Please try again later.";
-        }
+        if (exception instanceof BadCredentialsException || exception instanceof InternalAuthenticationServiceException)
+            errorCode = "WRONG";   // 이메일 또는 비밀번호가 틀린 경우
+        else if (exception instanceof DisabledException)
+            errorCode = "DISABLED";   // 해당 계정이 비활성화된 경우 (현재 사용 안함)
+        else
+            errorCode = "UNEXPECTED";  // 예기치 못한 에러가 발생한 경우
 
-        request.setAttribute("ErrorMsg", ErrorMsg);
-        request.getRequestDispatcher(DEFAULT_FAILURE_URL).forward(request, response);
+        setDefaultFailureUrl("/login?errorMessage=" + errorCode);
+        super.onAuthenticationFailure(request, response, exception);
     }
 }

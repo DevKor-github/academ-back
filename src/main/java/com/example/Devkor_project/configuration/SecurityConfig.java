@@ -26,11 +26,13 @@ public class SecurityConfig
 
         httpSecurity
                 .authorizeHttpRequests((requests) -> (requests)
-                        // 해당 요청은 모든 사용자에게 접근 권한 허용
+                        // 아무나 접근 가능
                         .requestMatchers("/", "/login", "/signup").permitAll()
                         .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
-                        .requestMatchers("/mypage").hasAnyRole("USER", "ADMIN") // 예시
-                        .requestMatchers("/api/admin/**", "/admin").hasRole("ADMIN") // Admin 만 접근 가능
+                        // USER 또는 ADMIN 계정만 접근 가능
+                        .requestMatchers("/search", "/api/search").hasAnyRole("USER", "ADMIN")
+                        // ADMIN 계정만 접근 가능
+                        .requestMatchers("/api/admin/**", "/admin").hasRole("ADMIN")
                         // 그 외의 요청은 인증된 사용자에게만 접근 권한 허용
                         .anyRequest().authenticated()
                 );
@@ -47,17 +49,20 @@ public class SecurityConfig
                 );
 
         httpSecurity
-                .logout()
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
-                .deleteCookies("JSESSIONID", "remember-me");
+                .logout((logoutConfig) -> logoutConfig
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
+                        .deleteCookies("JSESSIONID", "remember-me")
+                );
+
 
         httpSecurity
-                .rememberMe()
-                .key("Test-Key-For-Academ")
-                .tokenValiditySeconds(60 * 60 * 24 * 30) // 30일
-                .rememberMeParameter("remember-me")
-                .userDetailsService(customUserDetailsService);
+                .rememberMe((rememberConfig) -> rememberConfig
+                        .key("Test-Key-For-Academ")
+                        .tokenValiditySeconds(60 * 60 * 24 * 30) // 30일
+                        .rememberMeParameter("remember-me")
+                        .userDetailsService(customUserDetailsService)
+                );
 
         // 필요시에 세션을 생성
         httpSecurity
@@ -74,7 +79,7 @@ public class SecurityConfig
     }
 
     @Bean
-    public AuthenticationFailureHandler customAuthFailureHandler() {
+    public CustomAuthFailureHandler customAuthFailureHandler() {
         return new CustomAuthFailureHandler();
     }
 }

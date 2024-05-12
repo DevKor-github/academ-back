@@ -50,7 +50,7 @@ public class CourseDto
     public static CourseDto CourseToCousreDto(Course course)
     {
         return new CourseDto(
-                course.getCourseId(),
+                course.getCourse_id(),
                 course.getCourseCode(),
                 course.getGraduateSchool(),
                 course.getDepartment(),

@@ -1,7 +1,5 @@
 package com.example.Devkor_project.service;
 
-import com.example.Devkor_project.dto.EmailAuthenticationRequestDto;
-import com.example.Devkor_project.dto.EmailCheckRequestDto;
 import com.example.Devkor_project.dto.SignUpRequestDto;
 import com.example.Devkor_project.entity.Code;
 import com.example.Devkor_project.entity.Profile;
@@ -17,8 +15,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -39,19 +35,14 @@ public class LoginService
     @Autowired
     JavaMailSender javaMailSender;
 
-    @Autowired
-    SpringTemplateEngine templateEngine;
-
-    /*
-        < 회원가입 서비스 >
-    */
+    /* 회원가입 서비스 */
     @Transactional
     public void signUp(SignUpRequestDto dto)
     {
         // 이메일 중복 체크
         profileRepository.findByEmail(dto.getEmail())
                 .ifPresent(user -> {
-                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail() + "는 이미 사용 중입니다.");
+                    throw new AppException(ErrorCode.EMAIL_DUPLICATED);
                 });
 
         // DTO -> Entity 변환
@@ -59,7 +50,7 @@ public class LoginService
                 .email(dto.getEmail())
                 .password(encoder.encode(dto.getPassword()))
                 .username(dto.getUsername())
-                .studentId(dto.getStudentId())
+                .student_id(dto.getStudent_id())
                 .grade(dto.getGrade())
                 .semester(dto.getSemester())
                 .department(dto.getDepartment())
@@ -71,11 +62,9 @@ public class LoginService
         profileRepository.save(profile);
     }
 
-    /*
-        < 이메일 인증번호 발송 서비스 >
-    */
+    /* 이메일 인증번호 발송 서비스 */
     @Transactional
-    public void sendAuthenticationNumber(EmailAuthenticationRequestDto dto)
+    public void sendAuthenticationNumber(String email)
     {
         // 인증번호 생성
         Random random = new Random();
@@ -89,17 +78,16 @@ public class LoginService
         // 인증번호 발송
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
-            Context context = new Context();
-            context.setVariable("authenticationNumber", authenticationNumber);
+            String content = String.format("Color.you <br> 인증 번호 <br><br> %s", authenticationNumber);
 
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-            mimeMessageHelper.setTo(dto.getEmail() + "@korea.ac.kr");    // 메일 수신자
+            mimeMessageHelper.setTo(email + "@korea.ac.kr");    // 메일 수신자
             mimeMessageHelper.setSubject("Academ 인증 번호");   // 메일 제목
-            mimeMessageHelper.setText(templateEngine.process("sendNumber", context), true);  // 메일 내용
+            mimeMessageHelper.setText(content, true);  // 메일 내용
             javaMailSender.send(mimeMessage);
 
             // 이미 인증번호가 발송된 이메일인 경우, 데이터베이스에서 인증번호 정보 삭제
-            Code code = codeRepository.findByEmail(dto.getEmail()).orElse(null);
+            Code code = codeRepository.findByEmail(email + "@korea.ac.kr").orElse(null);
             if(code != null)
             {
                 codeRepository.delete(code);
@@ -107,7 +95,7 @@ public class LoginService
 
             // 인증번호를 데이터베이스에 저장
             code = Code.builder()
-                    .email(dto.getEmail())
+                    .email(email + "@korea.ac.kr")
                     .code(authenticationNumber)
                     .createdAt(LocalDate.now())
                     .build();
@@ -115,40 +103,37 @@ public class LoginService
             codeRepository.save(code);
         }
         catch (AppException e) {
-            throw new AppException(ErrorCode.UNEXPECTED_ERROR, "예기치 못한 에러가 발생하였습니다.");
+            throw new AppException(ErrorCode.UNEXPECTED_ERROR);
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    /*
-        < 이메일 인증번호 확인 서비스 >
-    */
+    /* 이메일 인증번호 확인 서비스 */
     @Transactional
-    public boolean checkAuthenticationNumber(EmailCheckRequestDto dto)
+    public void checkAuthenticationNumber(String email, String code)
     {
         // 이메일 중복 체크
-        profileRepository.findByEmail(dto.getEmail())
+        profileRepository.findByEmail(email + "@korea.ac.kr")
                 .ifPresent(user -> {
-                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail() + "는 이미 사용 중입니다.");
+                    throw new AppException(ErrorCode.EMAIL_DUPLICATED);
                 });
 
         // 해당 이메일로 발송된 인증번호가 있는지 체크
-        Code code = codeRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.UNEXPECTED_ERROR, "예기치 못한 에러가 발생하였습니다."));
+        Code Actualcode = codeRepository.findByEmail(email + "@korea.ac.kr")
+                .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND));
 
-        // 요청으로 받은 인증번호와 데이터베이스에 저장되어있는 인증번호를 비교
-        return Objects.equals(dto.getAuthenticationCode(), code.getCode());
+        // 입력한 인증번호가 맞는지 체크
+        if(!Objects.equals(code, Actualcode.getCode()))
+            throw new AppException(ErrorCode.WRONG_CODE);
     }
 
-    /*
-        < 임시 비밀번호 발급 서비스 >
-    */
-    public void resetPassword(EmailAuthenticationRequestDto dto)
+    /* 임시 비밀번호 발급 서비스 */
+    public void resetPassword(String email)
     {
         // 이메일에 해당하는 계정 존재 여부 체크
-        Profile profile = profileRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_UNAUTHORIZED, dto.getEmail() + "에 해당하는 계정이 존재하지 않습니다."));
+        Profile profile = profileRepository.findByEmail(email + "@korea.ac.kr")
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND));
 
         // 임시 비밀번호 생성
         Random random = new Random();
@@ -169,17 +154,16 @@ public class LoginService
         // 임시 비밀번호를 이메일로 전송
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
-            Context context = new Context();
-            context.setVariable("newPassword", newPassword);
+            String content = String.format("Color.you <br> 임시 비밀번호 <br><br> %s", newPassword);
 
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-            mimeMessageHelper.setTo(dto.getEmail());    // 메일 수신자
+            mimeMessageHelper.setTo(email + "@korea.ac.kr");    // 메일 수신자
             mimeMessageHelper.setSubject("Academ 임시 비밀번호 발급");   // 메일 제목
-            mimeMessageHelper.setText(templateEngine.process("newPassword", context), true);  // 메일 내용
+            mimeMessageHelper.setText(content, true);  // 메일 내용
             javaMailSender.send(mimeMessage);
         }
         catch (AppException e) {
-            throw new AppException(ErrorCode.UNEXPECTED_ERROR, dto.getEmail() + "예기치 못한 에러가 발생하였습니다.");
+            throw new AppException(ErrorCode.UNEXPECTED_ERROR);
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }

@@ -17,7 +17,7 @@ public class Code
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long codeId;
+    private Long code_id;
 
     @Column(nullable = false) private String email;
     @Column(nullable = false) private String code;
