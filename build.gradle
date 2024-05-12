@@ -16,8 +16,27 @@ repositories {
 }
 
 dependencies {
+	// Spring Web, Lombok, Spring Data JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// MySQL 드라이버
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// DTO 검증
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// MockMvc 사용
+	testImplementation 'org.mockito:mockito-core:5.8.0'
+
+	// 메일 서버 연결 라이브러리
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 tasks.named('test') {
