@@ -5,10 +5,14 @@ plugins {
 }
 
 group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.1'
 
 java {
 	sourceCompatibility = '21'
+}
+
+jar {
+	enabled = false
 }
 
 repositories {
