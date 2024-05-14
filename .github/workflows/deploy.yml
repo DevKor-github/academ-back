@@ -38,5 +38,7 @@ jobs:
       run: |
         echo $GHCR_TOKEN | docker login ghcr.io -u $GHCR_USERNAME --password-stdin
         IMAGE_TAG=$(echo ${{ github.ref_name }} | sed 's/^v//')
+        docker build -t ghcr.io/devkor-github/academ-back:latest .
+        docker push ghcr.io/devkor-github/academ-back:latest
         docker build -t ghcr.io/devkor-github/academ-back:${IMAGE_TAG} .
         docker push ghcr.io/devkor-github/academ-back:${IMAGE_TAG}
