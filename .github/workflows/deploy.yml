@@ -21,9 +21,10 @@ jobs:
 
     - name: Create .properties file
       run: |
-        echo "DATASOURCE_URL=${{ secrets.DATASOURCE_URL }}" > ./src/main/resources/application-production.properties
-        echo "DATASOURCE_PASSWORD=${{ secrets.DATASOURCE_PASSWORD }}" >> ./src/main/resources/application-production.properties
-        echo "DATASOURCE_USERNAME=${{ secrets.DATASOURCE_USERNAME }}" >> ./src/main/resources/application-production.properties
+        touch ./src/main/resources/application-production.properties
+        echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application-production.properties
+        touch ./src/main/resources/application.properties
+        echo "${{ secrets.PROPERTIES_DEV }}" > ./src/main/resources/application.properties
 
     - name: Change permission of gradle
       run: chmod +x ./gradlew
