@@ -25,6 +25,9 @@ jobs:
         echo "DATASOURCE_PASSWORD=${{ secrets.DATASOURCE_PASSWORD }}" >> ./src/main/resources/application-production.properties
         echo "DATASOURCE_USERNAME=${{ secrets.DATASOURCE_USERNAME }}" >> ./src/main/resources/application-production.properties
 
+    - name: Change permission of gradle
+      run: chmod +x ./gradlew
+
     - name: Build with Gradle
       run: ./gradlew build --exclude-task test
 
