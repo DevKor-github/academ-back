@@ -22,8 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         Optional<Profile> profileOptional = profileRepository.findByEmail(email);
         System.out.println(profileOptional);
 
-        if (!profileOptional.isPresent()) {
-            // System.out.println("Profile not found");
+        if (profileOptional.isEmpty()) {
             throw new UsernameNotFoundException(email);
         }
 

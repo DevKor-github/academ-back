@@ -19,9 +19,7 @@ public class HomeController
     @Autowired
     HomeService homeService;
 
-    /*
-        강의 검색 컨트롤러
-    */
+    /* 강의 검색 컨트롤러 */
     @GetMapping("/api/search")
     public ResponseEntity<List<CourseDto>> searchCourse(@RequestParam("keyword") String keyword)
     {

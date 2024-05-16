@@ -51,8 +51,8 @@ public class CourseDto
     {
         return new CourseDto(
                 course.getCourse_id(),
-                course.getCourseCode(),
-                course.getGraduateSchool(),
+                course.getCourse_code(),
+                course.getGraduate_school(),
                 course.getDepartment(),
                 course.getYear(),
                 course.getSemester(),

@@ -40,8 +40,8 @@ public class AdminService
                 {
                     Course information = Course.builder()
                             .course_id(idIndex)
-                            .courseCode(course.get("cour_cd"))
-                            .graduateSchool(graduateSchool)
+                            .course_code(course.get("cour_cd"))
+                            .graduate_school(graduateSchool)
                             .department(department)
                             .year(course.get("year"))
                             .semester(course.get("term"))

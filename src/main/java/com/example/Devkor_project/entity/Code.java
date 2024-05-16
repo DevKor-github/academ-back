@@ -21,6 +21,6 @@ public class Code
 
     @Column(nullable = false) private String email;
     @Column(nullable = false) private String code;
-    @Column(nullable = false) private LocalDate createdAt;
+    @Column(nullable = false) private LocalDate created_at;
 
 }

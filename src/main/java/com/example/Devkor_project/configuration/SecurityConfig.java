@@ -42,6 +42,7 @@ public class SecurityConfig
                         .usernameParameter("email") // email 변경 예정
                         .passwordParameter("password")
                         .loginPage("/login")  // frontend login page
+                        .permitAll()
                         .loginProcessingUrl("/api/login")   // post api
                         .permitAll()
                         .defaultSuccessUrl("/", true)   // success 시 direct

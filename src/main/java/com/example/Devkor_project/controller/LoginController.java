@@ -17,6 +17,13 @@ public class LoginController
     @Autowired
     private LoginService loginService;
 
+    /* 로그인 성공 시 리다이렉트 경로 */
+    @GetMapping("/")
+    public ResponseEntity<String> login_success()
+    {
+        return ResponseEntity.status(HttpStatus.OK).body("로그인을 성공하였습니다.");
+    }
+
     /* 회원가입 컨트롤러 */
     @PostMapping("/api/signup")
     public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequestDto dto)

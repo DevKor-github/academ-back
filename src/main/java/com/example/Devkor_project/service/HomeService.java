@@ -19,9 +19,7 @@ public class HomeService
     @Autowired
     CourseRepository courseRepository;
 
-    /*
-        강의 검색 서비스
-    */
+    /* 강의 검색 서비스 */
     public List<CourseDto> searchCourse(String keyword)
     {
         // 검색어가 2글자 미만이면 예외 발생

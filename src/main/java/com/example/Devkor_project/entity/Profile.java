@@ -3,6 +3,8 @@ package com.example.Devkor_project.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Builder
 @Entity
 @AllArgsConstructor
@@ -24,6 +26,6 @@ public class Profile
     @Column(nullable = false) private int semester;
     @Column(nullable = false) private String department;
     @Column(nullable = false) private int point;
-
+    @Column(nullable = false) private LocalDate created_at;
     @Column(nullable = false) private String role;
 }

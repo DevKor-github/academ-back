@@ -56,6 +56,7 @@ public class LoginService
                 .department(dto.getDepartment())
                 .role("ROLE_USER") // Role auto mapping
                 .point(0)
+                .created_at(LocalDate.now())
                 .build();
 
         // 해당 Entity를 데이터베이스에 저장
@@ -97,7 +98,7 @@ public class LoginService
             code = Code.builder()
                     .email(email + "@korea.ac.kr")
                     .code(authenticationNumber)
-                    .createdAt(LocalDate.now())
+                    .created_at(LocalDate.now())
                     .build();
 
             codeRepository.save(code);

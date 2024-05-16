@@ -4,6 +4,7 @@ import com.example.Devkor_project.dto.ErrorDto;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -21,4 +22,18 @@ public class ExceptionManager
                             .build()
                 );
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorDto> validRequestExceptionHandler(MethodArgumentNotValidException e)
+    {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(
+                        ErrorDto.builder()
+                                .error_code("BAD_REQUEST")
+                                .description("잘못된 요청입니다.")
+                                .build()
+                );
+    }
+
+
 }
