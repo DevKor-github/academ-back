@@ -15,14 +15,14 @@ import lombok.ToString;
 @ToString
 public class CourseDto
 {
-    @NotNull(message = "courseId는 null일 수 없습니다.")
-    private Long courseId;
+    @NotNull(message = "course_id는 null일 수 없습니다.")
+    private Long course_id;
 
-    @NotBlank(message = "courseCode는 빈 문자열일 수 없습니다.")
-    private String courseCode;
+    @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
+    private String course_code;
 
-    @NotBlank(message = "graduateSchool은 빈 문자열일 수 없습니다.")
-    private String graduateSchool;
+    @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
+    private String graduate_school;
 
     @NotBlank(message = "department는 빈 문자열일 수 없습니다.")
     private String department;
@@ -39,13 +39,23 @@ public class CourseDto
     @NotBlank(message = "professor은 빈 문자열일 수 없습니다.")
     private String professor;
 
-    @NotBlank(message = "time은 빈 문자열일 수 없습니다.")
-    private String time;
-
-    private String location;
+    private String credit;
+    private String time_location;
 
     @NotNull(message = "rating은 null일 수 없습니다.")
     private double rating;
+
+    @NotNull(message = "amount_of_studying은 null일 수 없습니다.")
+    private double amount_of_studying;
+
+    @NotNull(message = "difficulty은 null일 수 없습니다.")
+    private double difficulty;
+
+    @NotNull(message = "delivery_power은 null일 수 없습니다.")
+    private double delivery_power;
+
+    @NotNull(message = "grading은 null일 수 없습니다.")
+    private double grading;
 
     public static CourseDto CourseToCourseDto(Course course)
     {
@@ -58,9 +68,13 @@ public class CourseDto
                 course.getSemester(),
                 course.getName(),
                 course.getProfessor(),
-                course.getTime(),
-                course.getLocation(),
-                course.getRating()
+                course.getCredit(),
+                course.getTime_location(),
+                course.getRating(),
+                course.getAmount_of_studying(),
+                course.getDifficulty(),
+                course.getDelivery_power(),
+                course.getGrading()
         );
     }
 }

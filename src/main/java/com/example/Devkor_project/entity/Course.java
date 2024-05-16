@@ -22,7 +22,12 @@ public class Course
     @Column(nullable = false) private String department;
     @Column(nullable = false) private String year;
     @Column(nullable = false) private String semester;
-    @Column(nullable = false) private String time;
-    @Column private String location;
+    @Column private String credit;
+    @Column private String time_location;
+
     @Column(nullable = false) private double rating;
+    @Column(nullable = false) private double amount_of_studying;
+    @Column(nullable = false) private double difficulty;
+    @Column(nullable = false) private double delivery_power;
+    @Column(nullable = false) private double grading;
 }

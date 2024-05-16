@@ -12,4 +12,7 @@ public interface CourseRepository extends JpaRepository<Course, Long>
 {
     @Query(value = "SELECT * FROM course WHERE name LIKE %:word% OR professor LIKE %:word% OR course_code LIKE %:word%", nativeQuery = true)
     List<Course> searchCourse(@Param("word") String word);
+
+    @Query(value = "SELECT count(*) FROM course", nativeQuery = true)
+    Long countCourse();
 }

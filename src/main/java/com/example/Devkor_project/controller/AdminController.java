@@ -2,7 +2,6 @@ package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.service.AdminService;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +24,20 @@ public class AdminController
     /* 대학원 강의 데이터베이스 초기화 컨트톨러 */
     @PostMapping("/api/admin/init-course-database")
     @JsonProperty("data")   // data JSON 객체를 MAP<String, Object> 형식으로 매핑
-    public ResponseEntity<String> initCourseDatabase(@Valid @RequestBody Map<String,Object> data, HttpServletRequest request)
+    public ResponseEntity<String> initCourseDatabase(@Valid @RequestBody Map<String,Object> data)
     {
         adminService.initCourseDatabase(data);
 
         return ResponseEntity.status(HttpStatus.OK).body("대학원 강의 데이터베이스 초기화가 정상적으로 수행되었습니다.");
+    }
+
+    /* 대학원 강의 데이터베이스 추가 컨트톨러 */
+    @PostMapping("/api/admin/insert-course-database")
+    @JsonProperty("data")   // data JSON 객체를 MAP<String, Object> 형식으로 매핑
+    public ResponseEntity<String> insertCourseDatabase(@Valid @RequestBody Map<String,Object> data)
+    {
+        adminService.insertCourseDatabase(data);
+
+        return ResponseEntity.status(HttpStatus.OK).body("대학원 강의 데이터베이스 추가가 정상적으로 수행되었습니다.");
     }
 }
