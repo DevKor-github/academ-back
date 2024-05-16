@@ -35,11 +35,11 @@ public class CourseService
 
         // 북마크 요청을 보낸 사용자의 계정 Profile entity
         Profile profile = profileRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
 
         // 사용자가 북마크할 강의
         Course course = courseRepository.findById(course_id)
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id.toString()));
 
         // Bookmark entity 생성
         Bookmark bookmark = Bookmark.builder()

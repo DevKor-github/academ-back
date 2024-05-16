@@ -19,5 +19,5 @@ public enum ErrorCode
     COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 course_id에 해당하는 강의가 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
-    private final String description;
+    private final String message;
 }
