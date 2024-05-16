@@ -30,7 +30,7 @@ public class HomeController
     @GetMapping("/api/search")
     public ResponseEntity<SuccessDto> searchCourse(@RequestParam("keyword") String keyword)
     {
-        List<Map<String, Object>> courses = homeService.searchCourse(keyword);
+        List<Map<String, String>> courses = homeService.searchCourse(keyword);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(SuccessDto.builder()

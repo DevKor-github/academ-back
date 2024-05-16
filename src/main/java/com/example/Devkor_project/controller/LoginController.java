@@ -40,6 +40,7 @@ public class LoginController
     public ResponseEntity<SuccessDto> signUp(@Valid @RequestBody SignUpRequestDto dto)
     {
         loginService.signUp(dto);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SuccessDto.builder()
                         .data(dto.getEmail())
@@ -54,9 +55,10 @@ public class LoginController
     public ResponseEntity<SuccessDto> sendAuthenticationNumber(@RequestParam("email") String email)
     {
         loginService.sendAuthenticationNumber(email);
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(SuccessDto.builder()
-                        .data(email)
+                        .data(email + "@korea.ac.kr")
                         .message("인증번호 이메일 발송에 성공하였습니다.")
                         .version(versionProvider.getVersion())
                         .build()
@@ -72,7 +74,7 @@ public class LoginController
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(SuccessDto.builder()
-                        .data(email)
+                        .data(email + "@korea.ac.kr")
                         .message("인증번호 이메일 확인에 성공하였습니다.")
                         .version(versionProvider.getVersion())
                         .build()
@@ -86,7 +88,7 @@ public class LoginController
         loginService.resetPassword(email);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(SuccessDto.builder()
-                        .data(email)
+                        .data(email + "@korea.ac.kr")
                         .message("비밀번호가 성공적으로 초기화 되었습니다.")
                         .version(versionProvider.getVersion())
                         .build()
