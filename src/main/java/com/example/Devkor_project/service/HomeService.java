@@ -29,7 +29,7 @@ public class HomeService
         // 강의명 + 교수명 + 학수번호 검색
         List<CourseDto> courses = courseRepository.searchCourse(keyword)
                 .stream()
-                .map(CourseDto::CourseToCousreDto)
+                .map(CourseDto::CourseToCourseDto)
                 .collect(Collectors.toList());
 
         // 검색 결과가 없다면 예외 발생
