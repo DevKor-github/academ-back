@@ -26,7 +26,7 @@ public class HomeService
 
     /* 강의 검색 서비스 */
     @SuppressWarnings("unchecked")
-    public List<Map<String, Object>> searchCourse(String keyword)
+    public List<Map<String, String>> searchCourse(String keyword)
     {
         // 검색어가 2글자 미만이면 예외 발생
         if(keyword.length() < 2)
@@ -39,12 +39,25 @@ public class HomeService
         if(courses.isEmpty())
             throw new AppException(ErrorCode.NO_RESULT, keyword);
 
-        List<Map<String, Object>> processedCourses = new ArrayList<>();;
+        // entity를 HashMap으로 변경
+        List<Map<String, String>> processedCourses = new ArrayList<>();;
         for(int i = 0; i < courses.size(); i++)
         {
             ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> processedCourse = objectMapper.convertValue(courses.get(i), Map.class);
-            processedCourses.add(processedCourse);
+            Map<String, Object> courseMap = objectMapper.convertValue(courses.get(i), Map.class);
+            Map<String, String> courseProcessedMap = new HashMap<String, String>();
+
+            for (Map.Entry<String, Object> entry : courseMap.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (value != null) {
+                    courseProcessedMap.put(key, value.toString());
+                } else {
+                    courseProcessedMap.put(key, null);
+                }
+            }
+
+            processedCourses.add(courseProcessedMap);
         }
 
         return processedCourses;
