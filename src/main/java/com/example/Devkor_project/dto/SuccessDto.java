@@ -1,18 +1,16 @@
 package com.example.Devkor_project.dto;
 
-import com.example.Devkor_project.configuration.VersionProvider;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Value;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Getter
 @Builder
-public class ErrorDto
+public class SuccessDto
 {
     @Builder.Default
-    private String status = "error";
+    private String status = "success";
 
     private String data;
 

@@ -1,3 +1,6 @@
+academ:
+  version: "v0.2.0-alpha"
+
 ## 데이터베이스(MySQL) 연동
 spring:
   application:
