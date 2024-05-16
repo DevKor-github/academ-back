@@ -1,6 +1,7 @@
 package com.example.Devkor_project.configuration;
 
 import com.example.Devkor_project.service.CustomUserDetailsService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -52,8 +53,14 @@ public class SecurityConfig
         httpSecurity
                 .logout((logoutConfig) -> logoutConfig
                         .logoutUrl("/logout")
+                        .addLogoutHandler((request, response, authentication) -> {
+                            HttpSession session = request.getSession();
+                            if (session != null) {
+                                session.invalidate();
+                            }
+                        })
                         .logoutSuccessUrl("/")
-                        .deleteCookies("JSESSIONID", "remember-me")
+                        .deleteCookies("remember-me")
                 );
 
 
