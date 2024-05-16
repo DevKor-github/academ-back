@@ -47,12 +47,12 @@ public class CourseDto
     @NotNull(message = "rating은 null일 수 없습니다.")
     private double rating;
 
-    public static CourseDto CourseToCousreDto(Course course)
+    public static CourseDto CourseToCourseDto(Course course)
     {
         return new CourseDto(
-                course.getCourseId(),
-                course.getCourseCode(),
-                course.getGraduateSchool(),
+                course.getCourse_id(),
+                course.getCourse_code(),
+                course.getGraduate_school(),
                 course.getDepartment(),
                 course.getYear(),
                 course.getSemester(),

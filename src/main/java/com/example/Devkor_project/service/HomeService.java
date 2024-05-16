@@ -1,7 +1,6 @@
 package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.CourseDto;
-import com.example.Devkor_project.dto.SearchCourseRequestDto;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.CourseRepository;
@@ -20,24 +19,22 @@ public class HomeService
     @Autowired
     CourseRepository courseRepository;
 
-    /*
-        강의 검색 서비스
-    */
-    public List<CourseDto> searchCourse(SearchCourseRequestDto dto)
+    /* 강의 검색 서비스 */
+    public List<CourseDto> searchCourse(String keyword)
     {
         // 검색어가 2글자 미만이면 예외 발생
-        if(dto.getSearchWord().length() < 2)
-            throw new AppException(ErrorCode.SHORT_SEARCH_WORD, "검색어는 2글자 이상이어야 합니다.");
+        if(keyword.length() < 2)
+            throw new AppException(ErrorCode.SHORT_SEARCH_WORD);
 
         // 강의명 + 교수명 + 학수번호 검색
-        List<CourseDto> courses = courseRepository.searchCourse(dto.getSearchWord())
+        List<CourseDto> courses = courseRepository.searchCourse(keyword)
                 .stream()
-                .map(CourseDto::CourseToCousreDto)
+                .map(CourseDto::CourseToCourseDto)
                 .collect(Collectors.toList());
 
         // 검색 결과가 없다면 예외 발생
         if(courses.isEmpty())
-            throw new AppException(ErrorCode.NO_RESULT, "검색 결과가 없습니다.");
+            throw new AppException(ErrorCode.NO_RESULT);
 
         return courses;
     }

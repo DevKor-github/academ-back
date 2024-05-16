@@ -5,10 +5,14 @@ plugins {
 }
 
 group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.1-beta'
 
 java {
 	sourceCompatibility = '21'
+}
+
+jar {
+	enabled = false
 }
 
 repositories {
@@ -37,10 +41,6 @@ dependencies {
 
 	// 메일 서버 연결 라이브러리
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
-
-	// thymeleaf 라이브러리
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 }
 
 tasks.named('test') {

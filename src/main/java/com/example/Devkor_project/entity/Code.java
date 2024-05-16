@@ -17,10 +17,10 @@ public class Code
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long codeId;
+    private Long code_id;
 
     @Column(nullable = false) private String email;
     @Column(nullable = false) private String code;
-    @Column(nullable = false) private LocalDate createdAt;
+    @Column(nullable = false) private LocalDate created_at;
 
 }
