@@ -15,7 +15,8 @@ public enum ErrorCode
     CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 이메일로 전송된 인증번호가 존재하지 않습니다."),
     WRONG_CODE(HttpStatus.BAD_REQUEST, "인증번호가 틀렸습니다."),
     SHORT_SEARCH_WORD(HttpStatus.BAD_REQUEST, "검색어는 2글자 이상이어야 합니다."),
-    NO_RESULT(HttpStatus.NOT_FOUND, "검색 결과가 없습니다.");
+    NO_RESULT(HttpStatus.NOT_FOUND, "검색 결과가 없습니다."),
+    COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 course_id에 해당하는 강의가 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String description;
