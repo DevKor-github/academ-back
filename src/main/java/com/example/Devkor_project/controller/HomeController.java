@@ -27,7 +27,7 @@ public class HomeController
     VersionProvider versionProvider;
 
     /* 강의 검색 컨트롤러 */
-    @GetMapping("/api/search")
+    @GetMapping("/api/home/search")
     public ResponseEntity<SuccessDto> searchCourse(@RequestParam("keyword") String keyword)
     {
         List<Map<String, String>> courses = homeService.searchCourse(keyword);

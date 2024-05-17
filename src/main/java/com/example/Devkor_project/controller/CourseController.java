@@ -22,7 +22,7 @@ public class CourseController
     VersionProvider versionProvider;
 
     /* 강의 북마크 컨트롤러 */
-    @GetMapping("/api/bookmark")
+    @GetMapping("/api/course/bookmark")
     public ResponseEntity<SuccessDto> bookmark(Principal principal,
                                                @RequestParam("course_id") Long course_id)
     {
