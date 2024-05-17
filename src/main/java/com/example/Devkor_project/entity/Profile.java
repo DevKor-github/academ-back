@@ -22,7 +22,7 @@ public class Profile
     @Column(nullable = false) private String password;
     @Column(nullable = false) private String username;
     @Column(nullable = false) private String student_id;
-    @Column(nullable = false) private int grade;
+    @Column(nullable = false) private String degree;
     @Column(nullable = false) private int semester;
     @Column(nullable = false) private String department;
     @Column(nullable = false) private int point;
