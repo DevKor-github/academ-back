@@ -26,8 +26,8 @@ public class SignUpRequestDto
     @NotBlank(message = "student_id는 빈 문자열일 수 없습니다.")
     private String student_id;
 
-    @NotNull(message = "grade는 null일 수 없습니다.")
-    private int grade;
+    @NotNull(message = "degree는 null일 수 없습니다.")
+    private String degree;
 
     @NotNull(message = "semester는 null일 수 없습니다.")
     private int semester;

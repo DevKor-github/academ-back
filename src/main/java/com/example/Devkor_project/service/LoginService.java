@@ -51,7 +51,7 @@ public class LoginService
                 .password(encoder.encode(dto.getPassword()))
                 .username(dto.getUsername())
                 .student_id(dto.getStudent_id())
-                .grade(dto.getGrade())
+                .degree(dto.getDegree())
                 .semester(dto.getSemester())
                 .department(dto.getDepartment())
                 .role("ROLE_USER") // Role auto mapping
