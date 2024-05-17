@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -33,21 +35,30 @@ public class CourseService
         // 북마크 요청을 보낸 사용자의 계정 이메일
         String email = principal.getName();
 
-        // 북마크 요청을 보낸 사용자의 계정 Profile entity
+        // 북마크 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
         Profile profile = profileRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
 
-        // 사용자가 북마크할 강의
+        // 사용자가 북마크할 강의가 존재하지 않으면 예외 처리
         Course course = courseRepository.findById(course_id)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id.toString()));
 
-        // Bookmark entity 생성
-        Bookmark bookmark = Bookmark.builder()
-                .profile_id(profile)
-                .course_id(course)
-                .build();
 
-        // 데이터베이스에 저장
-        bookmarkRepository.save(bookmark);
+        List<Bookmark> bookmark = bookmarkRepository.searchBookmark(profile.getProfile_id(), course.getCourse_id());
+        // 해당 북마크가 정보가 현재 존재하지 않으면, 북마크 생성
+        if(bookmark.isEmpty())
+        {
+            // Bookmark entity 생성
+            Bookmark newBookmark = Bookmark.builder()
+                    .profile_id(profile)
+                    .course_id(course)
+                    .build();
+
+            bookmarkRepository.save(newBookmark);
+        }
+        // 해당 북마크가 정보가 이미 존재하면, 북마크 해제
+        else
+            bookmarkRepository.delete(bookmark.getFirst());
+
     }
 }
