@@ -86,6 +86,7 @@ public class LoginController
     public ResponseEntity<SuccessDto> resetPassword(@RequestParam("email") String email)
     {
         loginService.resetPassword(email);
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(SuccessDto.builder()
                         .data(email + "@korea.ac.kr")

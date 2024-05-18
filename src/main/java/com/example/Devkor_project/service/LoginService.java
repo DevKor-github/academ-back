@@ -121,15 +121,16 @@ public class LoginService
                 });
 
         // 해당 이메일로 발송된 인증번호가 있는지 체크
-        Code Actualcode = codeRepository.findByEmail(email + "@korea.ac.kr")
+        Code actualCode = codeRepository.findByEmail(email + "@korea.ac.kr")
                 .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, email + "@korea.ac.kr"));
 
         // 입력한 인증번호가 맞는지 체크
-        if(!Objects.equals(code, Actualcode.getCode()))
+        if(!Objects.equals(code, actualCode.getCode()))
             throw new AppException(ErrorCode.WRONG_CODE, email + "@korea.ac.kr");
     }
 
     /* 임시 비밀번호 발급 서비스 */
+    @Transactional
     public void resetPassword(String email)
     {
         // 이메일에 해당하는 계정 존재 여부 체크
@@ -145,12 +146,25 @@ public class LoginService
         }
         String newPassword = randomString.toString();
 
+        // 임시 비밀번호를 비밀번호로 하는 새로 추가할 계정 생성
+        Profile newProfile = Profile.builder()
+                .email(profile.getEmail())
+                .password(encoder.encode(newPassword))
+                .username(profile.getUsername())
+                .student_id(profile.getStudent_id())
+                .degree(profile.getDegree())
+                .semester(profile.getSemester())
+                .department(profile.getDepartment())
+                .point(profile.getPoint())
+                .created_at(profile.getCreated_at())
+                .role(profile.getRole())
+                .build();
+
         // 기존의 계정을 데이터베이스에서 삭제
         profileRepository.delete(profile);
 
         // 임시 비밀번호를 비밀번호로 하는 새로운 계정을 데이터베이스에 반영
-        profile.setPassword(encoder.encode(newPassword));
-        profileRepository.save(profile);
+        profileRepository.save(newProfile);
 
         // 임시 비밀번호를 이메일로 전송
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
