@@ -8,6 +8,7 @@ import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.BookmarkRepository;
 import com.example.Devkor_project.repository.CourseRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class CourseService
     BookmarkRepository bookmarkRepository;
 
     /* 강의 북마크 서비스 */
+    @Transactional
     public void bookmark(Principal principal, Long course_id)
     {
         // 북마크 요청을 보낸 사용자의 계정 이메일

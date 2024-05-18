@@ -34,8 +34,8 @@ public class SecurityConfig
                         .requestMatchers("/search", "/api/search").hasAnyRole("USER", "ADMIN")
                         // ADMIN 계정만 접근 가능
                         .requestMatchers("/api/admin/**", "/admin").hasRole("ADMIN")
-                        // 그 외의 요청은 인증된 사용자에게만 접근 권한 허용
-                        .anyRequest().authenticated()
+                        // 그 외의 요청은 모든 사용자에게 접근 권한 허용
+                        .anyRequest().permitAll()
                 );
 
         httpSecurity
