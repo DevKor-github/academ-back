@@ -31,11 +31,12 @@ public class SecurityConfig
                         .requestMatchers("/", "/login", "/signup").permitAll()
                         .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
                         // USER 또는 ADMIN 계정만 접근 가능
-                        .requestMatchers("/search", "/api/search").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/search/**", "/api/search/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/course/**", "/api/course/**").hasAnyRole("USER", "ADMIN")
                         // ADMIN 계정만 접근 가능
-                        .requestMatchers("/api/admin/**", "/admin").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
                         // 그 외의 요청은 모든 사용자에게 접근 권한 허용
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 );
 
         httpSecurity
