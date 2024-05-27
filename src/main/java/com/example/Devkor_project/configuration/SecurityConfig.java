@@ -22,8 +22,7 @@ public class SecurityConfig
     {
         httpSecurity
                 .httpBasic(HttpBasicConfigurer::disable)    // HTTP 기본 인증 비활성화
-                .csrf(CsrfConfigurer::disable)              // CSRF 보호 비활성화
-                .cors(Customizer.withDefaults());           // CORS를 기본 값으로 활성화
+                .csrf(CsrfConfigurer::disable);             // CSRF 보호 비활성화
 
         httpSecurity
                 .authorizeHttpRequests((requests) -> (requests)
