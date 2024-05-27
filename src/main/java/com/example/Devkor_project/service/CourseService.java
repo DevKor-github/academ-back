@@ -68,6 +68,7 @@ public class CourseService
         return processedCourses;
     }
 
+    /* 강의 상세 정보 서비스 */
     public CourseDetailDto courseDetail(Long course_id)
     {
         // 사용자가 상세 정보를 요청한 강의가 존재하지 않으면 예외 처리
