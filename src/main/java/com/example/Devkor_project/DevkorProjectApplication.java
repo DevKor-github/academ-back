@@ -15,5 +15,4 @@ public class DevkorProjectApplication {
 		SpringApplication.run(DevkorProjectApplication.class, args);
 	}
 
-
 }
