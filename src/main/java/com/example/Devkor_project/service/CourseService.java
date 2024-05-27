@@ -121,6 +121,7 @@ public class CourseService
     }
 
     /* 강의평 작성 완료 및 등록 서비스 */
+    @Transactional
     public void insertComment(Principal principal, InsertCommentRequestDto dto)
     {
         // 강의평 작성 시작 요청을 보낸 사용자의 계정 이메일
@@ -138,32 +139,64 @@ public class CourseService
         List<Comment> comment = commentRepository.searchComment(profile.getProfile_id(), course.getCourse_id());
         if(!comment.isEmpty())
             throw new AppException(ErrorCode.ALREADY_EXIST, course.getCourse_id());
-        else
-        {
-            Comment newComment = Comment.builder()
-                    .profile_id(profile)
-                    .course_id(course)
-                    .rating(dto.getRating())
-                    .r1_amount_of_studying(dto.getR1_amount_of_studying())
-                    .r2_difficulty(dto.getR2_difficulty())
-                    .r3_delivery_power(dto.getR3_delivery_power())
-                    .r4_grading(dto.getR4_grading())
-                    .review(dto.getReview())
-                    .teach_t1_theory(dto.isTeach_t1_theory())
-                    .teach_t2_practice(dto.isTeach_t2_practice())
-                    .teach_t3_seminar(dto.isTeach_t3_seminar())
-                    .teach_t4_discussion(dto.isTeach_t4_discussion())
-                    .teach_t5_presentation(dto.isTeach_t5_presentation())
-                    .learn_t1_theory(dto.isLearn_t1_theory())
-                    .learn_t2_thesis(dto.isLearn_t2_thesis())
-                    .learn_t3_exam(dto.isLearn_t3_exam())
-                    .learn_t4_industry(dto.isLearn_t4_industry())
-                    .likes(0)
-                    .created_at(LocalDate.now())
-                    .updated_at(LocalDate.now())
-                    .build();
 
-            commentRepository.save(newComment);
-        }
+        // 강의평 추가
+        Comment newComment = Comment.builder()
+                .profile_id(profile)
+                .course_id(course)
+                .rating(dto.getRating())
+                .r1_amount_of_studying(dto.getR1_amount_of_studying())
+                .r2_difficulty(dto.getR2_difficulty())
+                .r3_delivery_power(dto.getR3_delivery_power())
+                .r4_grading(dto.getR4_grading())
+                .review(dto.getReview())
+                .teach_t1_theory(dto.isTeach_t1_theory())
+                .teach_t2_practice(dto.isTeach_t2_practice())
+                .teach_t3_seminar(dto.isTeach_t3_seminar())
+                .teach_t4_discussion(dto.isTeach_t4_discussion())
+                .teach_t5_presentation(dto.isTeach_t5_presentation())
+                .learn_t1_theory(dto.isLearn_t1_theory())
+                .learn_t2_thesis(dto.isLearn_t2_thesis())
+                .learn_t3_exam(dto.isLearn_t3_exam())
+                .learn_t4_industry(dto.isLearn_t4_industry())
+                .likes(0)
+                .created_at(LocalDate.now())
+                .updated_at(LocalDate.now())
+                .build();
+
+        commentRepository.save(newComment);
+
+        // 강의 엔티티의 강의평 개수 업데이트
+        int count = course.getCOUNT_comments() + 1;
+        course.setCOUNT_comments(count);
+
+        // 강의 엔티티의 평점 평균값 업데이트
+        course.setAVG_rating((course.getAVG_rating() * (count - 1) + dto.getRating()) / count);
+        course.setAVG_r1_amount_of_studying((course.getAVG_r1_amount_of_studying() * (count - 1) + dto.getR1_amount_of_studying()) / count);
+        course.setAVG_r2_difficulty((course.getAVG_r2_difficulty() * (count - 1) + dto.getR2_difficulty()) / count);
+        course.setAVG_r3_delivery_power((course.getAVG_r3_delivery_power() * (count - 1) + dto.getR3_delivery_power()) / count);
+        course.setAVG_r4_grading((course.getAVG_r4_grading() * (count - 1) + dto.getR4_grading()) / count);
+
+        // 강의 엔티티의 태그 개수 업데이트
+        if(dto.isTeach_t1_theory())
+            course.setCOUNT_teach_t1_theory(course.getCOUNT_teach_t1_theory() + 1);
+        if(dto.isTeach_t2_practice())
+            course.setCOUNT_teach_t2_practice(course.getCOUNT_teach_t2_practice() + 1);
+        if(dto.isTeach_t3_seminar())
+            course.setCOUNT_teach_t3_seminar(course.getCOUNT_teach_t3_seminar() + 1);
+        if(dto.isTeach_t4_discussion())
+            course.setCOUNT_teach_t4_discussion(course.getCOUNT_teach_t4_discussion() + 1);
+        if(dto.isTeach_t5_presentation())
+            course.setCOUNT_teach_t5_presentation(course.getCOUNT_teach_t5_presentation() + 1);
+        if(dto.isLearn_t1_theory())
+            course.setCOUNT_learn_t1_theory(course.getCOUNT_learn_t1_theory() + 1);
+        if(dto.isLearn_t2_thesis())
+            course.setCOUNT_learn_t2_thesis(course.getCOUNT_learn_t2_thesis() + 1);
+        if(dto.isLearn_t3_exam())
+            course.setCOUNT_learn_t3_exam(course.getCOUNT_learn_t3_exam() + 1);
+        if(dto.isLearn_t4_industry())
+            course.setCOUNT_learn_t4_industry(course.getCOUNT_learn_t4_industry() + 1);
+
+        courseRepository.save(course);
     }
 }
