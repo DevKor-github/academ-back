@@ -1,6 +1,7 @@
 package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.configuration.VersionProvider;
+import com.example.Devkor_project.dto.CourseDetailDto;
 import com.example.Devkor_project.dto.InsertCommentRequestDto;
 import com.example.Devkor_project.dto.SignUpRequestDto;
 import com.example.Devkor_project.dto.SuccessDto;
@@ -36,6 +37,22 @@ public class CourseController
                         .message("강의 검색이 성공적으로 수행되었습니다.")
                         .version(versionProvider.getVersion())
                         .build()
+                );
+    }
+
+    /* 강의 상세 정보 컨트롤러 */
+    @GetMapping("api/course/detail")
+    public ResponseEntity<SuccessDto> courseDetail(@RequestParam("course_id") Long course_id)
+    {
+        CourseDetailDto dto = courseService.courseDetail(course_id);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        SuccessDto.builder()
+                                .data(dto)
+                                .message("강의 상세 정보가 성공적으로 반환되었습니다.")
+                                .version(versionProvider.getVersion())
+                                .build()
                 );
     }
 

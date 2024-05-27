@@ -1,5 +1,7 @@
 package com.example.Devkor_project.service;
 
+import com.example.Devkor_project.dto.CommentDto;
+import com.example.Devkor_project.dto.CourseDetailDto;
 import com.example.Devkor_project.dto.InsertCommentRequestDto;
 import com.example.Devkor_project.entity.Bookmark;
 import com.example.Devkor_project.entity.Comment;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -63,6 +66,53 @@ public class CourseService
         }
 
         return processedCourses;
+    }
+
+    public CourseDetailDto courseDetail(Long course_id)
+    {
+        // 사용자가 상세 정보를 요청한 강의가 존재하지 않으면 예외 처리
+        Course course = courseRepository.findById(course_id)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id));
+
+        // 해당 강의의 강의평들 검색
+        List<Comment> comments = commentRepository.findByCourseId(course_id);
+
+        // 강의평 엔티티 리스트를 강의평 dto 리스트로 변환
+        List<CommentDto> commentDtos = comments.stream()
+                .map(comment -> {
+
+                    Profile profile = profileRepository.findById(comment.getProfile_id().getProfile_id())
+                            .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, comment.getProfile_id().getProfile_id()));
+                    String username = profile.getUsername();
+
+                    return CommentDto.builder()
+                            .comment_id(comment.getComment_id())
+                            .profile_username(username)
+                            .rating(comment.getRating())
+                            .r1_amount_of_studying(comment.getR1_amount_of_studying())
+                            .r2_difficulty(comment.getR2_difficulty())
+                            .r3_delivery_power(comment.getR3_delivery_power())
+                            .r4_grading(comment.getR4_grading())
+                            .review(comment.getReview())
+                            .teach_t1_theory(comment.isTeach_t1_theory())
+                            .teach_t2_practice(comment.isTeach_t2_practice())
+                            .teach_t3_seminar(comment.isTeach_t3_seminar())
+                            .teach_t4_discussion(comment.isTeach_t4_discussion())
+                            .teach_t5_presentation(comment.isTeach_t5_presentation())
+                            .learn_t1_theory(comment.isLearn_t1_theory())
+                            .learn_t2_thesis(comment.isLearn_t2_thesis())
+                            .learn_t3_exam(comment.isLearn_t3_exam())
+                            .learn_t4_industry(comment.isLearn_t4_industry())
+                            .likes(comment.getLikes())
+                            .created_at(comment.getCreated_at())
+                            .updated_at(comment.getUpdated_at())
+                            .build();
+
+                })
+                .toList();
+
+        // course 엔티티와 강의평 dto 리스트로 CourseDetailDto 만들어서 반환
+        return CourseDetailDto.makeCourseDetailDto(course, commentDtos);
     }
 
     /* 강의 북마크 서비스 */
