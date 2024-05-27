@@ -1,6 +1,7 @@
 package com.example.Devkor_project.configuration;
 
 import com.example.Devkor_project.service.CustomUserDetailsService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -21,8 +22,7 @@ public class SecurityConfig
     {
         httpSecurity
                 .httpBasic(HttpBasicConfigurer::disable)    // HTTP 기본 인증 비활성화
-                .csrf(CsrfConfigurer::disable)              // CSRF 보호 비활성화
-                .cors(Customizer.withDefaults());           // CORS를 기본 값으로 활성화
+                .csrf(CsrfConfigurer::disable);             // CSRF 보호 비활성화
 
         httpSecurity
                 .authorizeHttpRequests((requests) -> (requests)
@@ -30,10 +30,11 @@ public class SecurityConfig
                         .requestMatchers("/", "/login", "/signup").permitAll()
                         .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
                         // USER 또는 ADMIN 계정만 접근 가능
-                        .requestMatchers("/search", "/api/search").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/search/**", "/api/search/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/course/**", "/api/course/**").hasAnyRole("USER", "ADMIN")
                         // ADMIN 계정만 접근 가능
-                        .requestMatchers("/api/admin/**", "/admin").hasRole("ADMIN")
-                        // 그 외의 요청은 인증된 사용자에게만 접근 권한 허용
+                        .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
+                        // 그 외의 요청은 모든 사용자에게 접근 권한 허용
                         .anyRequest().authenticated()
                 );
 
@@ -42,6 +43,7 @@ public class SecurityConfig
                         .usernameParameter("email") // email 변경 예정
                         .passwordParameter("password")
                         .loginPage("/login")  // frontend login page
+                        .permitAll()
                         .loginProcessingUrl("/api/login")   // post api
                         .permitAll()
                         .defaultSuccessUrl("/", true)   // success 시 direct
@@ -51,8 +53,14 @@ public class SecurityConfig
         httpSecurity
                 .logout((logoutConfig) -> logoutConfig
                         .logoutUrl("/logout")
+                        .addLogoutHandler((request, response, authentication) -> {
+                            HttpSession session = request.getSession();
+                            if (session != null) {
+                                session.invalidate();
+                            }
+                        })
                         .logoutSuccessUrl("/")
-                        .deleteCookies("JSESSIONID", "remember-me")
+                        .deleteCookies("remember-me")
                 );
 
 

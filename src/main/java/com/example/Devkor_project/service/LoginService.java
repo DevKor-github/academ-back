@@ -42,7 +42,7 @@ public class LoginService
         // 이메일 중복 체크
         profileRepository.findByEmail(dto.getEmail())
                 .ifPresent(user -> {
-                    throw new AppException(ErrorCode.EMAIL_DUPLICATED);
+                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail());
                 });
 
         // DTO -> Entity 변환
@@ -51,11 +51,12 @@ public class LoginService
                 .password(encoder.encode(dto.getPassword()))
                 .username(dto.getUsername())
                 .student_id(dto.getStudent_id())
-                .grade(dto.getGrade())
+                .degree(dto.getDegree())
                 .semester(dto.getSemester())
                 .department(dto.getDepartment())
                 .role("ROLE_USER") // Role auto mapping
                 .point(0)
+                .created_at(LocalDate.now())
                 .build();
 
         // 해당 Entity를 데이터베이스에 저장
@@ -97,13 +98,13 @@ public class LoginService
             code = Code.builder()
                     .email(email + "@korea.ac.kr")
                     .code(authenticationNumber)
-                    .createdAt(LocalDate.now())
+                    .created_at(LocalDate.now())
                     .build();
 
             codeRepository.save(code);
         }
         catch (AppException e) {
-            throw new AppException(ErrorCode.UNEXPECTED_ERROR);
+            throw new AppException(ErrorCode.UNEXPECTED_ERROR, email + "@korea.ac.kr");
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
@@ -116,24 +117,25 @@ public class LoginService
         // 이메일 중복 체크
         profileRepository.findByEmail(email + "@korea.ac.kr")
                 .ifPresent(user -> {
-                    throw new AppException(ErrorCode.EMAIL_DUPLICATED);
+                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, email + "@korea.ac.kr");
                 });
 
         // 해당 이메일로 발송된 인증번호가 있는지 체크
-        Code Actualcode = codeRepository.findByEmail(email + "@korea.ac.kr")
-                .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND));
+        Code actualCode = codeRepository.findByEmail(email + "@korea.ac.kr")
+                .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, email + "@korea.ac.kr"));
 
         // 입력한 인증번호가 맞는지 체크
-        if(!Objects.equals(code, Actualcode.getCode()))
-            throw new AppException(ErrorCode.WRONG_CODE);
+        if(!Objects.equals(code, actualCode.getCode()))
+            throw new AppException(ErrorCode.WRONG_CODE, email + "@korea.ac.kr");
     }
 
     /* 임시 비밀번호 발급 서비스 */
+    @Transactional
     public void resetPassword(String email)
     {
         // 이메일에 해당하는 계정 존재 여부 체크
         Profile profile = profileRepository.findByEmail(email + "@korea.ac.kr")
-                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email + "@korea.ac.kr"));
 
         // 임시 비밀번호 생성
         Random random = new Random();
@@ -144,12 +146,25 @@ public class LoginService
         }
         String newPassword = randomString.toString();
 
+        // 임시 비밀번호를 비밀번호로 하는 새로 추가할 계정 생성
+        Profile newProfile = Profile.builder()
+                .email(profile.getEmail())
+                .password(encoder.encode(newPassword))
+                .username(profile.getUsername())
+                .student_id(profile.getStudent_id())
+                .degree(profile.getDegree())
+                .semester(profile.getSemester())
+                .department(profile.getDepartment())
+                .point(profile.getPoint())
+                .created_at(profile.getCreated_at())
+                .role(profile.getRole())
+                .build();
+
         // 기존의 계정을 데이터베이스에서 삭제
         profileRepository.delete(profile);
 
         // 임시 비밀번호를 비밀번호로 하는 새로운 계정을 데이터베이스에 반영
-        profile.setPassword(encoder.encode(newPassword));
-        profileRepository.save(profile);
+        profileRepository.save(newProfile);
 
         // 임시 비밀번호를 이메일로 전송
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -163,7 +178,7 @@ public class LoginService
             javaMailSender.send(mimeMessage);
         }
         catch (AppException e) {
-            throw new AppException(ErrorCode.UNEXPECTED_ERROR);
+            throw new AppException(ErrorCode.UNEXPECTED_ERROR, email + "@korea.ac.kr");
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }

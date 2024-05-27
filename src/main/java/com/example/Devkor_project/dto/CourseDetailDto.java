@@ -1,19 +1,23 @@
 package com.example.Devkor_project.dto;
 
+import com.example.Devkor_project.entity.Comment;
 import com.example.Devkor_project.entity.Course;
+import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @ToString
-public class CourseDto
+@Builder
+public class CourseDetailDto
 {
     @NotNull(message = "course_id는 null일 수 없습니다.")
     private Long course_id;
@@ -66,9 +70,11 @@ public class CourseDto
     @NotNull(message = "COUNT_learn_t4_industry는 null일 수 없습니다.")
     private int COUNT_learn_t4_industry;
 
-    public static CourseDto CourseToCourseDto(Course course)
+    private List<CommentDto> comments;
+
+    public static CourseDetailDto makeCourseDetailDto(Course course, List<CommentDto> commentDtos)
     {
-        return new CourseDto(
+        return new CourseDetailDto(
                 course.getCourse_id(),
                 course.getCourse_code(),
                 course.getGraduate_school(),
@@ -93,7 +99,8 @@ public class CourseDto
                 course.getCOUNT_learn_t1_theory(),
                 course.getCOUNT_learn_t2_thesis(),
                 course.getCOUNT_learn_t3_exam(),
-                course.getCOUNT_learn_t4_industry()
+                course.getCOUNT_learn_t4_industry(),
+                commentDtos
         );
     }
 }
