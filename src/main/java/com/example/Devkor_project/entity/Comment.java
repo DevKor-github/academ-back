@@ -35,7 +35,9 @@ public class Comment
     @Column(nullable = false) private int r2_difficulty;
     @Column(nullable = false) private int r3_delivery_power;
     @Column(nullable = false) private int r4_grading;
+
     @Column(columnDefinition = "TEXT", nullable = false) private String review;
+
     @Column(nullable = false) private boolean teach_t1_theory;
     @Column(nullable = false) private boolean teach_t2_practice;
     @Column(nullable = false) private boolean teach_t3_seminar;
