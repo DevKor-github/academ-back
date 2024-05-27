@@ -1,5 +1,6 @@
 package com.example.Devkor_project.service;
 
+import com.example.Devkor_project.dto.InsertCommentRequestDto;
 import com.example.Devkor_project.entity.Bookmark;
 import com.example.Devkor_project.entity.Comment;
 import com.example.Devkor_project.entity.Course;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -112,8 +114,56 @@ public class CourseService
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id));
 
         // 해당 사용자가 이미 해당 강의에 강의평을 달았다면, 예외 처리
-        List<Comment> comment = commentRepository.searchComment(profile.getProfile_id(), course.getCourse_id());
+        List<Comment> comment = commentRepository.searchComment(profile.getProfile_id(), course_id);
         if(!comment.isEmpty())
             throw new AppException(ErrorCode.ALREADY_EXIST, course_id);
+
+    }
+
+    /* 강의평 작성 완료 및 등록 서비스 */
+    public void insertComment(Principal principal, InsertCommentRequestDto dto)
+    {
+        // 강의평 작성 시작 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 강의평 작성 시작 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // 사용자가 강의평을 추가할 강의가 존재하지 않으면 예외 처리
+        Course course = courseRepository.findById(dto.getCourse_id())
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, dto.getCourse_id()));
+
+        // 해당 사용자가 이미 해당 강의에 강의평을 달았다면, 예외 처리
+        List<Comment> comment = commentRepository.searchComment(profile.getProfile_id(), course.getCourse_id());
+        if(!comment.isEmpty())
+            throw new AppException(ErrorCode.ALREADY_EXIST, course.getCourse_id());
+        else
+        {
+            Comment newComment = Comment.builder()
+                    .profile_id(profile)
+                    .course_id(course)
+                    .rating(dto.getRating())
+                    .r1_amount_of_studying(dto.getR1_amount_of_studying())
+                    .r2_difficulty(dto.getR2_difficulty())
+                    .r3_delivery_power(dto.getR3_delivery_power())
+                    .r4_grading(dto.getR4_grading())
+                    .review(dto.getReview())
+                    .teach_t1_theory(dto.isTeach_t1_theory())
+                    .teach_t2_practice(dto.isTeach_t2_practice())
+                    .teach_t3_seminar(dto.isTeach_t3_seminar())
+                    .teach_t4_discussion(dto.isTeach_t4_discussion())
+                    .teach_t5_presentation(dto.isTeach_t5_presentation())
+                    .learn_t1_theory(dto.isLearn_t1_theory())
+                    .learn_t2_thesis(dto.isLearn_t2_thesis())
+                    .learn_t3_exam(dto.isLearn_t3_exam())
+                    .learn_t4_industry(dto.isLearn_t4_industry())
+                    .likes(0)
+                    .created_at(LocalDate.now())
+                    .updated_at(LocalDate.now())
+                    .build();
+
+            commentRepository.save(newComment);
+        }
     }
 }
