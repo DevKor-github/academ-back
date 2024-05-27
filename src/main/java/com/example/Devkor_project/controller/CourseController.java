@@ -54,4 +54,21 @@ public class CourseController
                                 .build()
                 );
     }
+
+    /* 강의평 작성 시작 컨트롤러 */
+    @GetMapping("/api/course/start-comment")
+    public ResponseEntity<SuccessDto> startComment(Principal principal,
+                                                   @RequestParam("course_id") Long course_id)
+    {
+        courseService.bookmark(principal, course_id);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        SuccessDto.builder()
+                                .data(course_id)
+                                .message("강의평 작성을 시작합니다.")
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
 }
