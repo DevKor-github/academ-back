@@ -8,14 +8,14 @@ import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.BookmarkRepository;
 import com.example.Devkor_project.repository.CourseRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -30,6 +30,41 @@ public class CourseService
     @Autowired
     BookmarkRepository bookmarkRepository;
 
+    /* 강의 검색 서비스 */
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> searchCourse(String keyword)
+    {
+        // 검색어가 2글자 미만이면 예외 발생
+        if(keyword.length() < 2)
+            throw new AppException(ErrorCode.SHORT_SEARCH_WORD, keyword);
+
+        // 강의명 + 교수명 + 학수번호 검색
+        List<Course> courses = courseRepository.searchCourse(keyword);
+
+        // 검색 결과가 없다면 예외 발생
+        if(courses.isEmpty())
+            throw new AppException(ErrorCode.NO_RESULT, keyword);
+
+        // entity를 HashMap으로 변경
+        List<Map<String, Object>> processedCourses = new ArrayList<>();;
+        for(int i = 0; i < courses.size(); i++)
+        {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> courseMap = objectMapper.convertValue(courses.get(i), Map.class);
+            Map<String, Object> courseProcessedMap = new HashMap<String, Object>();
+
+            for (Map.Entry<String, Object> entry : courseMap.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                courseProcessedMap.put(key, value);
+            }
+
+            processedCourses.add(courseProcessedMap);
+        }
+
+        return processedCourses;
+    }
+
     /* 강의 북마크 서비스 */
     @Transactional
     public void bookmark(Principal principal, Long course_id)
@@ -43,7 +78,7 @@ public class CourseService
 
         // 사용자가 북마크할 강의가 존재하지 않으면 예외 처리
         Course course = courseRepository.findById(course_id)
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id.toString()));
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id));
 
 
         List<Bookmark> bookmark = bookmarkRepository.searchBookmark(profile.getProfile_id(), course.getCourse_id());

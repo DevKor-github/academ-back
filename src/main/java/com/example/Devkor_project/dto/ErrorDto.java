@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 public class ErrorDto
 {
     @Builder.Default
-    private String status = "error";
+    private String status = "ERROR";
 
-    private String data;
+    private Object data;
 
     private String message;
 

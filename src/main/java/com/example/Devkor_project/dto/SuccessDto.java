@@ -10,9 +10,9 @@ import lombok.*;
 public class SuccessDto
 {
     @Builder.Default
-    private String status = "success";
+    private String status = "SUCCESS";
 
-    private String data;
+    private Object data;
 
     private String message;
 

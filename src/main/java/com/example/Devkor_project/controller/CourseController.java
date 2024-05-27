@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 public class CourseController
@@ -20,6 +22,21 @@ public class CourseController
 
     @Autowired
     VersionProvider versionProvider;
+
+    /* 강의 검색 컨트롤러 */
+    @GetMapping("/api/course/search")
+    public ResponseEntity<SuccessDto> searchCourse(@RequestParam("keyword") String keyword)
+    {
+        List<Map<String, Object>> courses = courseService.searchCourse(keyword);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(SuccessDto.builder()
+                        .data(courses)
+                        .message("강의 검색이 성공적으로 수행되었습니다.")
+                        .version(versionProvider.getVersion())
+                        .build()
+                );
+    }
 
     /* 강의 북마크 컨트롤러 */
     @GetMapping("/api/course/bookmark")
