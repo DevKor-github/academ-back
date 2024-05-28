@@ -2,7 +2,6 @@ package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.CommentDto;
 import com.example.Devkor_project.dto.CourseDetailDto;
-import com.example.Devkor_project.dto.InsertCommentRequestDto;
 import com.example.Devkor_project.entity.Bookmark;
 import com.example.Devkor_project.entity.Comment;
 import com.example.Devkor_project.entity.Course;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -79,16 +77,17 @@ public class CourseService
         List<Comment> comments = commentRepository.findByCourseId(course_id);
 
         // 강의평 엔티티 리스트를 강의평 dto 리스트로 변환
-        List<CommentDto> commentDtos = comments.stream()
+        List<CommentDto.Detail> commentDtos = comments.stream()
                 .map(comment -> {
 
+                    // 해당 강의평을 작성한 사용자의 profile_id가 존재하지 않으면 예외 처리
                     Profile profile = profileRepository.findById(comment.getProfile_id().getProfile_id())
                             .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, comment.getProfile_id().getProfile_id()));
-                    String username = profile.getUsername();
 
-                    return CommentDto.builder()
+                    return CommentDto.Detail.builder()
                             .comment_id(comment.getComment_id())
-                            .profile_username(username)
+                            .profile_id(profile.getProfile_id())
+                            .username(profile.getUsername())
                             .rating(comment.getRating())
                             .r1_amount_of_studying(comment.getR1_amount_of_studying())
                             .r2_difficulty(comment.getR2_difficulty())
@@ -173,7 +172,7 @@ public class CourseService
 
     /* 강의평 작성 완료 및 등록 서비스 */
     @Transactional
-    public void insertComment(Principal principal, InsertCommentRequestDto dto)
+    public void insertComment(Principal principal, CommentDto.Insert dto)
     {
         // 강의평 작성 시작 요청을 보낸 사용자의 계정 이메일
         String email = principal.getName();
@@ -191,7 +190,7 @@ public class CourseService
         if(!comment.isEmpty())
             throw new AppException(ErrorCode.ALREADY_EXIST, course.getCourse_id());
 
-        // 강의평 추가
+        // 새로운 강의평 엔티티 생성
         Comment newComment = Comment.builder()
                 .profile_id(profile)
                 .course_id(course)
@@ -213,9 +212,8 @@ public class CourseService
                 .likes(0)
                 .created_at(LocalDate.now())
                 .updated_at(LocalDate.now())
+                .reward(false)
                 .build();
-
-        commentRepository.save(newComment);
 
         // 강의 엔티티의 강의평 개수 업데이트
         int count = course.getCOUNT_comments() + 1;
@@ -248,6 +246,12 @@ public class CourseService
         if(dto.isLearn_t4_industry())
             course.setCOUNT_learn_t4_industry(course.getCOUNT_learn_t4_industry() + 1);
 
+        // 해당 사용자에게 100 포인트 지급
+        profile.setPoint(profile.getPoint() + 100);
+
+        // 변경 사항 적용
+        profileRepository.save(profile);
         courseRepository.save(course);
+        commentRepository.save(newComment);
     }
 }

@@ -1,6 +1,6 @@
 package com.example.Devkor_project.service;
 
-import com.example.Devkor_project.dto.SignUpRequestDto;
+import com.example.Devkor_project.dto.ProfileDto;
 import com.example.Devkor_project.entity.Code;
 import com.example.Devkor_project.entity.Profile;
 import com.example.Devkor_project.exception.AppException;
@@ -37,7 +37,7 @@ public class LoginService
 
     /* 회원가입 서비스 */
     @Transactional
-    public void signUp(SignUpRequestDto dto)
+    public void signUp(ProfileDto.Signup dto)
     {
         // 이메일 중복 체크
         profileRepository.findByEmail(dto.getEmail())

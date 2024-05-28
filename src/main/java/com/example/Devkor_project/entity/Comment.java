@@ -51,4 +51,6 @@ public class Comment
     @Column(nullable = false) private int likes;
     @Column(nullable = false) private LocalDate created_at;
     @Column(nullable = false) private LocalDate updated_at;
+
+    @Column(nullable = false) private boolean reward;
 }

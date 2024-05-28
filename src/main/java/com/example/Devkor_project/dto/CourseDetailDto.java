@@ -70,9 +70,9 @@ public class CourseDetailDto
     @NotNull(message = "COUNT_learn_t4_industry는 null일 수 없습니다.")
     private int COUNT_learn_t4_industry;
 
-    private List<CommentDto> comments;
+    private List<CommentDto.Detail> comments;
 
-    public static CourseDetailDto makeCourseDetailDto(Course course, List<CommentDto> commentDtos)
+    public static CourseDetailDto makeCourseDetailDto(Course course, List<CommentDto.Detail> commentDtos)
     {
         return new CourseDetailDto(
                 course.getCourse_id(),

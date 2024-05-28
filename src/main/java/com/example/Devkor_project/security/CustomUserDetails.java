@@ -1,4 +1,4 @@
-package com.example.Devkor_project.dto;
+package com.example.Devkor_project.security;
 
 import com.example.Devkor_project.entity.Profile;
 import org.springframework.security.core.GrantedAuthority;
