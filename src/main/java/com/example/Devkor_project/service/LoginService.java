@@ -54,7 +54,7 @@ public class LoginService
                 .degree(dto.getDegree())
                 .semester(dto.getSemester())
                 .department(dto.getDepartment())
-                .role("ROLE_USER") // Role auto mapping
+                .role("ROLE_USER")
                 .point(0)
                 .created_at(LocalDate.now())
                 .build();

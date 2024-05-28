@@ -26,7 +26,7 @@ public class CourseController
     @GetMapping("/api/course/search")
     public ResponseEntity<ResponseDto.Success> searchCourse(@RequestParam("keyword") String keyword)
     {
-        List<Map<String, Object>> courses = courseService.searchCourse(keyword);
+        List<CourseDto> courses = courseService.searchCourse(keyword);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()

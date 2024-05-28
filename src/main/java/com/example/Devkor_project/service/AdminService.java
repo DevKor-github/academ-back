@@ -1,6 +1,8 @@
 package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.entity.Course;
+import com.example.Devkor_project.entity.CourseRating;
+import com.example.Devkor_project.repository.CourseRatingRepository;
 import com.example.Devkor_project.repository.CourseRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +17,8 @@ import java.util.Objects;
 @Service
 public class AdminService
 {
-    @Autowired
-    CourseRepository courseRepository;
+    @Autowired CourseRepository courseRepository;
+    @Autowired CourseRatingRepository courseRatingRepository;
 
     /* 대학원 강의 데이터베이스 초기화 서비스 */
     @Transactional
@@ -25,9 +27,7 @@ public class AdminService
     {
         // 데이터베이스 데이터 삭제
         courseRepository.deleteAll();
-
-        // 데이터베이스에 데이터 추가
-        Long idIndex = 0L;
+        courseRatingRepository.deleteAll();
 
         for(String graduateSchool : data.keySet())
         {
@@ -37,29 +37,18 @@ public class AdminService
                 Map<String,Object> dataArray = (Map<String,Object>)value1.get(department);
                 List<Map<String, String>> dataList = (List<Map<String, String>>) dataArray.get("data");
 
-                for(Map<String, String> course : dataList)
+                for(Map<String, String> courseInfo : dataList)
                 {
                     String credit = null;
                     String time_location = null;
 
-                    if (!course.get("time").isEmpty())
-                        credit = course.get("time").replaceAll("\\(.*?\\)", "");
+                    if (!courseInfo.get("time").isEmpty())
+                        credit = courseInfo.get("time").replaceAll("\\(.*?\\)", "");
 
-                    if (!course.get("time_room").isEmpty())
-                        time_location = course.get("time_room").replaceAll("<.*?>", "");
+                    if (!courseInfo.get("time_room").isEmpty())
+                        time_location = courseInfo.get("time_room").replaceAll("<.*?>", "");
 
-                    Course information = Course.builder()
-                            .course_id(idIndex)
-                            .course_code(course.get("cour_cd"))
-                            .graduate_school(graduateSchool)
-                            .department(department)
-                            .year(course.get("year"))
-                            .semester(course.get("term"))
-                            .name(course.get("cour_nm"))
-                            .professor(course.get("prof_nm"))
-                            .credit(credit)
-                            .time_location(time_location)
-                            .COUNT_comments(0)
+                    CourseRating courseRating = CourseRating.builder()
                             .AVG_rating(0.0)
                             .AVG_r1_amount_of_studying(0.0)
                             .AVG_r2_difficulty(0.0)
@@ -76,9 +65,23 @@ public class AdminService
                             .COUNT_learn_t4_industry(0)
                             .build();
 
-                    courseRepository.save(information);
+                    courseRatingRepository.save(courseRating);
 
-                    idIndex++;
+                    Course course = Course.builder()
+                            .courseRating_id(courseRating)
+                            .name(courseInfo.get("cour_nm"))
+                            .course_code(courseInfo.get("cour_cd"))
+                            .professor(courseInfo.get("prof_nm"))
+                            .graduate_school(graduateSchool)
+                            .department(department)
+                            .year(courseInfo.get("year"))
+                            .semester(courseInfo.get("term"))
+                            .credit(credit)
+                            .time_location(time_location)
+                            .COUNT_comments(0)
+                            .build();
+
+                    courseRepository.save(course);
                 }
             }
         }
@@ -89,9 +92,6 @@ public class AdminService
     @SuppressWarnings("unchecked")  // Object가 Map 형식이 아닐 수도 있다는 경고 무시
     public void insertCourseDatabase(Map<String,Object> data)
     {
-        // 데이터베이스에 데이터 추가
-        Long idIndex = courseRepository.countCourse();
-
         for(String graduateSchool : data.keySet())
         {
             Map<String,Object> value1 = (Map<String,Object>)data.get(graduateSchool);
@@ -100,29 +100,18 @@ public class AdminService
                 Map<String,Object> dataArray = (Map<String,Object>)value1.get(department);
                 List<Map<String, String>> dataList = (List<Map<String, String>>) dataArray.get("data");
 
-                for(Map<String, String> course : dataList)
+                for(Map<String, String> courseInfo : dataList)
                 {
                     String credit = null;
                     String time_location = null;
 
-                    if (!course.get("time").isEmpty())
-                        credit = course.get("time").replaceAll("\\(.*?\\)", "");
+                    if (!courseInfo.get("time").isEmpty())
+                        credit = courseInfo.get("time").replaceAll("\\(.*?\\)", "");
 
-                    if (!course.get("time_room").isEmpty())
-                        time_location = course.get("time_room").replaceAll("<.*?>", "");
+                    if (!courseInfo.get("time_room").isEmpty())
+                        time_location = courseInfo.get("time_room").replaceAll("<.*?>", "");
 
-                    Course information = Course.builder()
-                            .course_id(idIndex)
-                            .course_code(course.get("cour_cd"))
-                            .graduate_school(graduateSchool)
-                            .department(department)
-                            .year(course.get("year"))
-                            .semester(course.get("term"))
-                            .name(course.get("cour_nm"))
-                            .professor(course.get("prof_nm"))
-                            .credit(credit)
-                            .time_location(time_location)
-                            .COUNT_comments(0)
+                    CourseRating courseRating = CourseRating.builder()
                             .AVG_rating(0.0)
                             .AVG_r1_amount_of_studying(0.0)
                             .AVG_r2_difficulty(0.0)
@@ -139,9 +128,23 @@ public class AdminService
                             .COUNT_learn_t4_industry(0)
                             .build();
 
-                    courseRepository.save(information);
+                    courseRatingRepository.save(courseRating);
 
-                    idIndex++;
+                    Course course = Course.builder()
+                            .courseRating_id(courseRating)
+                            .name(courseInfo.get("cour_nm"))
+                            .course_code(courseInfo.get("cour_cd"))
+                            .professor(courseInfo.get("prof_nm"))
+                            .graduate_school(graduateSchool)
+                            .department(department)
+                            .year(courseInfo.get("year"))
+                            .semester(courseInfo.get("term"))
+                            .credit(credit)
+                            .time_location(time_location)
+                            .COUNT_comments(0)
+                            .build();
+
+                    courseRepository.save(course);
                 }
             }
         }
