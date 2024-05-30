@@ -4,15 +4,13 @@ import com.example.Devkor_project.entity.Course;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @ToString
+@Builder
 public class CourseDto
 {
     @NotNull(message = "course_id는 null일 수 없습니다.")
@@ -33,9 +31,9 @@ public class CourseDto
     private String professor;
     private String credit;
     private String time_location;
-
     @NotNull(message = "COUNT_comments는 null일 수 없습니다.")
     private int COUNT_comments;
+
     @NotNull(message = "AVG_rating은 null일 수 없습니다.")
     private double AVG_rating;
     @NotNull(message = "AVG_r1_amount_of_studying은 null일 수 없습니다.")
@@ -65,35 +63,4 @@ public class CourseDto
     private int COUNT_learn_t3_exam;
     @NotNull(message = "COUNT_learn_t4_industry는 null일 수 없습니다.")
     private int COUNT_learn_t4_industry;
-
-    public static CourseDto CourseToCourseDto(Course course)
-    {
-        return new CourseDto(
-                course.getCourse_id(),
-                course.getCourse_code(),
-                course.getGraduate_school(),
-                course.getDepartment(),
-                course.getYear(),
-                course.getSemester(),
-                course.getName(),
-                course.getProfessor(),
-                course.getCredit(),
-                course.getTime_location(),
-                course.getCOUNT_comments(),
-                course.getAVG_rating(),
-                course.getAVG_r1_amount_of_studying(),
-                course.getAVG_r2_difficulty(),
-                course.getAVG_r3_delivery_power(),
-                course.getAVG_r4_grading(),
-                course.getCOUNT_teach_t1_theory(),
-                course.getCOUNT_teach_t2_practice(),
-                course.getCOUNT_teach_t3_seminar(),
-                course.getCOUNT_teach_t4_discussion(),
-                course.getCOUNT_teach_t5_presentation(),
-                course.getCOUNT_learn_t1_theory(),
-                course.getCOUNT_learn_t2_thesis(),
-                course.getCOUNT_learn_t3_exam(),
-                course.getCOUNT_learn_t4_industry()
-        );
-    }
 }

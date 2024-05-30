@@ -18,6 +18,7 @@ public enum ErrorCode
     NO_RESULT(HttpStatus.NOT_FOUND, "검색 결과가 없습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 profile_id에 해당하는 사용자가 존재하지 않습니다."),
     COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 course_id에 해당하는 강의가 존재하지 않습니다."),
+    RATING_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 courseRating_id에 해당하는 평점이 존재하지 않습니다."),
     ALREADY_EXIST(HttpStatus.BAD_REQUEST, "해당 강의에 해당 사용자는 이미 강의평을 달았습니다.");
 
     private final HttpStatus httpStatus;

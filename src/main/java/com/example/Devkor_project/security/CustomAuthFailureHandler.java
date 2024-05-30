@@ -1,4 +1,4 @@
-package com.example.Devkor_project.configuration;
+package com.example.Devkor_project.security;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

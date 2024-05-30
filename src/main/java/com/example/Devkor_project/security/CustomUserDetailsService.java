@@ -1,6 +1,5 @@
-package com.example.Devkor_project.service;
+package com.example.Devkor_project.security;
 
-import com.example.Devkor_project.dto.CustomUserDetails;
 import com.example.Devkor_project.repository.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

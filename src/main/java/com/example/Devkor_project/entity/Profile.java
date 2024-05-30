@@ -5,13 +5,13 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-@Builder
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
+@Builder
 public class Profile
 {
     @Id

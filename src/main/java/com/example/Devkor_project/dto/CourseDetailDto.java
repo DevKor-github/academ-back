@@ -2,6 +2,7 @@ package com.example.Devkor_project.dto;
 
 import com.example.Devkor_project.entity.Comment;
 import com.example.Devkor_project.entity.Course;
+import com.example.Devkor_project.entity.CourseRating;
 import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -70,37 +71,39 @@ public class CourseDetailDto
     @NotNull(message = "COUNT_learn_t4_industry는 null일 수 없습니다.")
     private int COUNT_learn_t4_industry;
 
-    private List<CommentDto> comments;
+    private List<CommentDto.Detail> comments;
 
-    public static CourseDetailDto makeCourseDetailDto(Course course, List<CommentDto> commentDtos)
+    public static CourseDetailDto makeCourseDetailDto(Course course,
+                                                      CourseRating courseRating,
+                                                      List<CommentDto.Detail> commentDtos)
     {
-        return new CourseDetailDto(
-                course.getCourse_id(),
-                course.getCourse_code(),
-                course.getGraduate_school(),
-                course.getDepartment(),
-                course.getYear(),
-                course.getSemester(),
-                course.getName(),
-                course.getProfessor(),
-                course.getCredit(),
-                course.getTime_location(),
-                course.getCOUNT_comments(),
-                course.getAVG_rating(),
-                course.getAVG_r1_amount_of_studying(),
-                course.getAVG_r2_difficulty(),
-                course.getAVG_r3_delivery_power(),
-                course.getAVG_r4_grading(),
-                course.getCOUNT_teach_t1_theory(),
-                course.getCOUNT_teach_t2_practice(),
-                course.getCOUNT_teach_t3_seminar(),
-                course.getCOUNT_teach_t4_discussion(),
-                course.getCOUNT_teach_t5_presentation(),
-                course.getCOUNT_learn_t1_theory(),
-                course.getCOUNT_learn_t2_thesis(),
-                course.getCOUNT_learn_t3_exam(),
-                course.getCOUNT_learn_t4_industry(),
-                commentDtos
-        );
+        return CourseDetailDto.builder()
+                .course_id(course.getCourse_id())
+                .course_code(course.getCourse_code())
+                .graduate_school(course.getGraduate_school())
+                .department(course.getDepartment())
+                .year(course.getYear())
+                .semester(course.getSemester())
+                .name(course.getName())
+                .professor(course.getProfessor())
+                .credit(course.getCredit())
+                .time_location(course.getTime_location())
+                .COUNT_comments(course.getCOUNT_comments())
+                .AVG_rating(courseRating.getAVG_rating())
+                .AVG_r1_amount_of_studying(courseRating.getAVG_r1_amount_of_studying())
+                .AVG_r2_difficulty(courseRating.getAVG_r2_difficulty())
+                .AVG_r3_delivery_power(courseRating.getAVG_r3_delivery_power())
+                .AVG_r4_grading(courseRating.getAVG_r4_grading())
+                .COUNT_teach_t1_theory(courseRating.getCOUNT_teach_t1_theory())
+                .COUNT_teach_t2_practice(courseRating.getCOUNT_teach_t2_practice())
+                .COUNT_teach_t3_seminar(courseRating.getCOUNT_teach_t3_seminar())
+                .COUNT_teach_t4_discussion(courseRating.getCOUNT_teach_t4_discussion())
+                .COUNT_teach_t5_presentation(courseRating.getCOUNT_teach_t5_presentation())
+                .COUNT_learn_t1_theory(courseRating.getCOUNT_learn_t1_theory())
+                .COUNT_learn_t2_thesis(courseRating.getCOUNT_learn_t2_thesis())
+                .COUNT_learn_t3_exam(courseRating.getCOUNT_learn_t3_exam())
+                .COUNT_learn_t4_industry(courseRating.getCOUNT_learn_t4_industry())
+                .comments(commentDtos)
+                .build();
     }
 }
