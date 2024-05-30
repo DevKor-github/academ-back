@@ -53,3 +53,6 @@ server:
   servlet:
     session:
       timeout: 60m
+      cookie:             # 쿠키 관련 설정
+        secure: true
+        same-site: None
