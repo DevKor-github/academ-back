@@ -20,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .allowedOrigins("https://localhost:4000", "http://localhost:4000", "https://127.0.0.1:4000",
-                        "http://127.0.0.1:4000") // added more origin
+                        "http://127.0.0.1:4000", "https://academ-frontend.vercel.app") // added more origin
                 .allowedMethods("GET", "POST", "PUT", "DELETE"); // Wildcard method not works in some browsers, and HTTPS
     }
 
