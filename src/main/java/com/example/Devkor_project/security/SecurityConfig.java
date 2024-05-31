@@ -1,5 +1,7 @@
 package com.example.Devkor_project.security;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,7 +10,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -21,15 +25,6 @@ public class SecurityConfig {
                                 .csrf(CsrfConfigurer::disable); // CSRF 보호 비활성화
 
                 httpSecurity
-                                // .requiresChannel(channel -> channel
-                                // .anyRequest().requiresSecure()
-                                // )
-                                // .headers(headers -> headers
-                                // .httpStrictTransportSecurity(hsts -> hsts
-                                // .includeSubDomains(true)
-                                // .maxAgeInSeconds(31536000) // 1년
-                                // )
-                                // )
                                 .authorizeHttpRequests((requests) -> (requests)
                                                 // 아무나 접근 가능
                                                 .requestMatchers("/", "/login", "/signup").permitAll()
@@ -53,7 +48,7 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 .loginProcessingUrl("/api/login") // post api
                                                 .permitAll()
-                                                .defaultSuccessUrl("/", true) // success 시 direct
+                                                .successHandler(customAuthSuccessHandler())
                                                 .failureHandler(customAuthFailureHandler()));
 
                 httpSecurity
@@ -92,5 +87,10 @@ public class SecurityConfig {
         @Bean
         public CustomAuthFailureHandler customAuthFailureHandler() {
                 return new CustomAuthFailureHandler();
+        }
+
+        @Bean
+        public CustomAuthSuccessHandler customAuthSuccessHandler() {
+                return new CustomAuthSuccessHandler();
         }
 }
