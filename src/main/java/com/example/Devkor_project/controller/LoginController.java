@@ -15,85 +15,75 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
-public class LoginController
-{
-    @Autowired
-    LoginService loginService;
+public class LoginController {
+        @Autowired
+        LoginService loginService;
 
-    @Autowired
-    VersionProvider versionProvider;
+        @Autowired
+        VersionProvider versionProvider;
 
-    /* 로그인 성공 시 리다이렉트 경로 */
-    @GetMapping("/")
-    public ResponseEntity<ResponseDto.Success> loginSuccess()
-    {
-            return ResponseEntity.status(HttpStatus.OK)
-                            .body(ResponseDto.Success.builder()
-                                            .data(null)
-                                            .message("로그인을 성공하였습니다.")
-                                            .version(versionProvider.getVersion())
-                                            .build());
-    }
+        /* 로그인 성공 시 리다이렉트 경로 */
+        @GetMapping("/")
+        public ResponseEntity<ResponseDto.Success> loginSuccess() {
+                return ResponseEntity.status(HttpStatus.OK)
+                                .body(ResponseDto.Success.builder()
+                                                .data(null)
+                                                .message("로그인을 성공하였습니다.")
+                                                .version(versionProvider.getVersion())
+                                                .build());
+        }
 
-    /* 회원가입 컨트롤러 */
-    @PostMapping("/api/signup")
-    public ResponseEntity<ResponseDto.Success> signUp(@Valid @RequestBody ProfileDto.Signup dto)
-    {
-        loginService.signUp(dto);
+        /* 회원가입 컨트롤러 */
+        @PostMapping("/api/signup")
+        public ResponseEntity<ResponseDto.Success> signUp(@Valid @RequestBody ProfileDto.Signup dto) {
+                loginService.signUp(dto);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ResponseDto.Success.builder()
-                        .data(dto.getEmail())
-                        .message("회원가입을 성공하였습니다.")
-                        .version(versionProvider.getVersion())
-                        .build()
-                );
-    }
+                return ResponseEntity.status(HttpStatus.CREATED)
+                                .body(ResponseDto.Success.builder()
+                                                .data(dto.getEmail())
+                                                .message("회원가입을 성공하였습니다.")
+                                                .version(versionProvider.getVersion())
+                                                .build());
+        }
 
-    /* 이메일 인증번호 발송 컨트롤러 */
-    @PostMapping("/api/signup/send-email")
-    public ResponseEntity<ResponseDto.Success> sendAuthenticationNumber(@RequestParam("email") String email)
-    {
-        loginService.sendAuthenticationNumber(email);
+        /* 이메일 인증번호 발송 컨트롤러 */
+        @PostMapping("/api/signup/send-email")
+        public ResponseEntity<ResponseDto.Success> sendAuthenticationNumber(@RequestParam("email") String email) {
+                loginService.sendAuthenticationNumber(email);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseDto.Success.builder()
-                        .data(email + "@korea.ac.kr")
-                        .message("인증번호 이메일 발송에 성공하였습니다.")
-                        .version(versionProvider.getVersion())
-                        .build()
-                );
-    }
+                return ResponseEntity.status(HttpStatus.OK)
+                                .body(ResponseDto.Success.builder()
+                                                .data(email + "@korea.ac.kr")
+                                                .message("인증번호 이메일 발송에 성공하였습니다.")
+                                                .version(versionProvider.getVersion())
+                                                .build());
+        }
 
-    /* 인증번호 확인 컨트롤러 */
-    @GetMapping("/api/signup/check-email")
-    public ResponseEntity<ResponseDto.Success> checkAuthenticationNumber(@RequestParam("email") String email,
-                                                            @RequestParam("code") String code)
-    {
-        loginService.checkAuthenticationNumber(email, code);
+        /* 인증번호 확인 컨트롤러 */
+        @GetMapping("/api/signup/check-email")
+        public ResponseEntity<ResponseDto.Success> checkAuthenticationNumber(@RequestParam("email") String email,
+                        @RequestParam("code") String code) {
+                loginService.checkAuthenticationNumber(email, code);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseDto.Success.builder()
-                        .data(email + "@korea.ac.kr")
-                        .message("인증번호 이메일 확인에 성공하였습니다.")
-                        .version(versionProvider.getVersion())
-                        .build()
-                );
-    }
+                return ResponseEntity.status(HttpStatus.OK)
+                                .body(ResponseDto.Success.builder()
+                                                .data(email + "@korea.ac.kr")
+                                                .message("인증번호 이메일 확인에 성공하였습니다.")
+                                                .version(versionProvider.getVersion())
+                                                .build());
+        }
 
-    /* 임시 비밀번호 발급 컨트롤러 */
-    @PostMapping("/api/login/reset-password")
-    public ResponseEntity<ResponseDto.Success> resetPassword(@RequestParam("email") String email)
-    {
-        loginService.resetPassword(email);
+        /* 임시 비밀번호 발급 컨트롤러 */
+        @PostMapping("/api/login/reset-password")
+        public ResponseEntity<ResponseDto.Success> resetPassword(@RequestParam("email") String email) {
+                loginService.resetPassword(email);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseDto.Success.builder()
-                        .data(email + "@korea.ac.kr")
-                        .message("비밀번호가 성공적으로 초기화 되었습니다.")
-                        .version(versionProvider.getVersion())
-                        .build()
-                );
-    }
+                return ResponseEntity.status(HttpStatus.OK)
+                                .body(ResponseDto.Success.builder()
+                                                .data(email + "@korea.ac.kr")
+                                                .message("비밀번호가 성공적으로 초기화 되었습니다.")
+                                                .version(versionProvider.getVersion())
+                                                .build());
+        }
 
 }
