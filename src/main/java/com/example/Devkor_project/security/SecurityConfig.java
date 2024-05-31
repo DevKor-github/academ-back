@@ -17,10 +17,18 @@ public class SecurityConfig
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, CustomUserDetailsService customUserDetailsService) throws Exception
     {
-        httpSecurity
+            httpSecurity
                 .httpBasic(HttpBasicConfigurer::disable)    // HTTP 기본 인증 비활성화
-                .csrf(CsrfConfigurer::disable);             // CSRF 보호 비활성화
+                            .csrf(CsrfConfigurer::disable);             // CSRF 보호 비활성화
 
+                            httpSecurity
+                            .headers(headers -> headers
+                                    .httpStrictTransportSecurity(hsts -> hsts
+                                    .includeSubDomains(true)
+                                    .maxAgeInSeconds(31536000) // 1년
+                                    )
+                            );
+            
         httpSecurity
                 .authorizeHttpRequests((requests) -> (requests)
                         // 아무나 접근 가능
@@ -43,9 +51,10 @@ public class SecurityConfig
                         .permitAll()
                         .loginProcessingUrl("/api/login")   // post api
                         .permitAll()
-                        .defaultSuccessUrl("/", true)   // success 시 direct
+                        .defaultSuccessUrl("/", true) // success 시 direct
                         .failureHandler(customAuthFailureHandler())
-                );
+                        );
+
 
         httpSecurity
                 .logout((logoutConfig) -> logoutConfig
