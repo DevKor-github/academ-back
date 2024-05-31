@@ -22,18 +22,16 @@ public class SecurityConfig
                             .csrf(CsrfConfigurer::disable);             // CSRF 보호 비활성화
 
                             httpSecurity
-                            .requiresChannel(channel -> channel
-                                .anyRequest().requiresSecure()
-                             ).headers(headers -> headers
+                        //     .requiresChannel(channel -> channel
+                        //         .anyRequest().requiresSecure()
+                        //                     )
+                             .headers(headers -> headers
                              .httpStrictTransportSecurity(hsts -> hsts
                              .includeSubDomains(true)
                              .maxAgeInSeconds(31536000) // 1년
                              )
                      )
                 .authorizeHttpRequests((requests) -> (requests)
-
-
-
                         // 아무나 접근 가능
                         .requestMatchers("/", "/login", "/signup").permitAll()
                         .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
@@ -45,7 +43,6 @@ public class SecurityConfig
                         // 그 외의 요청은 모든 사용자에게 접근 권한 허용
                         .anyRequest().authenticated()
                         );
-
 
                 
                 

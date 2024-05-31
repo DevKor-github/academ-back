@@ -5,6 +5,7 @@ import com.example.Devkor_project.dto.ProfileDto;
 import com.example.Devkor_project.dto.ResponseDto;
 import com.example.Devkor_project.service.LoginService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +27,12 @@ public class LoginController
     @GetMapping("/")
     public ResponseEntity<ResponseDto.Success> loginSuccess()
     {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseDto.Success.builder()
-                        .data(null)
-                        .message("로그인을 성공하였습니다.")
-                        .version(versionProvider.getVersion())
-                        .build()
-                );
+            return ResponseEntity.status(HttpStatus.OK)
+                            .body(ResponseDto.Success.builder()
+                                            .data(null)
+                                            .message("로그인을 성공하였습니다.")
+                                            .version(versionProvider.getVersion())
+                                            .build());
     }
 
     /* 회원가입 컨트롤러 */
