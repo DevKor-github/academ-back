@@ -18,8 +18,10 @@ public class WebConfig implements WebMvcConfigurer {
         registry
                 .addMapping("/**")
                 .allowedHeaders("*")
-                .allowedOrigins("https://localhost:4000/", "http://localhost:4000")
-                .allowedMethods("*");
+                .allowCredentials(true)
+                .allowedOrigins("https://localhost:4000", "http://localhost:4000", "https://127.0.0.1:4000",
+                        "http://127.0.0.1:4000") // added more origin
+                .allowedMethods("GET", "POST", "PUT", "DELETE"); // Wildcard method not works in some browsers, and HTTPS
     }
 
 }
