@@ -45,6 +45,14 @@ public class LoginService
                     throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail());
                 });
 
+        // 해당 이메일로 발송된 인증번호가 있는지 체크
+        Code actualCode = codeRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, dto.getEmail()));
+
+        // 입력한 인증번호가 맞는지 체크
+        if(!Objects.equals(dto.getCode(), actualCode.getCode()))
+            throw new AppException(ErrorCode.WRONG_CODE, dto.getEmail());
+
         // DTO -> Entity 변환
         Profile profile = Profile.builder()
                 .email(dto.getEmail())

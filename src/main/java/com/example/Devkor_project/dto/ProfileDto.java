@@ -77,5 +77,8 @@ public class ProfileDto
 
         @NotBlank(message = "[department] cannot be blank.")
         private String department;
+
+        @NotBlank(message = "[code] cannot be blank.")
+        private String code;
     }
 }
