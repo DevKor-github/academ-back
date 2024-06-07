@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @Slf4j
 public class LoginController
@@ -93,6 +95,21 @@ public class LoginController
                         .message("비밀번호가 성공적으로 초기화 되었습니다.")
                         .version(versionProvider.getVersion())
                         .build()
+                );
+    }
+
+    /* 로그인 여부 확인 컨트롤러 */
+    @GetMapping("/api/login/check-login")
+    public ResponseEntity<ResponseDto.Success> checkLogin(Principal principal)
+    {
+        ProfileDto.CheckLogin dto = loginService.checkLogin(principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                                .data(dto)
+                                .message("로그인 여부 확인이 완료되었습니다.")
+                                .version(versionProvider.getVersion())
+                                .build()
                 );
     }
 

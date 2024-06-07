@@ -16,8 +16,10 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -190,5 +192,33 @@ public class LoginService
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /* 로그인 여부 확인 서비스 */
+    public ProfileDto.CheckLogin checkLogin(Principal principal)
+    {
+        // 로그인을 하지 않은 사용자는 false 반환
+        if(principal == null)
+            throw new AppException(ErrorCode.NOT_LOGIN, null);
+
+        // 로그인 여부 확인 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 해당 사용자의 계정이 존재하는지 확인한 뒤, 해당 여부를 반환
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        return ProfileDto.CheckLogin.builder()
+                .profile_id(profile.getProfile_id())
+                .email(profile.getEmail())
+                .username(profile.getUsername())
+                .student_id(profile.getStudent_id())
+                .degree(profile.getDegree())
+                .semester(profile.getSemester())
+                .department(profile.getDepartment())
+                .point(profile.getPoint())
+                .created_at(profile.getCreated_at())
+                .role(profile.getRole())
+                .build();
     }
 }
