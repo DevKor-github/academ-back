@@ -24,19 +24,6 @@ public class LoginController
     @Autowired
     VersionProvider versionProvider;
 
-    /* 로그인 성공 시 리다이렉트 경로 */
-    @GetMapping("/")
-    public ResponseEntity<ResponseDto.Success> loginSuccess()
-    {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseDto.Success.builder()
-                        .data(null)
-                        .message("로그인을 성공하였습니다.")
-                        .version(versionProvider.getVersion())
-                        .build()
-                );
-    }
-
     /* 회원가입 컨트롤러 */
     @PostMapping("/api/signup")
     public ResponseEntity<ResponseDto.Success> signUp(@Valid @RequestBody ProfileDto.Signup dto)

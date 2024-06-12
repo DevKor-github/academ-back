@@ -43,7 +43,7 @@ public class SecurityConfig
                         .permitAll()
                         .loginProcessingUrl("/api/login")   // post api
                         .permitAll()
-                        .defaultSuccessUrl("/", true)   // success 시 direct
+                        .successHandler(customAuthSuccessHandler())
                         .failureHandler(customAuthFailureHandler())
                 );
 
@@ -56,6 +56,7 @@ public class SecurityConfig
                                 session.invalidate();
                             }
                         })
+                        .logoutSuccessHandler(customLogoutSuccessHandler())
                         .logoutSuccessUrl("/")
                         .deleteCookies("remember-me")
                 );
@@ -84,7 +85,17 @@ public class SecurityConfig
     }
 
     @Bean
+    public CustomAuthSuccessHandler customAuthSuccessHandler() {
+        return new CustomAuthSuccessHandler();
+    }
+
+    @Bean
     public CustomAuthFailureHandler customAuthFailureHandler() {
         return new CustomAuthFailureHandler();
+    }
+
+    @Bean
+    public CustomLogoutSuccessHandler customLogoutSuccessHandler() {
+        return new CustomLogoutSuccessHandler();
     }
 }
