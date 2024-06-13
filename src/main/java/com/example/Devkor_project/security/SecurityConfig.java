@@ -1,7 +1,5 @@
 package com.example.Devkor_project.security;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,13 +8,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
                         CustomUserDetailsService customUserDetailsService) throws Exception {
@@ -28,32 +26,41 @@ public class SecurityConfig {
                                 .authorizeHttpRequests((requests) -> (requests)
                                                 // 아무나 접근 가능
                                                 .requestMatchers("/", "/login", "/signup").permitAll()
+                                                .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
+                                                .requestMatchers("/search/**", "/api/search/**")
+                                                .hasAnyRole("USER", "ADMIN")
+                                                .requestMatchers("/course/**", "/api/course/**")
+                                                .hasAnyRole("USER", "ADMIN") // ADMIN 계정만 접근 가능
+                                                .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
+                                                // 그 외의 요청은 모든 사용자에게 접근 권한 허용
+                                                .anyRequest().permitAll())
 
-        httpSecurity
-                .formLogin((auth) -> auth
-                        .usernameParameter("email") // email 변경 예정
-                        .passwordParameter("password")
-                        .loginPage("/login")  // frontend login page
-                        .permitAll()
-                        .loginProcessingUrl("/api/login")   // post api
-                        .permitAll()
-                        .successHandler(customAuthSuccessHandler())
-                        .failureHandler(customAuthFailureHandler())
-                );
+                                .exceptionHandling((exception) -> exception
+                                                .accessDeniedHandler(customAccessDeniedHandler()));
 
-        httpSecurity
-                .logout((logoutConfig) -> logoutConfig
-                        .logoutUrl("/logout")
-                        .addLogoutHandler((request, response, authentication) -> {
-                            HttpSession session = request.getSession();
-                            if (session != null) {
-                                session.invalidate();
-                            }
-                        })
-                        .logoutSuccessHandler(customLogoutSuccessHandler())
-                        .logoutSuccessUrl("/")
-                        .deleteCookies("remember-me")
-                );
+                httpSecurity
+                                .formLogin((auth) -> auth
+                                                .usernameParameter("email") // email 변경 예정
+                                                .passwordParameter("password")
+                                                .loginPage("/login") // frontend login page
+                                                .permitAll()
+                                                .loginProcessingUrl("/api/login") // post api
+                                                .permitAll()
+                                                .successHandler(customAuthSuccessHandler())
+                                                .failureHandler(customAuthFailureHandler()));
+
+                httpSecurity
+                                .logout((logoutConfig) -> logoutConfig
+                                                .logoutUrl("/logout")
+                                                .addLogoutHandler((request, response, authentication) -> {
+                                                        HttpSession session = request.getSession();
+                                                        if (session != null) {
+                                                                session.invalidate();
+                                                        }
+                                                })
+                                                .logoutSuccessHandler(customLogoutSuccessHandler())
+                                                .logoutSuccessUrl("/")
+                                                .deleteCookies("remember-me"));
 
                 httpSecurity
                                 .logout((logoutConfig) -> logoutConfig
@@ -88,18 +95,23 @@ public class SecurityConfig {
                 return httpSecurity.build();
         }
 
-    @Bean
-    public CustomAuthSuccessHandler customAuthSuccessHandler() {
-        return new CustomAuthSuccessHandler();
-    }
+        @Bean
+        public CustomAccessDeniedHandler customAccessDeniedHandler() {
+                return new CustomAccessDeniedHandler();
+        }
 
-    @Bean
-    public CustomAuthFailureHandler customAuthFailureHandler() {
-        return new CustomAuthFailureHandler();
-    }
+        @Bean
+        public CustomAuthSuccessHandler customAuthSuccessHandler() {
+                return new CustomAuthSuccessHandler();
+        }
 
-    @Bean
-    public CustomLogoutSuccessHandler customLogoutSuccessHandler() {
-        return new CustomLogoutSuccessHandler();
-    }
+        @Bean
+        public CustomAuthFailureHandler customAuthFailureHandler() {
+                return new CustomAuthFailureHandler();
+        }
+
+        @Bean
+        public CustomLogoutSuccessHandler customLogoutSuccessHandler() {
+                return new CustomLogoutSuccessHandler();
+        }
 }
