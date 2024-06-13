@@ -1,5 +1,8 @@
 package com.example.Devkor_project.security;
 
+import com.example.Devkor_project.configuration.VersionProvider;
+import com.example.Devkor_project.dto.ResponseDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,29 +20,34 @@ import com.example.Devkor_project.configuration.VersionProvider;
 import java.io.IOException;
 
 @Component
-public class CustomAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
-
+public class CustomAuthFailureHandler implements AuthenticationFailureHandler
+{
     @Autowired
     VersionProvider versionProvider;
 
-    @Override
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-            AuthenticationException exception) throws IOException, ServletException {
-        String errorCode = null;
+    @Override
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+
+        String errorMessage = null;
 
         if (exception instanceof BadCredentialsException || exception instanceof InternalAuthenticationServiceException)
-            errorCode = "WRONG"; // 이메일 또는 비밀번호가 틀린 경우
+            errorMessage = "WRONG";         // 이메일 또는 비밀번호가 틀린 경우
         else if (exception instanceof DisabledException)
-            errorCode = "DISABLED"; // 해당 계정이 비활성화된 경우 (현재 사용 안함)
+            errorMessage = "DISABLED";      // 해당 계정이 비활성화된 경우
         else
-            errorCode = "UNEXPECTED"; // 예기치 못한 에러가 발생한 경우
+            errorMessage = "UNEXPECTED";    // 예기치 못한 에러가 발생한 경우
+
+        ResponseDto.Error dto = ResponseDto.Error.builder()
+                .data(null)
+                .message(errorMessage)
+                .version(versionProvider.getVersion())
+                .build();
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().print("{\"status\":\"FAILURE\", \"reason\":\"" + errorCode + "\", \"version\":\""
-                + versionProvider.getVersion() + "\"}");
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(dto));
         response.getWriter().flush();
-
-        // super.onAuthenticationFailure(request, response, exception);
     }
 }

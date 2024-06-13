@@ -29,27 +29,31 @@ public class SecurityConfig {
                                                 // 아무나 접근 가능
                                                 .requestMatchers("/", "/login", "/signup").permitAll()
 
-                                                .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
-                                                // USER 또는 ADMIN 계정만 접근 가능
-                                                .requestMatchers("/search/**", "/api/search/**")
-                                                .hasAnyRole("USER", "ADMIN")
-                                                .requestMatchers("/course/**", "/api/course/**")
-                                                .hasAnyRole("USER", "ADMIN")
-                                                // ADMIN 계정만 접근 가능
-                                                .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
-                                                // 그 외의 요청은 모든 사용자에게 접근 권한 허용
-                                                .anyRequest().authenticated());
+        httpSecurity
+                .formLogin((auth) -> auth
+                        .usernameParameter("email") // email 변경 예정
+                        .passwordParameter("password")
+                        .loginPage("/login")  // frontend login page
+                        .permitAll()
+                        .loginProcessingUrl("/api/login")   // post api
+                        .permitAll()
+                        .successHandler(customAuthSuccessHandler())
+                        .failureHandler(customAuthFailureHandler())
+                );
 
-                httpSecurity
-                                .formLogin((auth) -> auth
-                                                .usernameParameter("email") // email 변경 예정
-                                                .passwordParameter("password")
-                                                .loginPage("/login") // frontend login page
-                                                .permitAll()
-                                                .loginProcessingUrl("/api/login") // post api
-                                                .permitAll()
-                                                .successHandler(customAuthSuccessHandler())
-                                                .failureHandler(customAuthFailureHandler()));
+        httpSecurity
+                .logout((logoutConfig) -> logoutConfig
+                        .logoutUrl("/logout")
+                        .addLogoutHandler((request, response, authentication) -> {
+                            HttpSession session = request.getSession();
+                            if (session != null) {
+                                session.invalidate();
+                            }
+                        })
+                        .logoutSuccessHandler(customLogoutSuccessHandler())
+                        .logoutSuccessUrl("/")
+                        .deleteCookies("remember-me")
+                );
 
                 httpSecurity
                                 .logout((logoutConfig) -> logoutConfig
@@ -84,13 +88,18 @@ public class SecurityConfig {
                 return httpSecurity.build();
         }
 
-        @Bean
-        public CustomAuthFailureHandler customAuthFailureHandler() {
-                return new CustomAuthFailureHandler();
-        }
+    @Bean
+    public CustomAuthSuccessHandler customAuthSuccessHandler() {
+        return new CustomAuthSuccessHandler();
+    }
 
-        @Bean
-        public CustomAuthSuccessHandler customAuthSuccessHandler() {
-                return new CustomAuthSuccessHandler();
-        }
+    @Bean
+    public CustomAuthFailureHandler customAuthFailureHandler() {
+        return new CustomAuthFailureHandler();
+    }
+
+    @Bean
+    public CustomLogoutSuccessHandler customLogoutSuccessHandler() {
+        return new CustomLogoutSuccessHandler();
+    }
 }
