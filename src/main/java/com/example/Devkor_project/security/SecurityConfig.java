@@ -51,7 +51,7 @@ public class SecurityConfig {
 
                 httpSecurity
                                 .logout((logoutConfig) -> logoutConfig
-                                                .logoutUrl("/logout")
+                                                .logoutUrl("/api/logout")
                                                 .addLogoutHandler((request, response, authentication) -> {
                                                         HttpSession session = request.getSession();
                                                         if (session != null) {
