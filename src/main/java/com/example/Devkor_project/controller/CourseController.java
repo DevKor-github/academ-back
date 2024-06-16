@@ -71,11 +71,11 @@ public class CourseController
     }
 
     /* 강의평 작성 시작 컨트롤러 */
-    @GetMapping("/api/course/start-comment")
-    public ResponseEntity<ResponseDto.Success> startComment(Principal principal,
+    @GetMapping("/api/course/start-insert-comment")
+    public ResponseEntity<ResponseDto.Success> startInsertComment(Principal principal,
                                                    @RequestParam("course_id") Long course_id)
     {
-        courseService.startComment(principal, course_id);
+        courseService.startInsertComment(principal, course_id);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
@@ -99,6 +99,40 @@ public class CourseController
                         ResponseDto.Success.builder()
                                 .data(dto.getCourse_id())
                                 .message("강의평 작성을 정상적으로 완료하였습니다.")
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
+
+    /* 강의평 수정 시작 컨트롤러 */
+    @GetMapping("/api/course/start-update-comment")
+    public ResponseEntity<ResponseDto.Success> startUpdateComment(Principal principal,
+                                                            @RequestParam("comment_id") Long comment_id)
+    {
+        CommentDto.Update dto = courseService.startUpdateComment(principal, comment_id);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .data(dto)
+                                .message("강의평 수정을 시작합니다.")
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
+
+    /* 강의평 수정 완료 컨트롤러 */
+    @PostMapping("/api/course/update-comment")
+    public ResponseEntity<ResponseDto.Success> updateComment(Principal principal,
+                                                             @Valid @RequestBody CommentDto.Update dto)
+    {
+        Long course_id = courseService.updateComment(principal, dto);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .data(course_id)
+                                .message("강의평 수정을 정상적으로 완료하였습니다.")
                                 .version(versionProvider.getVersion())
                                 .build()
                 );
