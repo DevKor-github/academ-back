@@ -18,9 +18,12 @@ public enum ErrorCode
     NO_RESULT(HttpStatus.NOT_FOUND, "검색 결과가 없습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 profile_id에 해당하는 사용자가 존재하지 않습니다."),
     COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 course_id에 해당하는 강의가 존재하지 않습니다."),
-    RATING_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 courseRating_id에 해당하는 평점이 존재하지 않습니다."),
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 comment_id에 해당하는 강의평이 존재하지 않습니다."),
+    COURSE_RATING_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 courseRating_id에 해당하는 평점이 존재하지 않습니다."),
+    COMMENT_RATING_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 commentRating_id에 해당하는 평점이 존재하지 않습니다."),
     ALREADY_EXIST(HttpStatus.BAD_REQUEST, "해당 강의에 해당 사용자는 이미 강의평을 달았습니다."),
-    NOT_LOGIN(HttpStatus.UNAUTHORIZED, "로그인하지 않은 사용자입니다.");
+    NOT_LOGIN(HttpStatus.UNAUTHORIZED, "로그인하지 않은 사용자입니다."),
+    NOT_COMMENT_BY_USER(HttpStatus.BAD_REQUEST, "해당 강의평은 해당 사용자가 작성한 강의평이 아닙니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
