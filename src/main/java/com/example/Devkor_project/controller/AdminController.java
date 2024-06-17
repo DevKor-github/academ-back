@@ -57,7 +57,7 @@ public class AdminController {
                                                 .build());
         }
 
-        @GetMapping("/check-https")
+        @GetMapping("/api/is-secure")
         public ResponseEntity<ResponseDto.Success> getHTTPSStatus(HttpServletRequest request) {
                 String st;
 
