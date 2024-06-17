@@ -45,7 +45,7 @@ public class ExceptionManager {
                                 .body(
                                                 ResponseDto.Error.builder()
                                                                 .data(null)
-                                                                .message("예기치 못한 에러가 발생하였습니다.")
+                                                                .message(e.getMessage())
                                                                 .version(versionProvider.getVersion())
                                                                 .build());
         }
