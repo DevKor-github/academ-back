@@ -3,10 +3,7 @@ package com.example.Devkor_project.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -151,6 +148,17 @@ public class CommentDto
         private boolean learn_t3_exam;
         @NotNull(message = "[learn_t4_industry] cannot be null.")
         private boolean learn_t4_industry;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    @Getter
+    @Builder
+    public static class Delete
+    {
+        @NotNull(message = "[comment_id] cannot be null.")
+        private Long comment_id;
     }
 }
 
