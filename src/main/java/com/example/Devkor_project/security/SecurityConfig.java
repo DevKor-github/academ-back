@@ -25,13 +25,15 @@ public class SecurityConfig {
                 httpSecurity
                                 .authorizeHttpRequests((requests) -> (requests)
                                                 // 아무나 접근 가능
-                                                .requestMatchers("/", "/login", "/signup").permitAll()
+                                                .requestMatchers("/").permitAll()
                                                 .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
-                                                .requestMatchers("/search/**", "/api/search/**")
+                                                .requestMatchers("/api/login/check-login")
                                                 .hasAnyRole("USER", "ADMIN")
-                                                .requestMatchers("/course/**", "/api/course/**")
+                                                .requestMatchers("/api/search/**")
+                                                .hasAnyRole("USER", "ADMIN")
+                                                .requestMatchers("/api/course/**")
                                                 .hasAnyRole("USER", "ADMIN") // ADMIN 계정만 접근 가능
-                                                .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
+                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                                 // 그 외의 요청은 모든 사용자에게 접근 권한 허용
                                                 .anyRequest().permitAll())
 
@@ -59,19 +61,6 @@ public class SecurityConfig {
                                                         }
                                                 })
                                                 .logoutSuccessHandler(customLogoutSuccessHandler())
-                                                .logoutSuccessUrl("/")
-                                                .deleteCookies("remember-me"));
-
-                httpSecurity
-                                .logout((logoutConfig) -> logoutConfig
-                                                .logoutUrl("/logout")
-                                                .addLogoutHandler((request, response, authentication) -> {
-                                                        HttpSession session = request.getSession();
-                                                        if (session != null) {
-                                                                session.invalidate();
-                                                        }
-                                                })
-                                                .logoutSuccessUrl("/")
                                                 .deleteCookies("remember-me"));
 
                 httpSecurity
