@@ -4,6 +4,7 @@ import com.example.Devkor_project.configuration.VersionProvider;
 import com.example.Devkor_project.dto.*;
 import com.example.Devkor_project.service.CourseService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@Slf4j
 public class CourseController
 {
     @Autowired
@@ -133,6 +135,24 @@ public class CourseController
                         ResponseDto.Success.builder()
                                 .data(course_id)
                                 .message("강의평 수정을 정상적으로 완료하였습니다.")
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
+
+    /* 강의평 삭제 컨트롤러 */
+    @PostMapping("/api/course/delete-comment")
+    public ResponseEntity<ResponseDto.Success> deleteComment(Principal principal,
+                                                             @Valid @RequestBody CommentDto.Delete dto)
+    {
+        log.info("start controller");
+        Long course_id = courseService.deleteComment(principal, dto);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .data(course_id)
+                                .message("강의평 삭제를 정상적으로 완료하였습니다.")
                                 .version(versionProvider.getVersion())
                                 .build()
                 );

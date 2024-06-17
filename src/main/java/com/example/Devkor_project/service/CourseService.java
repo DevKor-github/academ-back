@@ -432,4 +432,92 @@ public class CourseService
 
         return course.getCourse_id();
     }
+
+    /* 강의평 삭제 서비스 */
+    @Transactional
+    public Long deleteComment(Principal principal, CommentDto.Delete dto)
+    {
+        log.info("start service");
+
+        // 강의평 작성 수정 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 강의평 작성 수정 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // 사용자가 삭제할 강의평이 존재하지 않으면 예외 처리
+        Comment comment = commentRepository.findById(dto.getComment_id())
+                .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND, dto.getComment_id()));
+
+        // 사용자가 강의평을 삭제할 강의가 존재하지 않으면 예외 처리
+        Course course = courseRepository.findById(comment.getCourse_id().getCourse_id())
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, comment.getCourse_id().getCourse_id()));
+
+        // 해당 강의평의 평점 데이터
+        CommentRating commentRating = comment.getCommentRating_id();
+
+        // 해당 강의의 평점 데이터
+        CourseRating courseRating = course.getCourseRating_id();
+
+        // 해당 강의평이 해당 사용자가 작성한 강의평이 아니라면, 예외 처리
+        if(!Objects.equals(comment.getProfile_id().getProfile_id(), profile.getProfile_id()))
+            throw new AppException(ErrorCode.NOT_COMMENT_BY_USER, comment.getProfile_id().getProfile_id());
+
+        // 강의 엔티티의 강의평 개수 업데이트
+        int count = course.getCOUNT_comments() - 1;
+        course.setCOUNT_comments(count);
+
+        // 강의 평점 엔티티의 평점 평균값 업데이트
+        if(count == 0)
+        {
+            courseRating.setAVG_rating(0.0);
+            courseRating.setAVG_r1_amount_of_studying(0.0);
+            courseRating.setAVG_r2_difficulty(0.0);
+            courseRating.setAVG_r3_delivery_power(0.0);
+            courseRating.setAVG_r4_grading(0.0);
+        }
+        else
+        {
+            courseRating.setAVG_rating((courseRating.getAVG_rating() * (count + 1) - commentRating.getRating()) / count);
+            courseRating.setAVG_r1_amount_of_studying((courseRating.getAVG_r1_amount_of_studying() * (count + 1) - commentRating.getR1_amount_of_studying()) / count);
+            courseRating.setAVG_r2_difficulty((courseRating.getAVG_r2_difficulty() * (count + 1) - commentRating.getR2_difficulty()) / count);
+            courseRating.setAVG_r3_delivery_power((courseRating.getAVG_r3_delivery_power() * (count + 1) - commentRating.getR3_delivery_power()) / count);
+            courseRating.setAVG_r4_grading((courseRating.getAVG_r4_grading() * (count + 1) - commentRating.getR4_grading()) / count);
+        }
+
+        // 강의 평점 엔티티의 태그 개수 업데이트
+        if(commentRating.isTeach_t1_theory())
+            courseRating.setCOUNT_teach_t1_theory(courseRating.getCOUNT_teach_t1_theory() - 1);
+        if(commentRating.isTeach_t2_practice())
+            courseRating.setCOUNT_teach_t2_practice(courseRating.getCOUNT_teach_t2_practice() - 1);
+        if(commentRating.isTeach_t3_seminar())
+            courseRating.setCOUNT_teach_t3_seminar(courseRating.getCOUNT_teach_t3_seminar() - 1);
+        if(commentRating.isTeach_t4_discussion())
+            courseRating.setCOUNT_teach_t4_discussion(courseRating.getCOUNT_teach_t4_discussion() - 1);
+        if(commentRating.isTeach_t5_presentation())
+            courseRating.setCOUNT_teach_t5_presentation(courseRating.getCOUNT_teach_t5_presentation() - 1);
+        if(commentRating.isLearn_t1_theory())
+            courseRating.setCOUNT_learn_t1_theory(courseRating.getCOUNT_learn_t1_theory() - 1);
+        if(commentRating.isLearn_t2_thesis())
+            courseRating.setCOUNT_learn_t2_thesis(courseRating.getCOUNT_learn_t2_thesis() - 1);
+        if(commentRating.isLearn_t3_exam())
+            courseRating.setCOUNT_learn_t3_exam(courseRating.getCOUNT_learn_t3_exam() - 1);
+        if(commentRating.isLearn_t4_industry())
+            courseRating.setCOUNT_learn_t4_industry(courseRating.getCOUNT_learn_t4_industry() - 1);
+
+        // 해당 사용자로부터 100 포인트 차감
+        profile.setPoint(profile.getPoint() - 100);
+
+        // 강의평 삭제
+        // 강의평 평점 데이터 삭제하면, CASCADE 옵션으로 인해 강의평 데이터도 삭제됨
+        commentRatingRepository.delete(commentRating);
+
+        // 변경사항 적용
+        profileRepository.save(profile);
+        courseRepository.save(course);
+        courseRatingRepository.save(courseRating);
+
+        return course.getCourse_id();
+    }
 }
