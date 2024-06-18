@@ -57,7 +57,7 @@ public class ExceptionManager {
                                 .body(
                                                 ResponseDto.Error.builder()
                                                                 .data(null)
-                                                                .message("권한이 없습니다.")
+                                                                .message(e.getMessage())
                                                                 .version(versionProvider.getVersion())
                                                                 .build());
         }
