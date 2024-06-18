@@ -1,6 +1,7 @@
 package com.example.Devkor_project.security;
 
 import com.example.Devkor_project.entity.Profile;
+import lombok.EqualsAndHashCode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -58,5 +59,18 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CustomUserDetails) {
+            return this.profile.getEmail().equals(((CustomUserDetails) obj).profile.getEmail());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.profile.getEmail().hashCode();
     }
 }

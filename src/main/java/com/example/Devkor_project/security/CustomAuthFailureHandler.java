@@ -19,14 +19,14 @@ import java.io.IOException;
 
 @Component
 public class CustomAuthFailureHandler implements AuthenticationFailureHandler {
-    @Autowired
-    VersionProvider versionProvider;
+
+    @Autowired VersionProvider versionProvider;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-            AuthenticationException exception) throws IOException, ServletException {
+                                        AuthenticationException exception) throws IOException, ServletException {
 
         String errorMessage = null;
 
