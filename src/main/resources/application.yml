@@ -1,5 +1,5 @@
 academ:
-  version: "v0.3.20-alpha"
+  version: "v0.3.21-alpha"
 
 ## 데이터베이스(MySQL) 연동
 spring:
@@ -56,4 +56,4 @@ server:
       timeout: 60m
       cookie:             # 쿠키 관련 설정
         secure: true      # 로컬에서 http로 테스트하는 경우 false
-        same-site: Strict
+        same-site: None
