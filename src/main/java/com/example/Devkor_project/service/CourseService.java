@@ -437,8 +437,6 @@ public class CourseService
     @Transactional
     public Long deleteComment(Principal principal, CommentDto.Delete dto)
     {
-        log.info("start service");
-
         // 강의평 작성 수정 요청을 보낸 사용자의 계정 이메일
         String email = principal.getName();
 
@@ -519,5 +517,56 @@ public class CourseService
         courseRatingRepository.save(courseRating);
 
         return course.getCourse_id();
+    }
+
+    /* 내가 작성한 강의평 전체 조회 서비스 */
+    public List<CommentDto.Comment> myComments(Principal principal)
+    {
+        // 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // 사용자가 작성한 모든 강의평 엔티티 조회
+        List<Comment> comments = commentRepository.findByProfileId(profile.getProfile_id());
+
+        // 강의평 엔티티 리스트를 강의평 dto 리스트로 변환
+        List<CommentDto.Comment> commentDtos = comments.stream()
+                .map(comment -> {
+
+                    // 해당 강의평의 평점 데이터가 존재하지 않으면 예외 처리
+                    CommentRating commentRating = commentRatingRepository.findById(comment.getCommentRating_id().getCommentRating_id())
+                            .orElseThrow(() -> new AppException(ErrorCode.COMMENT_RATING_NOT_FOUND, comment.getCommentRating_id().getCommentRating_id()));
+
+                    return CommentDto.Comment.builder()
+                            .comment_id(comment.getComment_id())
+                            .profile_id(profile.getProfile_id())
+                            .course_id(comment.getCourse_id().getCourse_id())
+                            .rating(commentRating.getRating())
+                            .r1_amount_of_studying(commentRating.getR1_amount_of_studying())
+                            .r2_difficulty(commentRating.getR2_difficulty())
+                            .r3_delivery_power(commentRating.getR3_delivery_power())
+                            .r4_grading(commentRating.getR4_grading())
+                            .review(comment.getReview())
+                            .teach_t1_theory(commentRating.isTeach_t1_theory())
+                            .teach_t2_practice(commentRating.isTeach_t2_practice())
+                            .teach_t3_seminar(commentRating.isTeach_t3_seminar())
+                            .teach_t4_discussion(commentRating.isTeach_t4_discussion())
+                            .teach_t5_presentation(commentRating.isTeach_t5_presentation())
+                            .learn_t1_theory(commentRating.isLearn_t1_theory())
+                            .learn_t2_thesis(commentRating.isLearn_t2_thesis())
+                            .learn_t3_exam(commentRating.isLearn_t3_exam())
+                            .learn_t4_industry(commentRating.isLearn_t4_industry())
+                            .likes(comment.getLikes())
+                            .created_at(comment.getCreated_at())
+                            .updated_at(comment.getUpdated_at())
+                            .build();
+
+                })
+                .toList();
+
+        return commentDtos;
     }
 }

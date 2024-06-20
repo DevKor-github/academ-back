@@ -197,7 +197,7 @@ public class LoginService
     /* 로그인 여부 확인 서비스 */
     public ProfileDto.CheckLogin checkLogin(Principal principal)
     {
-        // 로그인을 하지 않은 사용자는 false 반환
+        // 로그인을 하지 않은 사용자는 에러
         if(principal == null)
             throw new AppException(ErrorCode.NOT_LOGIN, null);
 
