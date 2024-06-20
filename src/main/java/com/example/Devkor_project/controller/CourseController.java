@@ -145,7 +145,6 @@ public class CourseController
     public ResponseEntity<ResponseDto.Success> deleteComment(Principal principal,
                                                              @Valid @RequestBody CommentDto.Delete dto)
     {
-        log.info("start controller");
         Long course_id = courseService.deleteComment(principal, dto);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -153,6 +152,22 @@ public class CourseController
                         ResponseDto.Success.builder()
                                 .data(course_id)
                                 .message("강의평 삭제를 정상적으로 완료하였습니다.")
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
+
+    /* 내가 작성한 강의평 전체 조회 컨트롤러 */
+    @GetMapping("/api/course/my-comments")
+    public ResponseEntity<ResponseDto.Success> myComments(Principal principal)
+    {
+        List<CommentDto.Comment> my_comments = courseService.myComments(principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .data(my_comments)
+                                .message("내가 작성한 강의평 전체 조회를 정상적으로 완료하였습니다.")
                                 .version(versionProvider.getVersion())
                                 .build()
                 );
