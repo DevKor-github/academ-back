@@ -1,6 +1,7 @@
 package com.example.Devkor_project.security;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,19 +14,24 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig
+{
+        @Autowired JwtUtil jwtUtil;
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
                                                        CustomUserDetailsService customUserDetailsService) throws Exception {
+                // 기본 설정
                 httpSecurity
                         .httpBasic(HttpBasicConfigurer::disable)    // HTTP 기본 인증 비활성화
                         .csrf(CsrfConfigurer::disable);             // CSRF 보호 비활성화
 
+                // 경로별 권한 설정
                 httpSecurity
                         .authorizeHttpRequests((requests) -> (requests)
                                 // 아무나 접근 가능
@@ -41,6 +47,11 @@ public class SecurityConfig {
                         .exceptionHandling((exception) -> exception
                                 .accessDeniedHandler(customAccessDeniedHandler()));
 
+                // UsernamePasswordAuthenticationFilter 앞에 JwtAuthFilter 추가
+                httpSecurity
+                        .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil), UsernamePasswordAuthenticationFilter.class);
+
+                // 로그인, 로그아웃 설정
                 httpSecurity
                         .formLogin((auth) -> auth
                                 .usernameParameter("email")
@@ -50,37 +61,30 @@ public class SecurityConfig {
                                 .loginProcessingUrl("/api/login")
                                 .permitAll()
                                 .successHandler(customAuthSuccessHandler())
-                                .failureHandler(customAuthFailureHandler()));
-
-                httpSecurity
+                                .failureHandler(customAuthFailureHandler())
+                        )
                         .logout((logoutConfig) -> logoutConfig
                                 .logoutUrl("/api/logout")
-                                .addLogoutHandler((request, response, authentication) -> {
-                                        HttpSession session = request.getSession();
-                                        if (session != null) {
-                                                session.invalidate();
-                                        }
-                                })
                                 .logoutSuccessHandler(customLogoutSuccessHandler())
-                                .deleteCookies("remember-me"));
+                                .deleteCookies("remember-me")
+                        )
+                        .userDetailsService(customUserDetailsService);
 
+                // remember-me 설정
                 httpSecurity
                         .rememberMe((rememberConfig) -> rememberConfig
                                 .key("Test-Key-For-Academ")
                                 .tokenValiditySeconds(60 * 60 * 24 * 30) // 30일
                                 .rememberMeParameter("remember-me")
-                                .userDetailsService(customUserDetailsService));
-
-                httpSecurity
-                        .sessionManagement((session) -> session
-                                .sessionFixation().changeSessionId()                            // 로그인 시, 기존 세션 무효화
-                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)       // 필요시에 세션을 생성
-                                .maximumSessions(1)                                             // 1명만 로그인 가능
-                                .maxSessionsPreventsLogin(false)                                // 다른 기기 로그인 시 기존 사용자 세션 만료
-                                .sessionRegistry(sessionRegistry())                             // 동시에 로그인한 세션들 추적
-                                .expiredSessionStrategy(customSessionExpiredStrategy())         // 만료된 세션으로 요청 시, 처리
+                                .userDetailsService(customUserDetailsService)
                         );
 
+
+                // 세션 생성 및 사용 정지
+                httpSecurity
+                        .sessionManagement((session) -> session
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        );
 
                 return httpSecurity.build();
         }
@@ -103,16 +107,6 @@ public class SecurityConfig {
         @Bean
         public CustomLogoutSuccessHandler customLogoutSuccessHandler() {
                 return new CustomLogoutSuccessHandler();
-        }
-
-        @Bean
-        public SessionRegistry sessionRegistry() {
-            return new SessionRegistryImpl();
-        }
-
-        @Bean
-        public CustomSessionExpiredStrategy customSessionExpiredStrategy() {
-            return new CustomSessionExpiredStrategy();
         }
 
         // 세션 생성, 만료 이벤트 리스너

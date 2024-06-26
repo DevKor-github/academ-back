@@ -2,26 +2,25 @@ package com.example.Devkor_project.security;
 
 import com.example.Devkor_project.entity.Profile;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+@RequiredArgsConstructor
+@Getter
 public class CustomUserDetails implements UserDetails {
-    private final Profile profile;
 
-    // 생성자 주입 방식
-    public CustomUserDetails(Profile profile) {
-        this.profile = profile;
-    }
+    private final Profile profile;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 
         authorities.add(new GrantedAuthority() {
-
             @Override
             public String getAuthority() {
                 return profile.getRole();
