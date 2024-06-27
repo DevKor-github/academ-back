@@ -1,22 +1,30 @@
 package com.example.Devkor_project.security;
 
+import com.example.Devkor_project.entity.Profile;
+import com.example.Devkor_project.exception.AppException;
+import com.example.Devkor_project.exception.ErrorCode;
+import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter
 {
     private final CustomUserDetailsService customUserDetailService;
     private final JwtUtil jwtUtil;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final ProfileRepository profileRepository;
 
     // JWT 토큰 검증 필터
     @Override
@@ -34,7 +42,12 @@ public class JwtAuthFilter extends OncePerRequestFilter
                 Long userId = jwtUtil.getUserId(token);
                 UserDetails userDetails = customUserDetailService.loadUserByProfileId(userId);
 
-                if(userDetails != null)
+                Profile profile = profileRepository.findById(userId)
+                        .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, null));
+
+                String email = profile.getEmail();
+
+                if(userDetails != null && Boolean.TRUE.equals(redisTemplate.hasKey(email)) && Objects.equals(redisTemplate.opsForValue().get(email), token))
                 {
                     // 접근 권한 인증 token 생성
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
