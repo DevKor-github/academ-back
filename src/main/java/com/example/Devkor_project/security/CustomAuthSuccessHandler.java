@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -19,6 +20,7 @@ import java.io.IOException;
 public class CustomAuthSuccessHandler implements AuthenticationSuccessHandler
 {
     @Autowired JwtUtil jwtUtil;
+    @Autowired RedisTemplate<String, String> redisTemplate;
     @Autowired ProfileRepository profileRepository;
     @Autowired VersionProvider versionProvider;
 
@@ -46,7 +48,11 @@ public class CustomAuthSuccessHandler implements AuthenticationSuccessHandler
                 .role(profile.getRole())
                 .build();
 
+        // access token 발행
         String accessToken = jwtUtil.createAccessToken(profileDto);
+
+        // redis에 token 정보 저장
+        redisTemplate.opsForValue().set(email, accessToken);
 
         ResponseDto.Success dto = ResponseDto.Success.builder()
                 .data(accessToken)

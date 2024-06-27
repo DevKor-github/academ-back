@@ -39,6 +39,12 @@ spring:
           starttls:
             enable: true  # StartTLS 활성화 여부
 
+  ## Redis 설정
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
 ## JPA 로깅 설정
 logging:
   level:

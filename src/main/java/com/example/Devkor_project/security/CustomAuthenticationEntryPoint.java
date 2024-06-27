@@ -1,30 +1,25 @@
 package com.example.Devkor_project.security;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.stereotype.Component;
-
 import com.example.Devkor_project.configuration.VersionProvider;
 import com.example.Devkor_project.dto.ResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
 
 import java.io.IOException;
 
-@Component
-public class CustomAccessDeniedHandler implements AccessDeniedHandler
+public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint
 {
     @Autowired VersionProvider versionProvider;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws ServletException, IOException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws ServletException, IOException {
 
         ResponseDto.Error dto = ResponseDto.Error.builder()
                 .data(null)

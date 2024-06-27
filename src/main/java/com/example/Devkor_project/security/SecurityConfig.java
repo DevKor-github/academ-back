@@ -1,10 +1,12 @@
 package com.example.Devkor_project.security;
 
+import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -22,6 +24,8 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 public class SecurityConfig
 {
         @Autowired JwtUtil jwtUtil;
+        @Autowired RedisTemplate<String, String> redisTemplate;
+        @Autowired ProfileRepository profileRepository;
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
@@ -34,30 +38,36 @@ public class SecurityConfig
                 // 경로별 권한 설정
                 httpSecurity
                         .authorizeHttpRequests((requests) -> (requests)
-                                // 아무나 접근 가능
-                                .requestMatchers("/", "/login", "/signup", "logout").permitAll()
-                                .requestMatchers("/api/login/**", "/api/signup/**", "/api/logout").permitAll()
-                                .requestMatchers("/search/**", "/api/search/**").hasAnyRole("USER", "ADMIN")
+                                // 해당 요청은 모든 사용자에게 접근 권한 허용
+                                .requestMatchers("/", "/login", "/signup").permitAll()
+                                .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
+                                // 해당 요청은 인증된 사용자에게만 접근 권한 허용
                                 .requestMatchers("/api/login/check-login").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/course/**", "/api/course/**").hasAnyRole("USER", "ADMIN") // ADMIN 계정만 접근 가능
-                                .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/course/**").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/course/**").hasAnyRole("USER", "ADMIN")
+                                // 해당 요청은 관리자에게만 접근 권한 허용
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 // 그 외의 요청은 모든 사용자에게 접근 권한 허용
-                                .anyRequest().permitAll())
+                                .anyRequest().authenticated()
+                        );
 
+                // 예외 처리 설정
+                httpSecurity
                         .exceptionHandling((exception) -> exception
-                                .accessDeniedHandler(customAccessDeniedHandler()));
+                                .authenticationEntryPoint(customAuthenticationEntryPoint())
+                                .accessDeniedHandler(customAccessDeniedHandler())
+                        );
 
                 // UsernamePasswordAuthenticationFilter 앞에 JwtAuthFilter 추가
                 httpSecurity
-                        .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                        .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil, redisTemplate, profileRepository), UsernamePasswordAuthenticationFilter.class);
 
                 // 로그인, 로그아웃 설정
                 httpSecurity
                         .formLogin((auth) -> auth
                                 .usernameParameter("email")
                                 .passwordParameter("password")
-                                .loginPage("/login")
-                                .permitAll()
                                 .loginProcessingUrl("/api/login")
                                 .permitAll()
                                 .successHandler(customAuthSuccessHandler())
@@ -87,6 +97,11 @@ public class SecurityConfig
                         );
 
                 return httpSecurity.build();
+        }
+
+        @Bean
+        public CustomAuthenticationEntryPoint customAuthenticationEntryPoint() {
+                return new CustomAuthenticationEntryPoint();
         }
 
         @Bean
