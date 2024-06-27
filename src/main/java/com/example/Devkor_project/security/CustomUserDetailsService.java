@@ -32,4 +32,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         // 해당 이메일의 계정이 존재하면, Spring security에서 제공하는 User 클래스를 빌드
         return new CustomUserDetails(profile);
     }
+
+    public UserDetails loadUserByProfileId(Long profile_id) throws UsernameNotFoundException
+    {
+        // profile 데이터베이스에서 해당 아이디의 계정 검색
+        Profile profile = profileRepository.findById(profile_id)
+                .orElseThrow(() -> new AppException(ErrorCode.LOGIN_FAILURE, null));
+
+        // 해당 이메일의 계정이 존재하면, Spring security에서 제공하는 User 클래스를 빌드
+        return new CustomUserDetails(profile);
+    }
 }

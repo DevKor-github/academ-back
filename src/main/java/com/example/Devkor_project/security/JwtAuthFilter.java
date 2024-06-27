@@ -32,7 +32,7 @@ public class JwtAuthFilter extends OncePerRequestFilter
             if(jwtUtil.validateToken(token))
             {
                 Long userId = jwtUtil.getUserId(token);
-                UserDetails userDetails = customUserDetailService.loadUserByUsername(userId.toString());
+                UserDetails userDetails = customUserDetailService.loadUserByProfileId(userId);
 
                 if(userDetails != null)
                 {
