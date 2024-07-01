@@ -17,12 +17,13 @@ public class ExceptionManager {
         @ExceptionHandler(AppException.class)
         public ResponseEntity<ResponseDto.Error> appExceptionHandler(AppException e) {
                 return ResponseEntity.status(e.getErrorCode().getHttpStatus())
-                                .body(
-                                                ResponseDto.Error.builder()
-                                                                .data(e.getData())
-                                                                .message(e.getErrorCode().getMessage())
-                                                                .version(versionProvider.getVersion())
-                                                                .build());
+                        .body(
+                                ResponseDto.Error.builder()
+                                        .code(e.getErrorCode().toString())
+                                        .message(e.getErrorCode().getMessage())
+                                        .data(e.getData())
+                                        .version(versionProvider.getVersion())
+                                        .build());
         }
 
         // @Valid 어노테이션으로 수행한 유효성 검사 예외 처리
@@ -30,36 +31,25 @@ public class ExceptionManager {
         public ResponseEntity<ResponseDto.Error> methodArgumentNotValidExceptionHandler(
                         MethodArgumentNotValidException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                .body(
-                                                ResponseDto.Error.builder()
-                                                                .data(null)
-                                                                .message("잘못된 요청입니다.")
-                                                                .version(versionProvider.getVersion())
-                                                                .build());
+                        .body(
+                                ResponseDto.Error.builder()
+                                        .code("INVALID_DATA")
+                                        .message("잘못된 형식의 요청 데이터입니다.")
+                                        .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build());
         }
 
-        // 이메일 전송 시, 원인 불명으로 발생한 예외 처리
-        @ExceptionHandler(RuntimeException.class)
+        // 원인 불명으로 발생한 예외 처리
+        @ExceptionHandler(Exception.class)
         public ResponseEntity<ResponseDto.Error> runtimeExceptionHandler(RuntimeException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(
-                                                ResponseDto.Error.builder()
-                                                                .data(null)
-                                                                .message(e.getMessage())
-                                                                .version(versionProvider.getVersion())
-                                                                .build());
+                        .body(
+                                ResponseDto.Error.builder()
+                                        .code("UNEXPECTED_ERROR")
+                                        .message(e.getMessage())
+                                        .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build());
         }
-
-        // 권한이 없는 api에 접근시 예외 처리
-        @ExceptionHandler(Exception.class)
-        public ResponseEntity<ResponseDto.Error> accessDeniedExceptionHandler(Exception e) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(
-                                                ResponseDto.Error.builder()
-                                                                .data(null)
-                                                                .message(e.getMessage())
-                                                                .version(versionProvider.getVersion())
-                                                                .build());
-        }
-
 }

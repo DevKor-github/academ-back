@@ -30,11 +30,13 @@ public class LoginController {
                 loginService.signUp(dto);
 
                 return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(ResponseDto.Success.builder()
-                                                .data(dto.getEmail())
-                                                .message("회원가입을 성공하였습니다.")
-                                                .version(versionProvider.getVersion())
-                                                .build());
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("회원가입을 성공하였습니다.")
+                                        .data(dto.getEmail())
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
         }
 
         /* 이메일 인증번호 발송 컨트롤러 */
@@ -43,11 +45,13 @@ public class LoginController {
                 loginService.sendAuthenticationNumber(email);
 
                 return ResponseEntity.status(HttpStatus.OK)
-                                .body(ResponseDto.Success.builder()
-                                                .data(email + "@korea.ac.kr")
-                                                .message("인증번호 이메일 발송에 성공하였습니다.")
-                                                .version(versionProvider.getVersion())
-                                                .build());
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("인증번호 이메일 발송에 성공하였습니다.")
+                                        .data(email + "@korea.ac.kr")
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
         }
 
         /* 인증번호 확인 컨트롤러 */
@@ -57,11 +61,13 @@ public class LoginController {
                 loginService.checkAuthenticationNumber(email, code);
 
                 return ResponseEntity.status(HttpStatus.OK)
-                                .body(ResponseDto.Success.builder()
-                                                .data(email + "@korea.ac.kr")
-                                                .message("인증번호 이메일 확인에 성공하였습니다.")
-                                                .version(versionProvider.getVersion())
-                                                .build());
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("인증번호 이메일 확인에 성공하였습니다.")
+                                        .data(email + "@korea.ac.kr")
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
         }
 
         /* 임시 비밀번호 발급 컨트롤러 */
@@ -70,24 +76,44 @@ public class LoginController {
                 loginService.resetPassword(email);
 
                 return ResponseEntity.status(HttpStatus.OK)
-                                .body(ResponseDto.Success.builder()
-                                                .data(email + "@korea.ac.kr")
-                                                .message("비밀번호가 성공적으로 초기화 되었습니다.")
-                                                .version(versionProvider.getVersion())
-                                                .build());
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("비밀번호가 성공적으로 초기화 되었습니다.")
+                                        .data(email + "@korea.ac.kr")
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
         }
 
         /* 로그인 여부 확인 컨트롤러 */
-        @GetMapping("/api/login/check-login")
+        @GetMapping("/api/check-login")
         public ResponseEntity<ResponseDto.Success> checkLogin(Principal principal) {
                 ProfileDto.CheckLogin dto = loginService.checkLogin(principal);
 
                 return ResponseEntity.status(HttpStatus.OK)
-                                .body(ResponseDto.Success.builder()
-                                                .data(dto)
-                                                .message("로그인 여부 확인이 완료되었습니다.")
-                                                .version(versionProvider.getVersion())
-                                                .build());
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("로그인 여부 확인이 완료되었습니다.")
+                                        .data(dto)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
+        }
+
+        /* access token 재발급 컨트롤러 */
+        @GetMapping("/api/refresh-token")
+        public ResponseEntity<ResponseDto.Success> refreshToken(HttpServletRequest request)
+        {
+                String token = loginService.refreshToken(request);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("access token 재발급이 완료되었습니다.")
+                                        .data(token)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
         }
 
 }

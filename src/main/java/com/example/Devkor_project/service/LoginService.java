@@ -1,18 +1,24 @@
 package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.ProfileDto;
+import com.example.Devkor_project.dto.TokenDto;
 import com.example.Devkor_project.entity.Code;
 import com.example.Devkor_project.entity.Profile;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.CodeRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
+import com.example.Devkor_project.security.CustomUserDetailsService;
+import com.example.Devkor_project.security.JwtUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,17 +31,13 @@ import java.util.Random;
 @Service
 public class LoginService
 {
-    @Autowired
-    private ProfileRepository profileRepository;
-
-    @Autowired
-    private CodeRepository codeRepository;
-
-    @Autowired
-    private BCryptPasswordEncoder encoder;
-
-    @Autowired
-    JavaMailSender javaMailSender;
+    @Autowired ProfileRepository profileRepository;
+    @Autowired CodeRepository codeRepository;
+    @Autowired BCryptPasswordEncoder encoder;
+    @Autowired JavaMailSender javaMailSender;
+    @Autowired JwtUtil jwtUtil;
+    @Autowired CustomUserDetailsService customUserDetailService;
+    @Autowired RedisTemplate<String, String> redisTemplate;
 
     /* 회원가입 서비스 */
     @Transactional
@@ -89,7 +91,7 @@ public class LoginService
         // 인증번호 발송
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
-            String content = String.format("Color.you <br> 인증 번호 <br><br> %s", authenticationNumber);
+            String content = String.format("Academ <br> 인증 번호 <br><br> %s", authenticationNumber);
 
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
             mimeMessageHelper.setTo(email + "@korea.ac.kr");    // 메일 수신자
@@ -113,10 +115,8 @@ public class LoginService
 
             codeRepository.save(code);
         }
-        catch (AppException e) {
-            throw new AppException(ErrorCode.UNEXPECTED_ERROR, email + "@korea.ac.kr");
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
+        catch (Exception error) {
+            throw new RuntimeException(error);
         }
     }
 
@@ -179,7 +179,7 @@ public class LoginService
         // 임시 비밀번호를 이메일로 전송
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
-            String content = String.format("Color.you <br> 임시 비밀번호 <br><br> %s", newPassword);
+            String content = String.format("Academ <br> 임시 비밀번호 <br><br> %s", newPassword);
 
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
             mimeMessageHelper.setTo(email + "@korea.ac.kr");    // 메일 수신자
@@ -187,20 +187,14 @@ public class LoginService
             mimeMessageHelper.setText(content, true);  // 메일 내용
             javaMailSender.send(mimeMessage);
         }
-        catch (AppException e) {
-            throw new AppException(ErrorCode.UNEXPECTED_ERROR, email + "@korea.ac.kr");
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
+        catch (Exception error) {
+            throw new RuntimeException(error);
         }
     }
 
     /* 로그인 여부 확인 서비스 */
     public ProfileDto.CheckLogin checkLogin(Principal principal)
     {
-        // 로그인을 하지 않은 사용자는 에러
-        if(principal == null)
-            throw new AppException(ErrorCode.NOT_LOGIN, null);
-
         // 로그인 여부 확인 요청을 보낸 사용자의 계정 이메일
         String email = principal.getName();
 
@@ -221,4 +215,53 @@ public class LoginService
                 .role(profile.getRole())
                 .build();
     }
+
+    /* access token 재발급 서비스 */
+    @Transactional
+    public String refreshToken(HttpServletRequest request)
+    {
+        String authorizationHeader = request.getHeader("Authorization");
+
+        // 헤더에 JWT token이 존재하는지 체크
+        if(authorizationHeader != null && authorizationHeader.startsWith("Bearer "))
+        {
+            String token = authorizationHeader.substring(7);
+
+            // JWT 유효성 검증
+            if(jwtUtil.validateToken(token))
+            {
+                Long profile_id = jwtUtil.getProfileId(token);
+                UserDetails userDetails = customUserDetailService.loadUserByProfileId(profile_id);
+
+                Profile profile = profileRepository.findById(profile_id)
+                        .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, null));
+
+                ProfileDto.Profile profileDto = ProfileDto.Profile.builder()
+                        .profile_id(profile.getProfile_id())
+                        .email(profile.getEmail())
+                        .password(profile.getPassword())
+                        .username(profile.getUsername())
+                        .created_at(profile.getCreated_at())
+                        .role(profile.getRole())
+                        .build();
+
+                String email = profile.getEmail();
+
+                if(userDetails != null)
+                {
+                    // access token 발행
+                    TokenDto tokenDto = jwtUtil.returnToken(profileDto, false);
+
+                    // redis에 access token 정보 저장
+                    redisTemplate.opsForValue().set(email, tokenDto.getAccessToken());
+
+                    // access token 반환
+                    return tokenDto.getAccessToken();
+                }
+            }
+        }
+
+        throw new AppException(ErrorCode.INVALID_TOKEN, null);
+    }
+
 }

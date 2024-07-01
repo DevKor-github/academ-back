@@ -28,6 +28,11 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException
     {
+        // 로그아웃 성공 여부
+        boolean isSuccess = false;
+        String errorCode = null;
+        String errorMessage = null;
+
         String authorizationHeader = request.getHeader("Authorization");
 
         // 헤더에 JWT token이 존재하는지 체크
@@ -36,9 +41,8 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler
             String token = authorizationHeader.substring(7);
 
             // JWT 유효성 검증
-            if(jwtUtil.validateToken(token))
-            {
-                Long userId = jwtUtil.getUserId(token);
+            if(jwtUtil.validateToken(token)) {
+                Long userId = jwtUtil.getProfileId(token);
 
                 Profile profile = profileRepository.findById(userId)
                         .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, null));
@@ -47,20 +51,48 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler
 
                 // redis에서 token 정보 삭제
                 if (redisTemplate.opsForValue().get(email) != null) {
+                    isSuccess = true;
                     redisTemplate.delete(email);
                 }
+                else {
+                    errorCode = "EXPIRED_TOKEN";
+                    errorMessage = "이미 만료된 토큰입니다.";
+                }
+            }
+            else {
+                errorCode = "INVALID_TOKEN";
+                errorMessage = "유효하지 않은 토큰입니다.";
             }
         }
+        else {
+            errorCode = "TOKEN_NOT_FOUND";
+            errorMessage = "헤더에 토큰 정보가 존재하지 않습니다.";
+        }
 
-        ResponseDto.Success dto = ResponseDto.Success.builder()
-                .data(null)
-                .message("로그아웃을 성공하였습니다.")
-                .version(versionProvider.getVersion())
-                .build();
+        if(isSuccess) {
+            ResponseDto.Success dto = ResponseDto.Success.builder()
+                    .message("로그아웃을 성공하였습니다.")
+                    .data(null)
+                    .version(versionProvider.getVersion())
+                    .build();
 
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(dto));
-        response.getWriter().flush();
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write(objectMapper.writeValueAsString(dto));
+            response.getWriter().flush();
+        }
+        else {
+            ResponseDto.Error dto = ResponseDto.Error.builder()
+                    .code(errorCode)
+                    .message(errorMessage)
+                    .data(null)
+                    .version(versionProvider.getVersion())
+                    .build();
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write(objectMapper.writeValueAsString(dto));
+            response.getWriter().flush();
+        }
     }
 }

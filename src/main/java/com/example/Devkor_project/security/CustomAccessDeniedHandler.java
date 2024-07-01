@@ -27,8 +27,9 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws ServletException, IOException {
 
         ResponseDto.Error dto = ResponseDto.Error.builder()
+                .code("LOW_AUTHORITY")
+                .message("권한이 부족합니다.")
                 .data(null)
-                .message("권한이 없습니다.")
                 .version(versionProvider.getVersion())
                 .build();
 

@@ -29,6 +29,7 @@ public class JwtAuthFilter extends OncePerRequestFilter
     // JWT 토큰 검증 필터
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
         String authorizationHeader = request.getHeader("Authorization");
 
         // 헤더에 JWT token이 존재하는지 체크
@@ -39,7 +40,7 @@ public class JwtAuthFilter extends OncePerRequestFilter
             // JWT 유효성 검증
             if(jwtUtil.validateToken(token))
             {
-                Long userId = jwtUtil.getUserId(token);
+                Long userId = jwtUtil.getProfileId(token);
                 UserDetails userDetails = customUserDetailService.loadUserByProfileId(userId);
 
                 Profile profile = profileRepository.findById(userId)

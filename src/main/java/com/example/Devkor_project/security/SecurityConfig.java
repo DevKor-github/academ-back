@@ -41,8 +41,10 @@ public class SecurityConfig
                                 // 해당 요청은 모든 사용자에게 접근 권한 허용
                                 .requestMatchers("/", "/login", "/signup").permitAll()
                                 .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
+                                .requestMatchers("/api/refresh-token").permitAll()
                                 // 해당 요청은 인증된 사용자에게만 접근 권한 허용
-                                .requestMatchers("/api/login/check-login").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/logout").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/check-login").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/course/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/api/course/**").hasAnyRole("USER", "ADMIN")
                                 // 해당 요청은 관리자에게만 접근 권한 허용
@@ -76,19 +78,8 @@ public class SecurityConfig
                         .logout((logoutConfig) -> logoutConfig
                                 .logoutUrl("/api/logout")
                                 .logoutSuccessHandler(customLogoutSuccessHandler())
-                                .deleteCookies("remember-me")
                         )
                         .userDetailsService(customUserDetailsService);
-
-                // remember-me 설정
-                httpSecurity
-                        .rememberMe((rememberConfig) -> rememberConfig
-                                .key("Test-Key-For-Academ")
-                                .tokenValiditySeconds(60 * 60 * 24 * 30) // 30일
-                                .rememberMeParameter("remember-me")
-                                .userDetailsService(customUserDetailsService)
-                        );
-
 
                 // 세션 생성 및 사용 정지
                 httpSecurity
@@ -127,6 +118,6 @@ public class SecurityConfig
         // 세션 생성, 만료 이벤트 리스너
         @Bean
         public static ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
-            return new ServletListenerRegistrationBean<>(new HttpSessionEventPublisher());
+                return new ServletListenerRegistrationBean<>(new HttpSessionEventPublisher());
         }
 }

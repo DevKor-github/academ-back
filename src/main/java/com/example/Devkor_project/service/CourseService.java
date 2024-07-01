@@ -309,7 +309,7 @@ public class CourseService
 
         // 해당 강의평이 해당 사용자가 작성한 강의평이 아니라면, 예외 처리
         if(!Objects.equals(comment.getProfile_id().getProfile_id(), profile.getProfile_id()))
-            throw new AppException(ErrorCode.NOT_COMMENT_BY_USER, comment.getProfile_id().getProfile_id());
+            throw new AppException(ErrorCode.NOT_COMMENT_BY_USER, null);
 
         CommentRating commentRating = comment.getCommentRating_id();
 

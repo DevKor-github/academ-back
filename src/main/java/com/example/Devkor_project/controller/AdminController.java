@@ -35,11 +35,13 @@ public class AdminController {
                 adminService.initCourseDatabase(data);
 
                 return ResponseEntity.status(HttpStatus.OK)
-                                .body(ResponseDto.Success.builder()
-                                                .data(null)
-                                                .message("대학원 강의 데이터베이스 초기화가 정상적으로 수행되었습니다.")
-                                                .version(versionProvider.getVersion())
-                                                .build());
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("대학원 강의 데이터베이스 초기화가 정상적으로 수행되었습니다.")
+                                        .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
 
         }
 
@@ -50,11 +52,13 @@ public class AdminController {
                 adminService.insertCourseDatabase(data);
 
                 return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(ResponseDto.Success.builder()
-                                                .data(null)
-                                                .message("대학원 강의 데이터베이스 추가가 정상적으로 수행되었습니다.")
-                                                .version(versionProvider.getVersion())
-                                                .build());
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("대학원 강의 데이터베이스 추가가 정상적으로 수행되었습니다.")
+                                        .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
         }
 
         @GetMapping("/api/is-secure")
@@ -69,11 +73,13 @@ public class AdminController {
                 }
 
                 return ResponseEntity.status(HttpStatus.OK)
-                                .body(ResponseDto.Success.builder()
-                                                .data(null)
-                                                .message(st)
-                                                .version(versionProvider.getVersion())
-                                                .build());
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message(st)
+                                        .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
         }
 
 }

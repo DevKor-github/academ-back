@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode
 {
-    // App exception
     LOGIN_FAILURE(HttpStatus.BAD_REQUEST, "로그인에 실패하였습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     UNEXPECTED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "예기치 못한 에러가 발생하였습니다."),
     EMAIL_DUPLICATED(HttpStatus.BAD_REQUEST, "해당 이메일은 이미 사용 중입니다."),
     EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 이메일로 생성된 계정이 존재하지 않습니다."),
@@ -23,7 +23,6 @@ public enum ErrorCode
     COURSE_RATING_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 courseRating_id에 해당하는 평점이 존재하지 않습니다."),
     COMMENT_RATING_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 commentRating_id에 해당하는 평점이 존재하지 않습니다."),
     ALREADY_EXIST(HttpStatus.BAD_REQUEST, "해당 강의에 해당 사용자는 이미 강의평을 달았습니다."),
-    NOT_LOGIN(HttpStatus.UNAUTHORIZED, "로그인하지 않은 사용자입니다."),
     NOT_COMMENT_BY_USER(HttpStatus.BAD_REQUEST, "해당 강의평은 해당 사용자가 작성한 강의평이 아닙니다.");
 
     private final HttpStatus httpStatus;

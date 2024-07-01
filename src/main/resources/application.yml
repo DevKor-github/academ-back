@@ -1,5 +1,5 @@
 academ:
-  version: "v0.3.20-alpha"
+  version: "v0.3.22-alpha"
 
 ## 데이터베이스(MySQL) 연동
 spring:
@@ -59,4 +59,5 @@ logging:
 jwt:
   # Base64
   secret: ${JWT_SECRET}
-  expiration_time: 3600    # 60분
+  access_expiration_time: 3600        # 60분
+  refresh_expiration_time: 2592000    # 30일

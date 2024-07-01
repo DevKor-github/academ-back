@@ -3,6 +3,7 @@ package com.example.Devkor_project.security;
 import com.example.Devkor_project.configuration.VersionProvider;
 import com.example.Devkor_project.dto.ProfileDto;
 import com.example.Devkor_project.dto.ResponseDto;
+import com.example.Devkor_project.dto.TokenDto;
 import com.example.Devkor_project.entity.Profile;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
@@ -29,7 +30,12 @@ public class CustomAuthSuccessHandler implements AuthenticationSuccessHandler
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException
     {
+        // 로그인 이메일
         String email = authentication.getName();
+
+        // body에서 remember-me 값 추출
+        String rememberMeParam = request.getParameter("remember-me");
+        boolean rememberMe = rememberMeParam != null && rememberMeParam.equalsIgnoreCase("true");
 
         Profile profile = profileRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.LOGIN_FAILURE, email));
@@ -48,14 +54,14 @@ public class CustomAuthSuccessHandler implements AuthenticationSuccessHandler
                 .role(profile.getRole())
                 .build();
 
-        // access token 발행
-        String accessToken = jwtUtil.createAccessToken(profileDto);
+        // token 발행
+        TokenDto tokenDto = jwtUtil.returnToken(profileDto, rememberMe);
 
         // redis에 token 정보 저장
-        redisTemplate.opsForValue().set(email, accessToken);
+        redisTemplate.opsForValue().set(email, tokenDto.getAccessToken());
 
         ResponseDto.Success dto = ResponseDto.Success.builder()
-                .data(accessToken)
+                .data(tokenDto)
                 .message("로그인을 성공하였습니다.")
                 .version(versionProvider.getVersion())
                 .build();
