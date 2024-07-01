@@ -32,8 +32,8 @@ public class CourseController
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
-                        .data(courses)
                         .message("강의 검색이 성공적으로 수행되었습니다.")
+                        .data(courses)
                         .version(versionProvider.getVersion())
                         .build()
                 );
@@ -48,8 +48,8 @@ public class CourseController
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         ResponseDto.Success.builder()
-                                .data(dto)
                                 .message("강의 상세 정보가 성공적으로 반환되었습니다.")
+                                .data(dto)
                                 .version(versionProvider.getVersion())
                                 .build()
                 );
@@ -65,8 +65,8 @@ public class CourseController
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         ResponseDto.Success.builder()
-                                .data(null)
                                 .message("북마크가 정상적으로 수행되었습니다.")
+                                .data(null)
                                 .version(versionProvider.getVersion())
                                 .build()
                 );
@@ -82,8 +82,8 @@ public class CourseController
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         ResponseDto.Success.builder()
-                                .data(course_id)
                                 .message("강의평 작성을 시작합니다.")
+                                .data(course_id)
                                 .version(versionProvider.getVersion())
                                 .build()
                 );
@@ -99,8 +99,8 @@ public class CourseController
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
                         ResponseDto.Success.builder()
-                                .data(dto.getCourse_id())
                                 .message("강의평 작성을 정상적으로 완료하였습니다.")
+                                .data(dto.getCourse_id())
                                 .version(versionProvider.getVersion())
                                 .build()
                 );
@@ -116,8 +116,8 @@ public class CourseController
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         ResponseDto.Success.builder()
-                                .data(dto)
                                 .message("강의평 수정을 시작합니다.")
+                                .data(dto)
                                 .version(versionProvider.getVersion())
                                 .build()
                 );
@@ -133,8 +133,8 @@ public class CourseController
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         ResponseDto.Success.builder()
-                                .data(course_id)
                                 .message("강의평 수정을 정상적으로 완료하였습니다.")
+                                .data(course_id)
                                 .version(versionProvider.getVersion())
                                 .build()
                 );
@@ -150,8 +150,8 @@ public class CourseController
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         ResponseDto.Success.builder()
-                                .data(course_id)
                                 .message("강의평 삭제를 정상적으로 완료하였습니다.")
+                                .data(course_id)
                                 .version(versionProvider.getVersion())
                                 .build()
                 );
@@ -166,8 +166,8 @@ public class CourseController
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         ResponseDto.Success.builder()
-                                .data(my_comments)
                                 .message("내가 작성한 강의평 전체 조회를 정상적으로 완료하였습니다.")
+                                .data(my_comments)
                                 .version(versionProvider.getVersion())
                                 .build()
                 );

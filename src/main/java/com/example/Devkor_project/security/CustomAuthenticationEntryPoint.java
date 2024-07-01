@@ -7,30 +7,24 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.web.session.SessionInformationExpiredEvent;
-import org.springframework.security.web.session.SessionInformationExpiredStrategy;
-import org.springframework.stereotype.Component;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
 
 import java.io.IOException;
 
-@Component
-public class CustomSessionExpiredStrategy implements SessionInformationExpiredStrategy
+public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint
 {
+    @Autowired VersionProvider versionProvider;
 
-    @Autowired
-    VersionProvider versionProvider;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void onExpiredSessionDetected(SessionInformationExpiredEvent event) throws IOException, ServletException {
-
-        HttpServletRequest request = event.getRequest();
-        HttpServletResponse response = event.getResponse();
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws ServletException, IOException {
 
         ResponseDto.Error dto = ResponseDto.Error.builder()
+                .code("UNAUTHORIZED")
+                .message("권한이 없습니다.")
                 .data(null)
-                .message("다른 기기에서 로그인하여 세션이 만료되었습니다.")
                 .version(versionProvider.getVersion())
                 .build();
 
@@ -38,5 +32,6 @@ public class CustomSessionExpiredStrategy implements SessionInformationExpiredSt
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(dto));
         response.getWriter().flush();
+
     }
 }

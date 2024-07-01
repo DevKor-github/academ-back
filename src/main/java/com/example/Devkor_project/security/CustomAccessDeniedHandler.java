@@ -1,5 +1,6 @@
 package com.example.Devkor_project.security;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -16,24 +17,24 @@ import org.springframework.security.access.AccessDeniedException;
 import java.io.IOException;
 
 @Component
-public class CustomAccessDeniedHandler implements AccessDeniedHandler {
-
-    @Autowired
-    VersionProvider versionProvider;
+public class CustomAccessDeniedHandler implements AccessDeniedHandler
+{
+    @Autowired VersionProvider versionProvider;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response,
-            AccessDeniedException accessDeniedException) throws IOException {
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws ServletException, IOException {
 
         ResponseDto.Error dto = ResponseDto.Error.builder()
-                .data("ACCESS DENIED")
-                .message("ERROR")
+                .code("LOW_AUTHORITY")
+                .message("권한이 부족합니다.")
+                .data(null)
                 .version(versionProvider.getVersion())
                 .build();
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(dto));
         response.getWriter().flush();
 

@@ -1,9 +1,12 @@
 package com.example.Devkor_project.security;
 
+import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -13,76 +16,83 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig
+{
+        @Autowired JwtUtil jwtUtil;
+        @Autowired RedisTemplate<String, String> redisTemplate;
+        @Autowired ProfileRepository profileRepository;
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
                                                        CustomUserDetailsService customUserDetailsService) throws Exception {
+                // 기본 설정
                 httpSecurity
                         .httpBasic(HttpBasicConfigurer::disable)    // HTTP 기본 인증 비활성화
                         .csrf(CsrfConfigurer::disable);             // CSRF 보호 비활성화
 
+                // 경로별 권한 설정
                 httpSecurity
                         .authorizeHttpRequests((requests) -> (requests)
-                                // 아무나 접근 가능
-                                .requestMatchers("/", "/login", "/signup", "logout").permitAll()
-                                .requestMatchers("/api/login/**", "/api/signup/**", "/api/logout").permitAll()
-                                .requestMatchers("/search/**", "/api/search/**").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/api/login/check-login").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/course/**", "/api/course/**").hasAnyRole("USER", "ADMIN") // ADMIN 계정만 접근 가능
-                                .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
+                                // 해당 요청은 모든 사용자에게 접근 권한 허용
+                                .requestMatchers("/", "/login", "/signup").permitAll()
+                                .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
+                                .requestMatchers("/api/refresh-token").permitAll()
+                                // 해당 요청은 인증된 사용자에게만 접근 권한 허용
+                                .requestMatchers("/api/logout").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/check-login").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/course/**").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/course/**").hasAnyRole("USER", "ADMIN")
+                                // 해당 요청은 관리자에게만 접근 권한 허용
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 // 그 외의 요청은 모든 사용자에게 접근 권한 허용
-                                .anyRequest().permitAll())
+                                .anyRequest().authenticated()
+                        );
 
+                // 예외 처리 설정
+                httpSecurity
                         .exceptionHandling((exception) -> exception
-                                .accessDeniedHandler(customAccessDeniedHandler()));
+                                .authenticationEntryPoint(customAuthenticationEntryPoint())
+                                .accessDeniedHandler(customAccessDeniedHandler())
+                        );
 
+                // UsernamePasswordAuthenticationFilter 앞에 JwtAuthFilter 추가
+                httpSecurity
+                        .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil, redisTemplate, profileRepository), UsernamePasswordAuthenticationFilter.class);
+
+                // 로그인, 로그아웃 설정
                 httpSecurity
                         .formLogin((auth) -> auth
                                 .usernameParameter("email")
                                 .passwordParameter("password")
-                                .loginPage("/login")
-                                .permitAll()
                                 .loginProcessingUrl("/api/login")
                                 .permitAll()
                                 .successHandler(customAuthSuccessHandler())
-                                .failureHandler(customAuthFailureHandler()));
-
-                httpSecurity
+                                .failureHandler(customAuthFailureHandler())
+                        )
                         .logout((logoutConfig) -> logoutConfig
                                 .logoutUrl("/api/logout")
-                                .addLogoutHandler((request, response, authentication) -> {
-                                        HttpSession session = request.getSession();
-                                        if (session != null) {
-                                                session.invalidate();
-                                        }
-                                })
                                 .logoutSuccessHandler(customLogoutSuccessHandler())
-                                .deleteCookies("remember-me"));
+                        )
+                        .userDetailsService(customUserDetailsService);
 
-                httpSecurity
-                        .rememberMe((rememberConfig) -> rememberConfig
-                                .key("Test-Key-For-Academ")
-                                .tokenValiditySeconds(60 * 60 * 24 * 30) // 30일
-                                .rememberMeParameter("remember-me")
-                                .userDetailsService(customUserDetailsService));
-
+                // 세션 생성 및 사용 정지
                 httpSecurity
                         .sessionManagement((session) -> session
-                                .sessionFixation().changeSessionId()                            // 로그인 시, 기존 세션 무효화
-                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)       // 필요시에 세션을 생성
-                                .maximumSessions(1)                                             // 1명만 로그인 가능
-                                .maxSessionsPreventsLogin(false)                                // 다른 기기 로그인 시 기존 사용자 세션 만료
-                                .sessionRegistry(sessionRegistry())                             // 동시에 로그인한 세션들 추적
-                                .expiredSessionStrategy(customSessionExpiredStrategy())         // 만료된 세션으로 요청 시, 처리
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                         );
 
-
                 return httpSecurity.build();
+        }
+
+        @Bean
+        public CustomAuthenticationEntryPoint customAuthenticationEntryPoint() {
+                return new CustomAuthenticationEntryPoint();
         }
 
         @Bean
@@ -105,19 +115,9 @@ public class SecurityConfig {
                 return new CustomLogoutSuccessHandler();
         }
 
-        @Bean
-        public SessionRegistry sessionRegistry() {
-            return new SessionRegistryImpl();
-        }
-
-        @Bean
-        public CustomSessionExpiredStrategy customSessionExpiredStrategy() {
-            return new CustomSessionExpiredStrategy();
-        }
-
         // 세션 생성, 만료 이벤트 리스너
         @Bean
         public static ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
-            return new ServletListenerRegistrationBean<>(new HttpSessionEventPublisher());
+                return new ServletListenerRegistrationBean<>(new HttpSessionEventPublisher());
         }
 }

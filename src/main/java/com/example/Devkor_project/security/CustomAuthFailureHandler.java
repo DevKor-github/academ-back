@@ -28,18 +28,29 @@ public class CustomAuthFailureHandler implements AuthenticationFailureHandler {
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
 
+        String errorCode = null;
         String errorMessage = null;
 
-        if (exception instanceof BadCredentialsException || exception instanceof InternalAuthenticationServiceException)
-            errorMessage = "WRONG"; // 이메일 또는 비밀번호가 틀린 경우
-        else if (exception instanceof DisabledException)
-            errorMessage = "DISABLED"; // 해당 계정이 비활성화된 경우
-        else
-            errorMessage = "UNEXPECTED"; // 예기치 못한 에러가 발생한 경우
+        if (exception instanceof BadCredentialsException || exception instanceof InternalAuthenticationServiceException) {
+            // 이메일 또는 비밀번호가 틀린 경우
+            errorCode = "WRONG";
+            errorMessage = "이메일 또는 비밀번호가 틀렸습니다.";
+        }
+        else if (exception instanceof DisabledException) {
+            // 해당 계정이 비활성화된 경우
+            errorCode = "DISABLED";
+            errorMessage = "해당 계정이 비활성화 되었습니다.";
+        }
+        else {
+            // 예기치 못한 에러가 발생한 경우
+            errorCode = "UNEXPECTED";
+            errorMessage = "예기치 못한 에러가 발생하였습니다.";
+        }
 
         ResponseDto.Error dto = ResponseDto.Error.builder()
-                .data(null)
+                .code(errorCode)
                 .message(errorMessage)
+                .data(null)
                 .version(versionProvider.getVersion())
                 .build();
 
