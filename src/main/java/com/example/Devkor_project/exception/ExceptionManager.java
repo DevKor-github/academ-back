@@ -42,7 +42,7 @@ public class ExceptionManager {
 
         // 원인 불명으로 발생한 예외 처리
         @ExceptionHandler(Exception.class)
-        public ResponseEntity<ResponseDto.Error> runtimeExceptionHandler(RuntimeException e) {
+        public ResponseEntity<ResponseDto.Error> unexpectedExceptionHandler(Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(
                                 ResponseDto.Error.builder()
