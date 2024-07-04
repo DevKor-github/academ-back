@@ -1,0 +1,42 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: academ
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./.mysql-data:/var/lib/mysql
+
+  java-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: java-app
+    depends_on:
+      - redis
+      - mysql
+    ports:
+      - "8080:8080"
+    environment:
+      - PROFILE=production
+
+  academ-nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: academ-nginx
+    depends_on:
+      - java-app
+    ports:
+      - "80:80"
