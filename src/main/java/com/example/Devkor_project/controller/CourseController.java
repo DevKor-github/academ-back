@@ -26,9 +26,10 @@ public class CourseController
 
     /* 강의 검색 컨트롤러 */
     @GetMapping("/api/course/search")
-    public ResponseEntity<ResponseDto.Success> searchCourse(@RequestParam("keyword") String keyword)
+    public ResponseEntity<ResponseDto.Success> searchCourse(@RequestParam("keyword") String keyword,
+                                                            @RequestParam("order") String order)
     {
-        List<CourseDto> courses = courseService.searchCourse(keyword);
+        List<CourseDto> courses = courseService.searchCourse(keyword, order);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()

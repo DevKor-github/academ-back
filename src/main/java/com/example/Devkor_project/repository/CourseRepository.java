@@ -12,8 +12,14 @@ import java.util.Optional;
 
 public interface CourseRepository extends JpaRepository<Course, Long>
 {
-    @Query(value = "SELECT * FROM course WHERE name LIKE %:word% OR professor LIKE %:word% OR course_code LIKE %:word%", nativeQuery = true)
-    List<Course> searchCourse(@Param("word") String word);
+    @Query(value = "SELECT * FROM course WHERE name LIKE %:word% OR professor LIKE %:word% OR course_code LIKE %:word% ORDER BY year DESC", nativeQuery = true)
+    List<Course> searchCourseByNewest(@Param("word") String word);
+
+    @Query(value = "SELECT course.* FROM course NATURAL JOIN course_rating WHERE name LIKE %:word% OR professor LIKE %:word% OR course_code LIKE %:word% ORDER BY avg_rating DESC", nativeQuery = true)
+    List<Course> searchCourseByRatingDesc(@Param("word") String word);
+
+    @Query(value = "SELECT course.* FROM course NATURAL JOIN course_rating WHERE name LIKE %:word% OR professor LIKE %:word% OR course_code LIKE %:word% ORDER BY avg_rating ASC", nativeQuery = true)
+    List<Course> searchCourseByRatingAsc(@Param("word") String word);
 
     @Query(value = "SELECT count(*) FROM course", nativeQuery = true)
     Long countCourse();

@@ -32,14 +32,23 @@ public class CourseService
     @Autowired CommentReportRepository commentReportRepository;
 
     /* 강의 검색 서비스 */
-    public List<CourseDto> searchCourse(String keyword)
+    public List<CourseDto> searchCourse(String keyword, String order)
     {
         // 검색어가 2글자 미만이면 예외 발생
         if(keyword.length() < 2)
             throw new AppException(ErrorCode.SHORT_SEARCH_WORD, keyword);
 
         // 강의명+교수명+학수번호 검색 후, Course 엔티티 리스트 생성
-        List<Course> courses = courseRepository.searchCourse(keyword);
+        List<Course> courses = null;
+
+        if(order.equals("NEWEST"))
+            courses = courseRepository.searchCourseByNewest(keyword);
+        else if(order.equals("RATING_DESC"))
+            courses = courseRepository.searchCourseByRatingDesc(keyword);
+        else if(order.equals("RATING_ASC"))
+            courses = courseRepository.searchCourseByRatingAsc(keyword);
+        else
+            throw new AppException(ErrorCode.INVALID_ORDER, order);
 
         // 검색 결과가 없다면 예외 발생
         if(courses.isEmpty())
