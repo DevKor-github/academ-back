@@ -28,6 +28,8 @@ public class CourseService
     @Autowired BookmarkRepository bookmarkRepository;
     @Autowired CommentRepository commentRepository;
     @Autowired CommentRatingRepository commentRatingRepository;
+    @Autowired CommentLikeRepository commentLikeRepository;
+    @Autowired CommentReportRepository commentReportRepository;
 
     /* 강의 검색 서비스 */
     public List<CourseDto> searchCourse(String keyword)
@@ -156,8 +158,8 @@ public class CourseService
         Course course = courseRepository.findById(course_id)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id));
 
-        // 해당 북마크가 정보가 현재 존재하지 않으면, 북마크 생성
-        // 해당 북마크가 정보가 이미 존재하면, 북마크 해제
+        // 해당 북마크 정보가 현재 존재하지 않으면, 북마크 생성
+        // 해당 북마크 정보가 이미 존재하면, 북마크 해제
         List<Bookmark> bookmark = bookmarkRepository.searchBookmark(profile.getProfile_id(), course.getCourse_id());
 
         if(bookmark.isEmpty())
@@ -568,5 +570,77 @@ public class CourseService
                 .toList();
 
         return commentDtos;
+    }
+
+    /* 강의평 좋아요 서비스 */
+    public void likeComment(Principal principal, CommentDto.Like dto)
+    {
+        // 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // 좋아요할 강의평이 존재하지 않으면 예외 처리
+        Comment comment = commentRepository.findById(dto.getComment_id())
+                .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND, dto.getComment_id()));
+
+        // 해당 좋아요 정보가 현재 존재하지 않으면, 좋아요 생성
+        // 해당 좋아요 정보가 이미 존재하면, 좋아요 해제
+        List<CommentLike> commentLike = commentLikeRepository.searchCommentLike(profile.getProfile_id(), comment.getComment_id());
+
+        if(commentLike.isEmpty())
+        {
+            // CommentLike entity 생성
+            CommentLike newCommentLike = CommentLike.builder()
+                    .profile_id(profile)
+                    .comment_id(comment)
+                    .created_at(LocalDate.now())
+                    .build();
+
+            commentLikeRepository.save(newCommentLike);
+        }
+        else
+            commentLikeRepository.delete(commentLike.getFirst());
+    }
+
+    /* 강의평 신고 서비스 */
+    public void reportComment(Principal principal, CommentDto.Report dto)
+    {
+        // 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // 신고할 강의평이 존재하지 않으면 예외 처리
+        Comment comment = commentRepository.findById(dto.getComment_id())
+                .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND, dto.getComment_id()));
+
+        // 신고 사유가 적절한지 확인
+        if(
+            dto.getReason().equals("INSINCERE") ||
+            dto.getReason().equals("PROFANITY") ||
+            dto.getReason().equals("COPIED") ||
+            dto.getReason().equals("REAL_NAME") ||
+            dto.getReason().equals("INAPPROPRIATE") ||
+            dto.getReason().equals("SEXUAL") ||
+            dto.getReason().equals("OTHER")
+        ) {
+            CommentReport commentReport = CommentReport.builder()
+                    .profile_id(profile)
+                    .comment_id(comment)
+                    .reason(dto.getReason())
+                    .detail(dto.getDetail())
+                    .created_at(LocalDate.now())
+                    .build();
+
+            commentReportRepository.save(commentReport);
+        }
+        else {
+            throw new AppException(ErrorCode.INVALID_REASON, dto.getReason());
+        }
     }
 }

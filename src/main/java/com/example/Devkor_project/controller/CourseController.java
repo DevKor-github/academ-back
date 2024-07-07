@@ -172,4 +172,38 @@ public class CourseController
                                 .build()
                 );
     }
+
+    /* 강의평 좋아요 컨트롤러 */
+    @PostMapping("/api/course/like-comment")
+    public ResponseEntity<ResponseDto.Success> likeComment(Principal principal,
+                                                           @Valid @RequestBody CommentDto.Like dto)
+    {
+        courseService.likeComment(principal, dto);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .message("강의평 좋아요를 정상적으로 완료하였습니다.")
+                                .data(null)
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
+
+    /* 강의평 신고 컨트롤러 */
+    @PostMapping("/api/course/report-comment")
+    public ResponseEntity<ResponseDto.Success> reportComment(Principal principal,
+                                                           @Valid @RequestBody CommentDto.Report dto)
+    {
+        courseService.reportComment(principal, dto);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .message("강의평 신고를 정상적으로 완료하였습니다.")
+                                .data(null)
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
 }
