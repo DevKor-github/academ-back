@@ -216,5 +216,33 @@ public class CommentDto
         @NotNull(message = "[comment_id] cannot be null.")
         private Long comment_id;
     }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    @Getter
+    @Builder
+    public static class Like
+    {
+        @NotNull(message = "[comment_id] cannot be null.")
+        private Long comment_id;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    @Getter
+    @Builder
+    public static class Report
+    {
+        @NotNull(message = "[comment_id] cannot be null.")
+        private Long comment_id;
+
+        @NotBlank(message = "[reason] cannot be blank.")
+        private String reason;
+
+        @NotBlank(message = "[detail] cannot be blank.")
+        private String detail;
+    }
 }
 
