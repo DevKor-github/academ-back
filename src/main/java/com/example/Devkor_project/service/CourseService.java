@@ -222,6 +222,10 @@ public class CourseService
         if(!comment.isEmpty())
             throw new AppException(ErrorCode.ALREADY_EXIST, course.getCourse_id());
 
+        // 강의평 상세 내용이 50자 이상인지 확인
+        if(dto.getReview().length() < 50)
+            throw new AppException(ErrorCode.SHORT_COMMENT_REVIEW, dto.getReview().length());
+
         // 새로운 강의평 평점 엔티티 생성 후, 저장
         CommentRating newCommentRating = CommentRating.builder()
                 .rating(dto.getRating())
@@ -363,6 +367,10 @@ public class CourseService
         // 해당 강의평이 해당 사용자가 작성한 강의평이 아니라면, 예외 처리
         if(!Objects.equals(comment.getProfile_id().getProfile_id(), profile.getProfile_id()))
             throw new AppException(ErrorCode.NOT_COMMENT_BY_USER, comment.getProfile_id().getProfile_id());
+
+        // 강의평 상세 내용이 50자 이상인지 확인
+        if(dto.getReview().length() < 50)
+            throw new AppException(ErrorCode.SHORT_COMMENT_REVIEW, dto.getReview().length());
 
         // 강의 엔티티의 강의평 개수
         int count = course.getCOUNT_comments();
