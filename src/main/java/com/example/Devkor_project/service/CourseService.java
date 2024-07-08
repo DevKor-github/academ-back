@@ -616,10 +616,30 @@ public class CourseService
                     .created_at(LocalDate.now())
                     .build();
 
+            // 강의 좋아요가 10개째이고, 아직 보상이 지급되지 않은 강의평이면 해당 강의평을 등록한 사용자에게 50포인트 지급
+            if(comment.getLikes() == 9 && !comment.isReward()) {
+                Profile commentOwner = comment.getProfile_id();
+                commentOwner.setPoint(commentOwner.getPoint() + 50);
+
+                profileRepository.save(commentOwner);
+
+                comment.setReward(true);
+            }
+
+            // 강의평 좋아요 개수 증가
+            comment.setLikes(comment.getLikes() + 1);
+
             commentLikeRepository.save(newCommentLike);
+            commentRepository.save(comment);
         }
-        else
+        else {
+            // 강의평 좋아요 개수 감소
+            comment.setLikes(comment.getLikes() - 1);
+
             commentLikeRepository.delete(commentLike.getFirst());
+            commentRepository.save(comment);
+        }
+
     }
 
     /* 강의평 신고 서비스 */
