@@ -27,9 +27,10 @@ public class CourseController
     /* 강의 검색 컨트롤러 */
     @GetMapping("/api/course/search")
     public ResponseEntity<ResponseDto.Success> searchCourse(@RequestParam("keyword") String keyword,
-                                                            @RequestParam("order") String order)
+                                                            @RequestParam("order") String order,
+                                                            @RequestParam("page") int page)
     {
-        List<CourseDto> courses = courseService.searchCourse(keyword, order);
+        List<CourseDto> courses = courseService.searchCourse(keyword, order, page - 1);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
@@ -40,11 +41,28 @@ public class CourseController
                 );
     }
 
+    /* 강의 검색 결과 개수 컨트롤러 */
+    @GetMapping("/api/course/search/count-result")
+    public ResponseEntity<ResponseDto.Success> searchCourseCountPage(@RequestParam("keyword") String keyword)
+    {
+        int number = courseService.searchCourseCountPage(keyword);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .message("강의 검색 결과 개수 확인이 성공적으로 수행되었습니다.")
+                        .data(number)
+                        .version(versionProvider.getVersion())
+                        .build()
+                );
+    }
+
     /* 강의 상세 정보 컨트롤러 */
     @GetMapping("api/course/detail")
-    public ResponseEntity<ResponseDto.Success> courseDetail(@RequestParam("course_id") Long course_id)
+    public ResponseEntity<ResponseDto.Success> courseDetail(@RequestParam("course_id") Long course_id,
+                                                            @RequestParam("order") String order,
+                                                            @RequestParam("page") int page)
     {
-        CourseDetailDto dto = courseService.courseDetail(course_id);
+        CourseDetailDto dto = courseService.courseDetail(course_id, order, page - 1);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
@@ -53,6 +71,21 @@ public class CourseController
                                 .data(dto)
                                 .version(versionProvider.getVersion())
                                 .build()
+                );
+    }
+
+    /* 강의평 개수 컨트롤러 */
+    @GetMapping("/api/course/count-comment")
+    public ResponseEntity<ResponseDto.Success> countComment(@RequestParam("course_id") Long course_id)
+    {
+        int number = courseService.countComment(course_id);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .message("강의평 개수 확인이 성공적으로 수행되었습니다.")
+                        .data(number)
+                        .version(versionProvider.getVersion())
+                        .build()
                 );
     }
 

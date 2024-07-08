@@ -11,6 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
@@ -32,21 +35,24 @@ public class CourseService
     @Autowired CommentReportRepository commentReportRepository;
 
     /* 강의 검색 서비스 */
-    public List<CourseDto> searchCourse(String keyword, String order)
+    public List<CourseDto> searchCourse(String keyword, String order, int page)
     {
         // 검색어가 2글자 미만이면 예외 발생
         if(keyword.length() < 2)
             throw new AppException(ErrorCode.SHORT_SEARCH_WORD, keyword);
 
+        // Pageable 객체 생성 (size = 10개)
+        Pageable pageable = PageRequest.of(page, 10);
+
         // 강의명+교수명+학수번호 검색 후, Course 엔티티 리스트 생성
-        List<Course> courses = null;
+        Page<Course> courses = null;
 
         if(order.equals("NEWEST"))
-            courses = courseRepository.searchCourseByNewest(keyword);
+            courses = courseRepository.searchCourseByNewest(keyword, pageable);
         else if(order.equals("RATING_DESC"))
-            courses = courseRepository.searchCourseByRatingDesc(keyword);
+            courses = courseRepository.searchCourseByRatingDesc(keyword, pageable);
         else if(order.equals("RATING_ASC"))
-            courses = courseRepository.searchCourseByRatingAsc(keyword);
+            courses = courseRepository.searchCourseByRatingAsc(keyword, pageable);
         else
             throw new AppException(ErrorCode.INVALID_ORDER, order);
 
@@ -95,8 +101,25 @@ public class CourseService
         return courseDtos;
     }
 
+    /* 강의 검색 결과 개수 서비스 */
+    public int searchCourseCountPage(String keyword)
+    {
+        // 검색어가 2글자 미만이면 예외 발생
+        if(keyword.length() < 2)
+            throw new AppException(ErrorCode.SHORT_SEARCH_WORD, keyword);
+
+        // 강의명+교수명+학수번호 검색 후, 결과 개수 반환
+        int number = courseRepository.countCourseByKeyword(keyword);
+
+        // 검색 결과가 없다면 예외 발생
+        if(number == 0)
+            throw new AppException(ErrorCode.NO_RESULT, keyword);
+
+        return number;
+    }
+
     /* 강의 상세 정보 서비스 */
-    public CourseDetailDto courseDetail(Long course_id)
+    public CourseDetailDto courseDetail(Long course_id, String order, int page)
     {
         // 사용자가 상세 정보를 요청한 강의가 존재하지 않으면 예외 처리
         Course course = courseRepository.findById(course_id)
@@ -106,8 +129,24 @@ public class CourseService
         CourseRating courseRating = courseRatingRepository.findById(course.getCourseRating_id().getCourseRating_id())
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_RATING_NOT_FOUND, course.getCourseRating_id().getCourseRating_id()));
 
+        // Pageable 객체 생성 (size = 10개)
+        Pageable pageable = PageRequest.of(page, 10);
+
         // 해당 강의의 강의평들 검색
-        List<Comment> comments = commentRepository.findByCourseId(course_id);
+        Page<Comment> comments = null;
+
+        if(order.equals("NEWEST"))
+            comments = commentRepository.findByCourseIdOrderNewest(course_id, pageable);
+        else if(order.equals("RATING_DESC"))
+            comments = commentRepository.findByCourseIdOrderRatingDesc(course_id, pageable);
+        else if(order.equals("RATING_ASC"))
+            comments = commentRepository.findByCourseIdOrderRatingAsc(course_id, pageable);
+        else if(order.equals("LIKES_DESC"))
+            comments = commentRepository.findByCourseIdOrderLikesDesc(course_id, pageable);
+        else if(order.equals("LIKES_ASC"))
+            comments = commentRepository.findByCourseIdOrderLikesAsc(course_id, pageable);
+        else
+            throw new AppException(ErrorCode.INVALID_ORDER, order);
 
         // 강의평 엔티티 리스트를 강의평 dto 리스트로 변환
         List<CommentDto.Detail> commentDtos = comments.stream()
@@ -150,6 +189,17 @@ public class CourseService
 
         // course 엔티티와 강의평 dto 리스트로 CourseDetailDto 만들어서 반환
         return CourseDetailDto.makeCourseDetailDto(course, courseRating, commentDtos);
+    }
+
+    /* 강의평 개수 서비스 */
+    public int countComment(Long course_id)
+    {
+        // 사용자가 강의평 개수를 요청한 강의가 존재하지 않으면 예외 처리
+        Course course = courseRepository.findById(course_id)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id));
+
+        // 강의평 개수 반환
+        return commentRepository.countCommentByCourseId(course_id);
     }
 
     /* 강의 북마크 서비스 */
