@@ -30,7 +30,7 @@ public class CourseController
                                                             @RequestParam("order") String order,
                                                             @RequestParam("page") int page)
     {
-        List<CourseDto> courses = courseService.searchCourse(keyword, order, page - 1);
+        List<CourseDto.Basic> courses = courseService.searchCourse(keyword, order, page - 1);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
@@ -62,7 +62,7 @@ public class CourseController
                                                             @RequestParam("order") String order,
                                                             @RequestParam("page") int page)
     {
-        CourseDetailDto dto = courseService.courseDetail(course_id, order, page - 1);
+        CourseDto.Detail dto = courseService.courseDetail(course_id, order, page - 1);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
@@ -111,13 +111,13 @@ public class CourseController
     public ResponseEntity<ResponseDto.Success> startInsertComment(Principal principal,
                                                    @RequestParam("course_id") Long course_id)
     {
-        courseService.startInsertComment(principal, course_id);
+        CourseDto.Basic dto = courseService.startInsertComment(principal, course_id);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         ResponseDto.Success.builder()
                                 .message("강의평 작성을 시작합니다.")
-                                .data(course_id)
+                                .data(dto)
                                 .version(versionProvider.getVersion())
                                 .build()
                 );
@@ -145,7 +145,7 @@ public class CourseController
     public ResponseEntity<ResponseDto.Success> startUpdateComment(Principal principal,
                                                             @RequestParam("comment_id") Long comment_id)
     {
-        CommentDto.Update dto = courseService.startUpdateComment(principal, comment_id);
+        CommentDto.StartUpdate dto = courseService.startUpdateComment(principal, comment_id);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(

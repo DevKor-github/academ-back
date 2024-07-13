@@ -1,20 +1,17 @@
 package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.CommentDto;
-import com.example.Devkor_project.dto.CourseDetailDto;
 import com.example.Devkor_project.dto.CourseDto;
 import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -35,7 +32,7 @@ public class CourseService
     @Autowired CommentReportRepository commentReportRepository;
 
     /* 강의 검색 서비스 */
-    public List<CourseDto> searchCourse(String keyword, String order, int page)
+    public List<CourseDto.Basic> searchCourse(String keyword, String order, int page)
     {
         // 검색어가 2글자 미만이면 예외 발생
         if(keyword.length() < 2)
@@ -60,41 +57,15 @@ public class CourseService
         if(courses.isEmpty())
             throw new AppException(ErrorCode.NO_RESULT, keyword);
 
-        // Course 엔티티 리스트 -> courseDto 리스트
-        List<CourseDto> courseDtos = courses.stream()
+        // Course 엔티티 리스트 -> courseDto.Basic 리스트
+        List<CourseDto.Basic> courseDtos = courses.stream()
                 .map(course -> {
 
                     // 해당 강의의 평점 데이터가 존재하지 않으면 예외 처리
                     CourseRating courseRating = courseRatingRepository.findById(course.getCourseRating_id().getCourseRating_id())
                             .orElseThrow(() -> new AppException(ErrorCode.COURSE_RATING_NOT_FOUND, course.getCourseRating_id().getCourseRating_id()));
 
-                    return CourseDto.builder()
-                            .course_id(course.getCourse_id())
-                            .course_code(course.getCourse_code())
-                            .graduate_school(course.getCourse_code())
-                            .department(course.getDepartment())
-                            .year(course.getYear())
-                            .semester(course.getSemester())
-                            .name(course.getName())
-                            .professor(course.getProfessor())
-                            .credit(course.getCredit())
-                            .time_location(course.getTime_location())
-                            .COUNT_comments(course.getCOUNT_comments())
-                            .AVG_rating(courseRating.getAVG_rating())
-                            .AVG_r1_amount_of_studying(courseRating.getAVG_r1_amount_of_studying())
-                            .AVG_r2_difficulty(courseRating.getAVG_r2_difficulty())
-                            .AVG_r3_delivery_power(courseRating.getAVG_r3_delivery_power())
-                            .AVG_r4_grading(courseRating.getAVG_r4_grading())
-                            .COUNT_teach_t1_theory(courseRating.getCOUNT_teach_t1_theory())
-                            .COUNT_teach_t2_practice(courseRating.getCOUNT_teach_t2_practice())
-                            .COUNT_teach_t3_seminar(courseRating.getCOUNT_teach_t3_seminar())
-                            .COUNT_teach_t4_discussion(courseRating.getCOUNT_teach_t4_discussion())
-                            .COUNT_teach_t5_presentation(courseRating.getCOUNT_teach_t5_presentation())
-                            .COUNT_learn_t1_theory(courseRating.getCOUNT_learn_t1_theory())
-                            .COUNT_learn_t2_thesis(courseRating.getCOUNT_learn_t2_thesis())
-                            .COUNT_learn_t3_exam(courseRating.getCOUNT_learn_t3_exam())
-                            .COUNT_learn_t4_industry(courseRating.getCOUNT_learn_t4_industry())
-                            .build();
+                    return CourseDto.entityToBasic(course, courseRating);
                 })
                 .toList();
 
@@ -119,7 +90,7 @@ public class CourseService
     }
 
     /* 강의 상세 정보 서비스 */
-    public CourseDetailDto courseDetail(Long course_id, String order, int page)
+    public CourseDto.Detail courseDetail(Long course_id, String order, int page)
     {
         // 사용자가 상세 정보를 요청한 강의가 존재하지 않으면 예외 처리
         Course course = courseRepository.findById(course_id)
@@ -187,8 +158,8 @@ public class CourseService
                 })
                 .toList();
 
-        // course 엔티티와 강의평 dto 리스트로 CourseDetailDto 만들어서 반환
-        return CourseDetailDto.makeCourseDetailDto(course, courseRating, commentDtos);
+        // course 엔티티와 강의평 dto 리스트로 CourseDto.Detail 만들어서 반환
+        return CourseDto.entityToDetail(course, courseRating, commentDtos);
     }
 
     /* 강의평 개수 서비스 */
@@ -237,7 +208,7 @@ public class CourseService
     }
 
     /* 강의평 작성 시작 서비스 */
-    public void startInsertComment(Principal principal, Long course_id)
+    public CourseDto.Basic startInsertComment(Principal principal, Long course_id)
     {
         // 강의평 작성 시작 요청을 보낸 사용자의 계정 이메일
         String email = principal.getName();
@@ -255,6 +226,10 @@ public class CourseService
         if(!comment.isEmpty())
             throw new AppException(ErrorCode.ALREADY_EXIST, course_id);
 
+        // 해당 강의의 평점 데이터
+        CourseRating courseRating = course.getCourseRating_id();
+
+        return CourseDto.entityToBasic(course, courseRating);
     }
 
     /* 강의평 작성 완료 및 등록 서비스 */
@@ -359,7 +334,7 @@ public class CourseService
     }
 
     /* 강의평 수정 시작 서비스 */
-    public CommentDto.Update startUpdateComment(Principal principal, Long comment_id)
+    public CommentDto.StartUpdate startUpdateComment(Principal principal, Long comment_id)
     {
         // 강의평 작성 시작 요청을 보낸 사용자의 계정 이메일
         String email = principal.getName();
@@ -372,30 +347,19 @@ public class CourseService
         Comment comment = commentRepository.findById(comment_id)
                 .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND, comment_id));
 
+        // 강의 정보
+        Course course = comment.getCourse_id();
+
+        // 강의 평점 정보
+        CourseRating courseRating = course.getCourseRating_id();
+
         // 해당 강의평이 해당 사용자가 작성한 강의평이 아니라면, 예외 처리
         if(!Objects.equals(comment.getProfile_id().getProfile_id(), profile.getProfile_id()))
             throw new AppException(ErrorCode.NOT_COMMENT_BY_USER, null);
 
         CommentRating commentRating = comment.getCommentRating_id();
 
-        return CommentDto.Update.builder()
-                .comment_id(comment_id)
-                .rating(commentRating.getRating())
-                .r1_amount_of_studying(commentRating.getR1_amount_of_studying())
-                .r2_difficulty(commentRating.getR2_difficulty())
-                .r3_delivery_power(commentRating.getR3_delivery_power())
-                .r4_grading(commentRating.getR4_grading())
-                .review(comment.getReview())
-                .teach_t1_theory(commentRating.isTeach_t1_theory())
-                .teach_t2_practice(commentRating.isTeach_t2_practice())
-                .teach_t3_seminar(commentRating.isTeach_t3_seminar())
-                .teach_t4_discussion(commentRating.isTeach_t4_discussion())
-                .teach_t5_presentation(commentRating.isTeach_t5_presentation())
-                .learn_t1_theory(commentRating.isLearn_t1_theory())
-                .learn_t2_thesis(commentRating.isLearn_t2_thesis())
-                .learn_t3_exam(commentRating.isLearn_t3_exam())
-                .learn_t4_industry(commentRating.isLearn_t4_industry())
-                .build();
+        return CommentDto.entityToStartUpdate(course, courseRating, comment, commentRating);
     }
 
     /* 강의평 수정 완료 서비스 */
