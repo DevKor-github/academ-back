@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 @Service
 public class LoginService
@@ -56,6 +57,50 @@ public class LoginService
         // 입력한 인증번호가 맞는지 체크
         if(!Objects.equals(dto.getCode(), actualCode.getCode()))
             throw new AppException(ErrorCode.WRONG_CODE, dto.getEmail());
+
+        // 학번이 7자리인지 체크
+        if(dto.getStudent_id().length() != 7)
+            throw new AppException(ErrorCode.INVALID_STUDENT_ID, dto.getStudent_id());
+
+        // 비밀번호가 8~24자리이고, 숫자와 영문을 포함하는지 체크
+        boolean hasEnglish = false;
+        boolean hasNumber = false;
+
+        for (int i = 0; i < dto.getPassword().length(); i++) {
+            char ch = dto.getPassword().charAt(i);
+            if (Character.isLetter(ch)) {
+                hasEnglish = true;
+            } else if (Character.isDigit(ch)) {
+                hasNumber = true;
+            }
+
+            if (hasEnglish && hasNumber) {
+                break;
+            }
+        }
+
+        if(
+            dto.getPassword().length() < 8 ||
+            dto.getPassword().length() > 24 ||
+            !hasEnglish ||
+            !hasNumber
+        ) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD, dto.getPassword());
+        }
+
+        // 닉네임이 1~10자리인지 체크
+        if(dto.getUsername().isEmpty() || dto.getUsername().length() > 10)
+            throw new AppException(ErrorCode.INVALID_USERNAME, dto.getUsername());
+
+        // 닉네임 중복 체크
+        profileRepository.findByUsername(dto.getUsername())
+                .ifPresent(user -> {
+                    throw new AppException(ErrorCode.USERNAME_DUPLICATED, dto.getUsername());
+                });
+
+        // 학위가 'MASTER' 또는 'DEGREE'인지 체크
+        if(!Objects.equals(dto.getDegree(), "MASTER") && !Objects.equals(dto.getDegree(), "DOCTOR"))
+            throw new AppException(ErrorCode.INVALID_DEGREE, dto.getDegree());
 
         // DTO -> Entity 변환
         Profile profile = Profile.builder()
