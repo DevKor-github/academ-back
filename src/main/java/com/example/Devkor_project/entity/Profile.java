@@ -26,6 +26,7 @@ public class Profile
     @Column(nullable = false) private int semester;
     @Column(nullable = false) private String department;
     @Column(nullable = false) private int point;
+    @Column(nullable = false) private LocalDate point_expiration_date;
     @Column(nullable = false) private LocalDate created_at;
     @Column(nullable = false) private String role;
 }
