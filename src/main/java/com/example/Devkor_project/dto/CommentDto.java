@@ -27,6 +27,17 @@ public class CommentDto
         @NotNull(message = "[course_id] cannot be null.")
         private Long course_id;
 
+        @NotBlank(message = "[review] cannot be blank.")
+        private String review;
+        @NotNull(message = "[likes] cannot be null.")
+        private int likes;
+        @NotNull(message = "[created_at] cannot be null.")
+        private LocalDate created_at;
+        @NotNull(message = "[updated_at] cannot be null.")
+        private LocalDate updated_at;
+        @NotNull(message = "[reward] cannot be null.")
+        private boolean reward;
+
         @NotNull(message = "[rating] cannot be null.")
         private int rating;
         @NotNull(message = "[r1_amount_of_studying] cannot be null.")
@@ -37,9 +48,6 @@ public class CommentDto
         private int r3_delivery_power;
         @NotNull(message = "[r4_grading] cannot be null.")
         private int r4_grading;
-
-        @NotBlank(message = "[review] cannot be blank.")
-        private String review;
 
         @NotNull(message = "[teach_t1_theory] cannot be null.")
         private boolean teach_t1_theory;
@@ -59,13 +67,6 @@ public class CommentDto
         private boolean learn_t3_exam;
         @NotNull(message = "[learn_t4_industry] cannot be null.")
         private boolean learn_t4_industry;
-
-        @NotNull(message = "[likes] cannot be null.")
-        private int likes;
-        @NotNull(message = "[created_at] cannot be null.")
-        private LocalDate created_at;
-        @NotNull(message = "[updated_at] cannot be null.")
-        private LocalDate updated_at;
     }
 
     @AllArgsConstructor
@@ -344,6 +345,76 @@ public class CommentDto
         private String detail;
     }
 
+    @AllArgsConstructor
+    @Getter
+    @ToString
+    @Builder
+    public static class MyPage
+    {
+        @NotNull(message = "[comment_id] cannot be null.")
+        private Long comment_id;
+
+        @NotNull(message = "course_id는 null일 수 없습니다.")
+        private Long course_id;
+        @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
+        private String course_code;
+        @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
+        private String graduate_school;
+        @NotBlank(message = "department는 빈 문자열일 수 없습니다.")
+        private String department;
+        @NotBlank(message = "year은 빈 문자열일 수 없습니다.")
+        private String year;
+        @NotBlank(message = "semester은 빈 문자열일 수 없습니다.")
+        private String semester;
+        @NotBlank(message = "name은 빈 문자열일 수 없습니다.")
+        private String name;
+        @NotBlank(message = "professor은 빈 문자열일 수 없습니다.")
+        private String professor;
+        private String credit;
+        private String time_location;
+
+        @NotBlank(message = "[review] cannot be blank.")
+        private String review;
+        @NotNull(message = "[likes] cannot be null.")
+        private int likes;
+        @NotNull(message = "[created_at] cannot be null.")
+        private LocalDate created_at;
+        @NotNull(message = "[updated_at] cannot be null.")
+        private LocalDate updated_at;
+        @NotNull(message = "[reward] cannot be null.")
+        private boolean reward;
+
+        @NotNull(message = "[rating] cannot be null.")
+        private int rating;
+        @NotNull(message = "[r1_amount_of_studying] cannot be null.")
+        private int r1_amount_of_studying;
+        @NotNull(message = "[r2_difficulty] cannot be null.")
+        private int r2_difficulty;
+        @NotNull(message = "[r3_delivery_power] cannot be null.")
+        private int r3_delivery_power;
+        @NotNull(message = "[r4_grading] cannot be null.")
+        private int r4_grading;
+
+        @NotNull(message = "[teach_t1_theory] cannot be null.")
+        private boolean teach_t1_theory;
+        @NotNull(message = "[teach_t2_practice] cannot be null.")
+        private boolean teach_t2_practice;
+        @NotNull(message = "[teach_t3_seminar] cannot be null.")
+        private boolean teach_t3_seminar;
+        @NotNull(message = "[teach_t4_discussion] cannot be null.")
+        private boolean teach_t4_discussion;
+        @NotNull(message = "[teach_t5_presentation] cannot be null.")
+        private boolean teach_t5_presentation;
+        @NotNull(message = "[learn_t1_theory] cannot be null.")
+        private boolean learn_t1_theory;
+        @NotNull(message = "[learn_t2_thesis] cannot be null.")
+        private boolean learn_t2_thesis;
+        @NotNull(message = "[learn_t3_exam] cannot be null.")
+        private boolean learn_t3_exam;
+        @NotNull(message = "[learn_t4_industry] cannot be null.")
+        private boolean learn_t4_industry;
+    }
+
     public static CommentDto.StartUpdate entityToStartUpdate(Course course,
                                                              CourseRating courseRating,
                                                              com.example.Devkor_project.entity.Comment comment,
@@ -382,6 +453,44 @@ public class CommentDto
                 .r3_delivery_power(commentRating.getR3_delivery_power())
                 .r4_grading(commentRating.getR4_grading())
                 .review(comment.getReview())
+                .teach_t1_theory(commentRating.isTeach_t1_theory())
+                .teach_t2_practice(commentRating.isTeach_t2_practice())
+                .teach_t3_seminar(commentRating.isTeach_t3_seminar())
+                .teach_t4_discussion(commentRating.isTeach_t4_discussion())
+                .teach_t5_presentation(commentRating.isTeach_t5_presentation())
+                .learn_t1_theory(commentRating.isLearn_t1_theory())
+                .learn_t2_thesis(commentRating.isLearn_t2_thesis())
+                .learn_t3_exam(commentRating.isLearn_t3_exam())
+                .learn_t4_industry(commentRating.isLearn_t4_industry())
+                .build();
+    }
+
+    public static CommentDto.MyPage entityToMyPage(com.example.Devkor_project.entity.Comment comment,
+                                                   Course course,
+                                                   CommentRating commentRating)
+    {
+        return MyPage.builder()
+                .comment_id(comment.getComment_id())
+                .course_id(course.getCourse_id())
+                .course_code(course.getCourse_code())
+                .graduate_school(course.getGraduate_school())
+                .department(course.getDepartment())
+                .year(course.getYear())
+                .semester(course.getSemester())
+                .name(course.getName())
+                .professor(course.getProfessor())
+                .credit(course.getCredit())
+                .time_location(course.getTime_location())
+                .review(comment.getReview())
+                .likes(comment.getLikes())
+                .created_at(comment.getCreated_at())
+                .updated_at(comment.getUpdated_at())
+                .reward(comment.isReward())
+                .rating(commentRating.getRating())
+                .r1_amount_of_studying(commentRating.getR1_amount_of_studying())
+                .r2_difficulty(commentRating.getR2_difficulty())
+                .r3_delivery_power(commentRating.getR3_delivery_power())
+                .r4_grading(commentRating.getR4_grading())
                 .teach_t1_theory(commentRating.isTeach_t1_theory())
                 .teach_t2_practice(commentRating.isTeach_t2_practice())
                 .teach_t3_seminar(commentRating.isTeach_t3_seminar())

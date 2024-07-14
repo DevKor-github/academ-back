@@ -53,6 +53,8 @@ public class SecurityConfig
                                 .requestMatchers("/api/course/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/point/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/api/point/**").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/mypage/**").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/mypage/**").hasAnyRole("USER", "ADMIN")
                                 // 해당 요청은 관리자에게만 접근 권한 허용
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
