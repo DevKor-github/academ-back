@@ -1,6 +1,8 @@
 package com.example.Devkor_project.security;
 
+import com.example.Devkor_project.configuration.VersionProvider;
 import com.example.Devkor_project.repository.ProfileRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
@@ -26,6 +28,8 @@ public class SecurityConfig
         @Autowired JwtUtil jwtUtil;
         @Autowired RedisTemplate<String, String> redisTemplate;
         @Autowired ProfileRepository profileRepository;
+        @Autowired VersionProvider versionProvider;
+        @Autowired ObjectMapper objectMapper = new ObjectMapper();
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
@@ -63,9 +67,13 @@ public class SecurityConfig
                                 .accessDeniedHandler(customAccessDeniedHandler())
                         );
 
-                // UsernamePasswordAuthenticationFilter 앞에 JwtAuthFilter 추가
+                // UsernamePasswordAuthenticationFilter 앞에 AccessAuthFilter 추가
                 httpSecurity
-                        .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil, redisTemplate, profileRepository), UsernamePasswordAuthenticationFilter.class);
+                        .addFilterBefore(new AccessAuthFilter(profileRepository, versionProvider, objectMapper), UsernamePasswordAuthenticationFilter.class);
+
+                // AccessAuthFilter 앞에 JwtAuthFilter 추가
+                httpSecurity
+                        .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil, redisTemplate, profileRepository), AccessAuthFilter.class);
 
                 // 로그인, 로그아웃 설정
                 httpSecurity

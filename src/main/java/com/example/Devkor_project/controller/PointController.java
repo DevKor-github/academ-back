@@ -28,7 +28,7 @@ public class PointController {
 
         LocalDate expirationDate = pointService.buyAccessAuthority(principal, dto);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         ResponseDto.Success.builder()
                                 .message("강의평 열람 권한 구매를 성공하였습니다.")
