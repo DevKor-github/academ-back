@@ -31,7 +31,9 @@ public enum ErrorCode
     ALREADY_EXIST(HttpStatus.BAD_REQUEST, "해당 강의에 해당 사용자는 이미 강의평을 달았습니다."),
     NOT_COMMENT_BY_USER(HttpStatus.BAD_REQUEST, "해당 강의평은 해당 사용자가 작성한 강의평이 아닙니다."),
     SHORT_COMMENT_REVIEW(HttpStatus.BAD_REQUEST, "강의평 상세 내용은 50자 이상이어야 합니다."),
-    INVALID_REASON(HttpStatus.BAD_REQUEST, "해당 신고 사유는 유효하지 않습니다.");
+    INVALID_REASON(HttpStatus.BAD_REQUEST, "해당 신고 사유는 유효하지 않습니다."),
+    INVALID_ITEM(HttpStatus.BAD_REQUEST, "해당 아이템은 유효하지 않습니다."),
+    NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "포인트가 부족합니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
