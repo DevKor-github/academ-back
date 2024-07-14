@@ -18,11 +18,9 @@ import java.security.Principal;
 @RestController
 @Slf4j
 public class LoginController {
-        @Autowired
-        LoginService loginService;
 
-        @Autowired
-        VersionProvider versionProvider;
+        @Autowired LoginService loginService;
+        @Autowired  VersionProvider versionProvider;
 
         /* 회원가입 컨트롤러 */
         @PostMapping("/api/signup")
