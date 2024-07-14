@@ -2,7 +2,6 @@ package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.configuration.VersionProvider;
 import com.example.Devkor_project.dto.PointDto;
-import com.example.Devkor_project.dto.ProfileDto;
 import com.example.Devkor_project.dto.ResponseDto;
 import com.example.Devkor_project.service.PointService;
 import jakarta.validation.Valid;
