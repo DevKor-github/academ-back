@@ -113,6 +113,7 @@ public class LoginService
                 .department(dto.getDepartment())
                 .role("ROLE_USER")
                 .point(0)
+                .access_expiration_date(LocalDate.now().plusMonths(1))
                 .created_at(LocalDate.now())
                 .build();
 
