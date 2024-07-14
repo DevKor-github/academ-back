@@ -18,11 +18,8 @@ import java.util.Map;
 @Slf4j
 public class CourseController
 {
-    @Autowired
-    CourseService courseService;
-
-    @Autowired
-    VersionProvider versionProvider;
+    @Autowired CourseService courseService;
+    @Autowired VersionProvider versionProvider;
 
     /* 강의 검색 컨트롤러 */
     @GetMapping("/api/course/search")

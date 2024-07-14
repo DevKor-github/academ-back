@@ -577,12 +577,16 @@ public class CourseService
                             .comment_id(comment.getComment_id())
                             .profile_id(profile.getProfile_id())
                             .course_id(comment.getCourse_id().getCourse_id())
+                            .review(comment.getReview())
+                            .likes(comment.getLikes())
+                            .created_at(comment.getCreated_at())
+                            .updated_at(comment.getUpdated_at())
+                            .reward(comment.isReward())
                             .rating(commentRating.getRating())
                             .r1_amount_of_studying(commentRating.getR1_amount_of_studying())
                             .r2_difficulty(commentRating.getR2_difficulty())
                             .r3_delivery_power(commentRating.getR3_delivery_power())
                             .r4_grading(commentRating.getR4_grading())
-                            .review(comment.getReview())
                             .teach_t1_theory(commentRating.isTeach_t1_theory())
                             .teach_t2_practice(commentRating.isTeach_t2_practice())
                             .teach_t3_seminar(commentRating.isTeach_t3_seminar())
@@ -592,9 +596,7 @@ public class CourseService
                             .learn_t2_thesis(commentRating.isLearn_t2_thesis())
                             .learn_t3_exam(commentRating.isLearn_t3_exam())
                             .learn_t4_industry(commentRating.isLearn_t4_industry())
-                            .likes(comment.getLikes())
-                            .created_at(comment.getCreated_at())
-                            .updated_at(comment.getUpdated_at())
+
                             .build();
 
                 })

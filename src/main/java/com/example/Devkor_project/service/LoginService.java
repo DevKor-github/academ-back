@@ -257,6 +257,7 @@ public class LoginService
                 .semester(profile.getSemester())
                 .department(profile.getDepartment())
                 .point(profile.getPoint())
+                .access_expiration_date(profile.getAccess_expiration_date())
                 .created_at(profile.getCreated_at())
                 .role(profile.getRole())
                 .build();
