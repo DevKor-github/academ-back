@@ -68,6 +68,13 @@ public class AccessAuthFilter extends OncePerRequestFilter {
                 "/api/check-login", "/api/refresh-token",
                 "/api/point",
                 "/api/mypage",
+                "/api/course/search",
+                "/api/course/start-insert-comment",
+                "/api/course/insert-comment",
+                "/api/course/start-update-comment",
+                "/api/course/update-comment",
+                "/api/course/delete-comment",
+                "/api/course/my-comments"
         };
         String path = request.getRequestURI();
 
