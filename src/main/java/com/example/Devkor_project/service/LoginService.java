@@ -14,7 +14,9 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -22,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.Files;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -30,6 +33,7 @@ import java.util.Random;
 import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 public class LoginService
 {
     @Autowired ProfileRepository profileRepository;
@@ -137,12 +141,16 @@ public class LoginService
         // 인증번호 발송
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
-            String content = String.format("Academ <br> 인증 번호 <br><br> %s", authenticationNumber);
+            String content = String.format(new String(Files.readAllBytes(new ClassPathResource("email/AuthenticationNumber.txt").getFile().toPath())), authenticationNumber);
 
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             mimeMessageHelper.setTo(email + "@korea.ac.kr");    // 메일 수신자
             mimeMessageHelper.setSubject("Academ 인증 번호");   // 메일 제목
             mimeMessageHelper.setText(content, true);  // 메일 내용
+
+            // 로고 이미지
+            mimeMessageHelper.addInline("logoImage", new ClassPathResource("email/logo.png"));
+
             javaMailSender.send(mimeMessage);
 
             // 이미 인증번호가 발송된 이메일인 경우, 데이터베이스에서 인증번호 정보 삭제
@@ -235,12 +243,16 @@ public class LoginService
         // 임시 비밀번호를 이메일로 전송
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
-            String content = String.format("Academ <br> 임시 비밀번호 <br><br> %s", newPassword);
+            String content = String.format(new String(Files.readAllBytes(new ClassPathResource("email/ResetPassword.txt").getFile().toPath())), newPassword);
 
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             mimeMessageHelper.setTo(email + "@korea.ac.kr");    // 메일 수신자
             mimeMessageHelper.setSubject("Academ 임시 비밀번호 발급");   // 메일 제목
             mimeMessageHelper.setText(content, true);  // 메일 내용
+
+            // 로고 이미지
+            mimeMessageHelper.addInline("logoImage", new ClassPathResource("email/logo.png"));
+
             javaMailSender.send(mimeMessage);
         }
         catch (Exception error) {
