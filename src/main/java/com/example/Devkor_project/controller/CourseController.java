@@ -25,9 +25,10 @@ public class CourseController
     @GetMapping("/api/course/search")
     public ResponseEntity<ResponseDto.Success> searchCourse(@RequestParam("keyword") String keyword,
                                                             @RequestParam("order") String order,
-                                                            @RequestParam("page") int page)
+                                                            @RequestParam("page") int page,
+                                                            Principal principal)
     {
-        List<CourseDto.Basic> courses = courseService.searchCourse(keyword, order, page - 1);
+        List<CourseDto.Basic> courses = courseService.searchCourse(keyword, order, page - 1, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
@@ -57,9 +58,10 @@ public class CourseController
     @GetMapping("api/course/detail")
     public ResponseEntity<ResponseDto.Success> courseDetail(@RequestParam("course_id") Long course_id,
                                                             @RequestParam("order") String order,
-                                                            @RequestParam("page") int page)
+                                                            @RequestParam("page") int page,
+                                                            Principal principal)
     {
-        CourseDto.Detail dto = courseService.courseDetail(course_id, order, page - 1);
+        CourseDto.Detail dto = courseService.courseDetail(course_id, order, page - 1, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(

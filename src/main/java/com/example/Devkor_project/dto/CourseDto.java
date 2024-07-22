@@ -37,6 +37,7 @@ public class CourseDto
         private String time_location;
         @NotNull(message = "COUNT_comments는 null일 수 없습니다.")
         private int COUNT_comments;
+        private Boolean isBookmark;
 
         @NotNull(message = "AVG_rating은 null일 수 없습니다.")
         private double AVG_rating;
@@ -93,9 +94,10 @@ public class CourseDto
         private String professor;
         private String credit;
         private String time_location;
-
         @NotNull(message = "COUNT_comments는 null일 수 없습니다.")
         private int COUNT_comments;
+        private Boolean isBookmark;
+
         @NotNull(message = "AVG_rating은 null일 수 없습니다.")
         private double AVG_rating;
         @NotNull(message = "AVG_r1_amount_of_studying은 null일 수 없습니다.")
@@ -129,8 +131,8 @@ public class CourseDto
         private List<CommentDto.Detail> comments;
     }
 
-    public static CourseDto.Basic entityToBasic(Course course, CourseRating courseRating) {
-        return CourseDto.Basic.builder()
+    public static CourseDto.Basic entityToBasic(Course course, CourseRating courseRating, Boolean isBookmark) {
+        return Basic.builder()
                 .course_id(course.getCourse_id())
                 .course_code(course.getCourse_code())
                 .graduate_school(course.getGraduate_school())
@@ -142,6 +144,7 @@ public class CourseDto
                 .credit(course.getCredit())
                 .time_location(course.getTime_location())
                 .COUNT_comments(course.getCOUNT_comments())
+                .isBookmark(isBookmark)
                 .AVG_rating(courseRating.getAVG_rating())
                 .AVG_r1_amount_of_studying(courseRating.getAVG_r1_amount_of_studying())
                 .AVG_r2_difficulty(courseRating.getAVG_r2_difficulty())
@@ -161,9 +164,10 @@ public class CourseDto
 
     public static CourseDto.Detail entityToDetail(Course course,
                                                   CourseRating courseRating,
-                                                  List<CommentDto.Detail> commentDtos)
+                                                  List<CommentDto.Detail> commentDtos,
+                                                  Boolean isBookmark)
     {
-        return CourseDto.Detail.builder()
+        return Detail.builder()
                 .course_id(course.getCourse_id())
                 .course_code(course.getCourse_code())
                 .graduate_school(course.getGraduate_school())
@@ -175,6 +179,7 @@ public class CourseDto
                 .credit(course.getCredit())
                 .time_location(course.getTime_location())
                 .COUNT_comments(course.getCOUNT_comments())
+                .isBookmark(isBookmark)
                 .AVG_rating(courseRating.getAVG_rating())
                 .AVG_r1_amount_of_studying(courseRating.getAVG_r1_amount_of_studying())
                 .AVG_r2_difficulty(courseRating.getAVG_r2_difficulty())
