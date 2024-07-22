@@ -42,7 +42,10 @@ public class MyPageService
                     Course course = bookmark.getCourse_id();                    // 강의 정보
                     CourseRating courseRating = course.getCourseRating_id();    // 강의 평점 정보
 
-                    return CourseDto.entityToBasic(course, courseRating);
+                    // 사용자의 해당 강의 북마크 여부
+                    boolean isBookmark = !bookmarkRepository.searchBookmark(profile.getProfile_id(), course.getCourse_id()).isEmpty();
+
+                    return CourseDto.entityToBasic(course, courseRating, isBookmark);
 
                 })
                 .toList();

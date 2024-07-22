@@ -32,8 +32,14 @@ public class CourseService
     @Autowired CommentReportRepository commentReportRepository;
 
     /* 강의 검색 서비스 */
-    public List<CourseDto.Basic> searchCourse(String keyword, String order, int page)
+    public List<CourseDto.Basic> searchCourse(String keyword, String order, int page, Principal principal)
     {
+        // 요청을 보낸 사용자의 계정 정보
+        String email = principal.getName();
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+        Long profile_id = profile.getProfile_id();
+
         // 검색어가 2글자 미만이면 예외 발생
         if(keyword.length() < 2)
             throw new AppException(ErrorCode.SHORT_SEARCH_WORD, keyword);
@@ -61,11 +67,13 @@ public class CourseService
         List<CourseDto.Basic> courseDtos = courses.stream()
                 .map(course -> {
 
-                    // 해당 강의의 평점 데이터가 존재하지 않으면 예외 처리
-                    CourseRating courseRating = courseRatingRepository.findById(course.getCourseRating_id().getCourseRating_id())
-                            .orElseThrow(() -> new AppException(ErrorCode.COURSE_RATING_NOT_FOUND, course.getCourseRating_id().getCourseRating_id()));
+                    // 해당 강의의 평점 데이터
+                    CourseRating courseRating = course.getCourseRating_id();
 
-                    return CourseDto.entityToBasic(course, courseRating);
+                    // 사용자의 해당 강의 북마크 여부
+                    boolean isBookmark = !bookmarkRepository.searchBookmark(profile_id, course.getCourse_id()).isEmpty();
+
+                    return CourseDto.entityToBasic(course, courseRating, isBookmark);
                 })
                 .toList();
 
@@ -90,8 +98,14 @@ public class CourseService
     }
 
     /* 강의 상세 정보 서비스 */
-    public CourseDto.Detail courseDetail(Long course_id, String order, int page)
+    public CourseDto.Detail courseDetail(Long course_id, String order, int page, Principal principal)
     {
+        // 요청을 보낸 사용자의 계정 정보
+        String principalEmail = principal.getName();
+        Profile principalProfile = profileRepository.findByEmail(principalEmail)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, principalEmail));
+        Long principalProfile_id = principalProfile.getProfile_id();
+
         // 사용자가 상세 정보를 요청한 강의가 존재하지 않으면 예외 처리
         Course course = courseRepository.findById(course_id)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id));
@@ -158,8 +172,11 @@ public class CourseService
                 })
                 .toList();
 
+        // 사용자의 해당 강의 북마크 여부
+        boolean isBookmark = !bookmarkRepository.searchBookmark(principalProfile_id, course.getCourse_id()).isEmpty();
+
         // course 엔티티와 강의평 dto 리스트로 CourseDto.Detail 만들어서 반환
-        return CourseDto.entityToDetail(course, courseRating, commentDtos);
+        return CourseDto.entityToDetail(course, courseRating, commentDtos, isBookmark);
     }
 
     /* 강의평 개수 서비스 */
@@ -229,7 +246,10 @@ public class CourseService
         // 해당 강의의 평점 데이터
         CourseRating courseRating = course.getCourseRating_id();
 
-        return CourseDto.entityToBasic(course, courseRating);
+        // 사용자의 해당 강의 북마크 여부
+        boolean isBookmark = !bookmarkRepository.searchBookmark(profile.getProfile_id(), course.getCourse_id()).isEmpty();
+
+        return CourseDto.entityToBasic(course, courseRating, isBookmark);
     }
 
     /* 강의평 작성 완료 및 등록 서비스 */
