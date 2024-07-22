@@ -185,6 +185,16 @@ public class LoginService
             throw new AppException(ErrorCode.WRONG_CODE, email + "@korea.ac.kr");
     }
 
+    /* 닉네임 중복 확인 서비스 */
+    public void checkUsername(String username)
+    {
+        // 닉네임 중복 체크
+        profileRepository.findByUsername(username)
+                .ifPresent(user -> {
+                    throw new AppException(ErrorCode.USERNAME_DUPLICATED, username);
+                });
+    }
+
     /* 임시 비밀번호 발급 서비스 */
     @Transactional
     public void resetPassword(String email)
