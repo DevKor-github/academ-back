@@ -68,6 +68,21 @@ public class LoginController {
                         );
         }
 
+        /* 닉네임 중복 확인 컨트롤러 */
+        @GetMapping("/api/signup/check-username")
+        public ResponseEntity<ResponseDto.Success> checkUsername(@RequestParam("username") String username) {
+                loginService.checkUsername(username);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("닉네임이 중복되지 않았습니다.")
+                                        .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
+        }
+
         /* 임시 비밀번호 발급 컨트롤러 */
         @GetMapping("/api/login/reset-password")
         public ResponseEntity<ResponseDto.Success> resetPassword(@RequestParam("email") String email) {
