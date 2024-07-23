@@ -32,7 +32,7 @@ public class CourseService
     @Autowired CommentReportRepository commentReportRepository;
 
     /* 강의 검색 서비스 */
-    public List<CourseDto.Basic> searchCourse(String keyword, String order, int page, Principal principal)
+    public List<?> searchCourse(String keyword, String order, int page, Principal principal)
     {
         // 요청을 보낸 사용자의 계정 정보
         String email = principal.getName();
@@ -63,21 +63,41 @@ public class CourseService
         if(courses.isEmpty())
             throw new AppException(ErrorCode.NO_RESULT, keyword);
 
-        // Course 엔티티 리스트 -> courseDto.Basic 리스트
-        List<CourseDto.Basic> courseDtos = courses.stream()
-                .map(course -> {
+        // 열람권 보유 시, 평점 데이터도 전달
+        // 열람권 만료 시, 평점 데이터는 전달하지 않음
+        if (profile.getAccess_expiration_date().isAfter(LocalDate.now()))
+        {
+            // Course 엔티티 리스트 -> courseDto.Basic 리스트
+            List<CourseDto.Basic> courseDtos = courses.stream()
+                    .map(course -> {
 
-                    // 해당 강의의 평점 데이터
-                    CourseRating courseRating = course.getCourseRating_id();
+                        // 해당 강의의 평점 데이터
+                        CourseRating courseRating = course.getCourseRating_id();
 
-                    // 사용자의 해당 강의 북마크 여부
-                    boolean isBookmark = !bookmarkRepository.searchBookmark(profile_id, course.getCourse_id()).isEmpty();
+                        // 사용자의 해당 강의 북마크 여부
+                        boolean isBookmark = !bookmarkRepository.searchBookmark(profile_id, course.getCourse_id()).isEmpty();
 
-                    return CourseDto.entityToBasic(course, courseRating, isBookmark);
-                })
-                .toList();
+                        return CourseDto.entityToBasic(course, courseRating, isBookmark);
+                    })
+                    .toList();
 
-        return courseDtos;
+            return courseDtos;
+        }
+        else
+        {
+            // Course 엔티티 리스트 -> courseDto.Basic 리스트
+            List<CourseDto.ExpiredBasic> courseDtos = courses.stream()
+                    .map(course -> {
+
+                        // 사용자의 해당 강의 북마크 여부
+                        boolean isBookmark = !bookmarkRepository.searchBookmark(profile_id, course.getCourse_id()).isEmpty();
+
+                        return CourseDto.entityToExpiredBasic(course, isBookmark);
+                    })
+                    .toList();
+
+            return courseDtos;
+        }
     }
 
     /* 강의 검색 결과 개수 서비스 */

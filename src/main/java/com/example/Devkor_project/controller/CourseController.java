@@ -28,7 +28,7 @@ public class CourseController
                                                             @RequestParam("page") int page,
                                                             Principal principal)
     {
-        List<CourseDto.Basic> courses = courseService.searchCourse(keyword, order, page - 1, principal);
+        List<?> courses = courseService.searchCourse(keyword, order, page - 1, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
