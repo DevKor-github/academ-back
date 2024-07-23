@@ -131,6 +131,35 @@ public class CourseDto
         private List<CommentDto.Detail> comments;
     }
 
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @ToString
+    @Builder
+    public static class ExpiredBasic {
+        @NotNull(message = "course_id는 null일 수 없습니다.")
+        private Long course_id;
+        @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
+        private String course_code;
+        @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
+        private String graduate_school;
+        @NotBlank(message = "department는 빈 문자열일 수 없습니다.")
+        private String department;
+        @NotBlank(message = "year은 빈 문자열일 수 없습니다.")
+        private String year;
+        @NotBlank(message = "semester은 빈 문자열일 수 없습니다.")
+        private String semester;
+        @NotBlank(message = "name은 빈 문자열일 수 없습니다.")
+        private String name;
+        @NotBlank(message = "professor은 빈 문자열일 수 없습니다.")
+        private String professor;
+        private String credit;
+        private String time_location;
+        @NotNull(message = "COUNT_comments는 null일 수 없습니다.")
+        private int COUNT_comments;
+        private Boolean isBookmark;
+    }
+
     public static CourseDto.Basic entityToBasic(Course course, CourseRating courseRating, Boolean isBookmark) {
         return Basic.builder()
                 .course_id(course.getCourse_id())
@@ -195,6 +224,23 @@ public class CourseDto
                 .COUNT_learn_t3_exam(courseRating.getCOUNT_learn_t3_exam())
                 .COUNT_learn_t4_industry(courseRating.getCOUNT_learn_t4_industry())
                 .comments(commentDtos)
+                .build();
+    }
+
+    public static CourseDto.ExpiredBasic entityToExpiredBasic(Course course, Boolean isBookmark) {
+        return ExpiredBasic.builder()
+                .course_id(course.getCourse_id())
+                .course_code(course.getCourse_code())
+                .graduate_school(course.getGraduate_school())
+                .department(course.getDepartment())
+                .year(course.getYear())
+                .semester(course.getSemester())
+                .name(course.getName())
+                .professor(course.getProfessor())
+                .credit(course.getCredit())
+                .time_location(course.getTime_location())
+                .COUNT_comments(course.getCOUNT_comments())
+                .isBookmark(isBookmark)
                 .build();
     }
 }
