@@ -67,4 +67,20 @@ public class MyPageController {
                         .build()
                 );
     }
+
+    /* 비밀번호 변경 컨트롤러 */
+    @PostMapping("/api/mypage/update-password")
+    public ResponseEntity<ResponseDto.Success> updatePassword(@Valid @RequestBody ProfileDto.UpdatePassword dto,
+                                                              Principal principal)
+    {
+        myPageService.updatePassword(dto, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .data(null)
+                        .message("비밀번호가 변경되었습니다.")
+                        .version(versionProvider.getVersion())
+                        .build()
+                );
+    }
 }

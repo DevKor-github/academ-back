@@ -123,4 +123,45 @@ public class MyPageService
 
         profileRepository.save(profile);
     }
+
+    /* 비밀번호 변경 서비스 */
+    @Transactional
+    public void updatePassword(ProfileDto.UpdatePassword dto, Principal principal)
+    {
+        // 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 해당 사용자의 계정이 존재하는지 확인
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // 비밀번호가 8~24자리이고, 숫자와 영문을 포함하는지 체크
+        boolean hasEnglish = false;
+        boolean hasNumber = false;
+
+        for (int i = 0; i < dto.getPassword().length(); i++) {
+            char ch = dto.getPassword().charAt(i);
+            if (Character.isLetter(ch)) {
+                hasEnglish = true;
+            } else if (Character.isDigit(ch)) {
+                hasNumber = true;
+            }
+
+            if (hasEnglish && hasNumber) {
+                break;
+            }
+        }
+
+        if(
+                dto.getPassword().length() < 8 ||
+                        dto.getPassword().length() > 24 ||
+                        !hasEnglish ||
+                        !hasNumber
+        ) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD, dto.getPassword());
+        }
+
+        profile.setPassword(encoder.encode(dto.getPassword()));
+        profileRepository.save(profile);
+    }
 }
