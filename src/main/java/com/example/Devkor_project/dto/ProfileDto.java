@@ -171,6 +171,51 @@ public class ProfileDto
         private List<CommentDto.MyPage> comments;
     }
 
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Builder
+    @ToString
+    public static class CheckPassword
+    {
+        @NotBlank(message = "[password] cannot be blank.")
+        private String password;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Builder
+    @ToString
+    public static class UpdateBasic
+    {
+        @NotBlank(message = "[username] cannot be blank.")
+        private String username;
+
+        @NotBlank(message = "[student_id] cannot be blank.")
+        private String student_id;
+
+        @NotBlank(message = "[degree] cannot be blank.")
+        private String degree;
+
+        @NotNull(message = "[semester] cannot be null.")
+        private int semester;
+
+        @NotBlank(message = "[department] cannot be blank.")
+        private String department;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Builder
+    @ToString
+    public static class UpdatePassword
+    {
+        @NotBlank(message = "[password] cannot be blank.")
+        private String password;
+    }
+
     public static ProfileDto.MyPage entityToMyPage(com.example.Devkor_project.entity.Profile profile,
                                                    List<CourseDto.Basic> courseDtos,
                                                    List<CommentDto.MyPage> commentDtos)

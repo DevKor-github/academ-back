@@ -33,7 +33,8 @@ public enum ErrorCode
     SHORT_COMMENT_REVIEW(HttpStatus.BAD_REQUEST, "강의평 상세 내용은 50자 이상이어야 합니다."),
     INVALID_REASON(HttpStatus.BAD_REQUEST, "해당 신고 사유는 유효하지 않습니다."),
     INVALID_ITEM(HttpStatus.BAD_REQUEST, "해당 아이템은 유효하지 않습니다."),
-    NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "포인트가 부족합니다.");
+    NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "포인트가 부족합니다."),
+    WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 틀렸습니다."),;
 
     private final HttpStatus httpStatus;
     private final String message;

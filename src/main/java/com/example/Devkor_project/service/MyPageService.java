@@ -10,6 +10,7 @@ import com.example.Devkor_project.repository.BookmarkRepository;
 import com.example.Devkor_project.repository.CommentRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -21,6 +22,7 @@ public class MyPageService
     @Autowired ProfileRepository profileRepository;
     @Autowired BookmarkRepository bookmarkRepository;
     @Autowired CommentRepository commentRepository;
+    @Autowired BCryptPasswordEncoder encoder;
 
     /* 마이페이지 확인 서비스 */
     public ProfileDto.MyPage myPage(Principal principal)
@@ -66,5 +68,19 @@ public class MyPageService
                 .toList();
 
         return ProfileDto.entityToMyPage(profile, courseDtos, commentDtos);
+    }
+
+    /* 비밀번호 확인 서비스 */
+    public void checkPassword(ProfileDto.CheckPassword dto, Principal principal)
+    {
+        // 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 해당 사용자의 계정이 존재하는지 확인
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        if(!encoder.matches(dto.getPassword(), profile.getPassword()))
+            throw new AppException(ErrorCode.WRONG_PASSWORD, null);
     }
 }

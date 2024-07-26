@@ -4,10 +4,13 @@ import com.example.Devkor_project.configuration.VersionProvider;
 import com.example.Devkor_project.dto.ProfileDto;
 import com.example.Devkor_project.dto.ResponseDto;
 import com.example.Devkor_project.service.MyPageService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
@@ -28,6 +31,22 @@ public class MyPageController {
                 .body(ResponseDto.Success.builder()
                         .message("마이페이지 불러오기가 성공적으로 수행되었습니다.")
                         .data(dto)
+                        .version(versionProvider.getVersion())
+                        .build()
+                );
+    }
+
+    /* 비밀번호 확인 컨트롤러 */
+    @PostMapping("/api/mypage/check-password")
+    public ResponseEntity<ResponseDto.Success> checkPassword(@Valid @RequestBody ProfileDto.CheckPassword dto,
+                                                             Principal principal)
+    {
+        myPageService.checkPassword(dto, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .message("비밀번호가 확인되었습니다.")
+                        .data(null)
                         .version(versionProvider.getVersion())
                         .build()
                 );
