@@ -51,4 +51,20 @@ public class MyPageController {
                         .build()
                 );
     }
+
+    /* 기본 프로필 정보 변경 컨트롤러 */
+    @PostMapping("/api/mypage/update-basic")
+    public ResponseEntity<ResponseDto.Success> updateBasic(@Valid @RequestBody ProfileDto.UpdateBasic dto,
+                                                           Principal principal)
+    {
+        myPageService.updateBasic(dto, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .data(null)
+                        .message("기본 프로필 정보가 변경되었습니다.")
+                        .version(versionProvider.getVersion())
+                        .build()
+                );
+    }
 }
