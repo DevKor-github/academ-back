@@ -50,4 +50,19 @@ public class NoticeController
                                 .build()
                 );
     }
+
+    /* 공지사항 개수 컨트롤러 */
+    @GetMapping("/api/notice/count")
+    public ResponseEntity<ResponseDto.Success> countNotice()
+    {
+        Long number = noticeService.countNotice();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .data(number)
+                        .message("공지사항 개수 반환에 성공하였습니다.")
+                        .version(versionProvider.getVersion())
+                        .build()
+                );
+    }
 }

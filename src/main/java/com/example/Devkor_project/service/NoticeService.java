@@ -55,4 +55,10 @@ public class NoticeService
                 .created_at(notice.getCreated_at())
                 .build();
     }
+
+    /* 공지사항 개수 서비스 */
+    public Long countNotice()
+    {
+        return noticeRepository.countAllNotices();
+    }
 }
