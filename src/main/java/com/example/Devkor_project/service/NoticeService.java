@@ -40,4 +40,19 @@ public class NoticeService
 
         return noticeDtos;
     }
+
+    /* 공지사항 상세 조회 서비스 */
+    public NoticeDto.Detail noticeDetail(Long notice_id)
+    {
+        // 해당 건의사항이 존재하는지 확인
+        Notice notice = noticeRepository.findById(notice_id)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTICE_NOT_FOUND, notice_id));
+
+        return NoticeDto.Detail.builder()
+                .notice_id(notice.getNotice_id())
+                .title(notice.getTitle())
+                .detail(notice.getDetail())
+                .created_at(notice.getCreated_at())
+                .build();
+    }
 }

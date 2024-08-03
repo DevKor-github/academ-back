@@ -21,13 +21,30 @@ public class NoticeController
 
     /* 공지사항 목록 조회 컨트롤러 */
     @GetMapping("/api/notice/list")
-    public ResponseEntity<ResponseDto.Success> noticeList(@RequestParam("page") int page) {
+    public ResponseEntity<ResponseDto.Success> noticeList(@RequestParam("page") int page)
+    {
         List<NoticeDto.List> data = noticeService.noticeList(page - 1);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         ResponseDto.Success.builder()
                                 .message("공지사항 목록 조회에 성공하였습니다.")
+                                .data(data)
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
+
+    /* 공지사항 상세 조회 컨트롤러 */
+    @GetMapping("/api/notice/detail")
+    public ResponseEntity<ResponseDto.Success> noticeDetail(@RequestParam("notice_id") Long notice_id)
+    {
+        NoticeDto.Detail data = noticeService.noticeDetail(notice_id);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .message("공지사항 상세 조회에 성공하였습니다.")
                                 .data(data)
                                 .version(versionProvider.getVersion())
                                 .build()
