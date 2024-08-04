@@ -717,7 +717,7 @@ public class CourseService
             dto.getReason().equals("INSINCERE") ||
             dto.getReason().equals("PROFANITY") ||
             dto.getReason().equals("SEXUAL") ||
-            dto.getReason().equals("PERSONAL ") ||
+            dto.getReason().equals("PERSONAL") ||
             dto.getReason().equals("OTHER")
         ) {
             CommentReport commentReport = CommentReport.builder()
