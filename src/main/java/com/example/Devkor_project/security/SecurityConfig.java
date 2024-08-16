@@ -45,6 +45,7 @@ public class SecurityConfig
                                 // 해당 요청은 모든 사용자에게 접근 권한 허용
                                 .requestMatchers("/", "/login", "/signup").permitAll()
                                 .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
+                                .requestMatchers("/notice/**", "/api/notice/**").permitAll()
                                 .requestMatchers("/api/refresh-token").permitAll()
                                 // 해당 요청은 인증된 사용자에게만 접근 권한 허용
                                 .requestMatchers("/api/logout").hasAnyRole("USER", "ADMIN")
@@ -55,8 +56,6 @@ public class SecurityConfig
                                 .requestMatchers("/api/point/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/mypage/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/api/mypage/**").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/notice/**").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/api/notice/**").hasAnyRole("USER", "ADMIN")
                                 // 해당 요청은 관리자에게만 접근 권한 허용
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
