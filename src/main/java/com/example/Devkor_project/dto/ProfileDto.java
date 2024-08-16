@@ -212,8 +212,11 @@ public class ProfileDto
     @ToString
     public static class UpdatePassword
     {
-        @NotBlank(message = "[password] cannot be blank.")
-        private String password;
+        @NotBlank(message = "[oldPassword] cannot be blank.")
+        private String oldPassword;
+
+        @NotBlank(message = "[newPassword] cannot be blank.")
+        private String newPassword;
     }
 
     public static ProfileDto.MyPage entityToMyPage(com.example.Devkor_project.entity.Profile profile,

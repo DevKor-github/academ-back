@@ -137,12 +137,16 @@ public class MyPageService
         Profile profile = profileRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
 
+        // 기존 비밀번호가 맞는지 체크
+        if(!encoder.matches(dto.getOldPassword(), profile.getPassword()))
+            throw new AppException(ErrorCode.WRONG_PASSWORD, null);
+
         // 비밀번호가 8~24자리이고, 숫자와 영문을 포함하는지 체크
         boolean hasEnglish = false;
         boolean hasNumber = false;
 
-        for (int i = 0; i < dto.getPassword().length(); i++) {
-            char ch = dto.getPassword().charAt(i);
+        for (int i = 0; i < dto.getNewPassword().length(); i++) {
+            char ch = dto.getNewPassword().charAt(i);
             if (Character.isLetter(ch)) {
                 hasEnglish = true;
             } else if (Character.isDigit(ch)) {
@@ -155,15 +159,15 @@ public class MyPageService
         }
 
         if(
-                dto.getPassword().length() < 8 ||
-                        dto.getPassword().length() > 24 ||
-                        !hasEnglish ||
-                        !hasNumber
+                dto.getNewPassword().length() < 8 ||
+                dto.getNewPassword().length() > 24 ||
+                !hasEnglish ||
+                !hasNumber
         ) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD, dto.getPassword());
+            throw new AppException(ErrorCode.INVALID_PASSWORD, dto.getNewPassword());
         }
 
-        profile.setPassword(encoder.encode(dto.getPassword()));
+        profile.setPassword(encoder.encode(dto.getNewPassword()));
         profileRepository.save(profile);
     }
 }
