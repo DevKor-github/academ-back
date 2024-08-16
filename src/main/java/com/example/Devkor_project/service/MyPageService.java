@@ -102,10 +102,12 @@ public class MyPageService
             throw new AppException(ErrorCode.INVALID_USERNAME, dto.getUsername());
 
         // 닉네임 중복 체크
-        profileRepository.findByUsername(dto.getUsername())
-                .ifPresent(user -> {
-                    throw new AppException(ErrorCode.USERNAME_DUPLICATED, dto.getUsername());
-                });
+        if(!dto.getUsername().equals(profile.getUsername())) {
+            profileRepository.findByUsername(dto.getUsername())
+                    .ifPresent(user -> {
+                        throw new AppException(ErrorCode.USERNAME_DUPLICATED, dto.getUsername());
+                    });
+        }
 
         // 학번이 7자리인지 체크
         if(dto.getStudent_id().length() != 7)
