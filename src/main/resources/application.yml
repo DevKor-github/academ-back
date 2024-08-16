@@ -1,10 +1,13 @@
 academ:
-  version: "v0.3.22-alpha"
+  version: "v1.0.0-alpha"
 
-## 데이터베이스(MySQL) 연동
 spring:
+
+  ## application 기본 이름 설정
   application:
-    name: Devkor_project
+    name: Academ_back
+
+  ## 데이터베이스(MySQL) 연동
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DATASOURCE_URL}
@@ -19,11 +22,6 @@ spring:
     properties:
       hibernate:
         format_sql: true  # JPA 로그 이쁘게 구조화
-  security:
-    user:
-      name: kk@kk
-      password: kkkk
-      
 
   ## Google SMTP server
   mail:
@@ -61,3 +59,8 @@ jwt:
   secret: ${JWT_SECRET}
   access_expiration_time: 3600        # 60분
   refresh_expiration_time: 2592000    # 30일
+
+## 애플리케이션 유휴 제한 시간 설정 (로드 밸런싱 관련 오류 해결)
+server:
+  tomcat:
+    keep-alive-timeout: 190_000       # 190초
