@@ -10,7 +10,6 @@ import com.example.Devkor_project.repository.CodeRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
 import com.example.Devkor_project.security.CustomUserDetailsService;
 import com.example.Devkor_project.security.JwtUtil;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -28,9 +27,7 @@ import java.nio.file.Files;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
-import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -55,11 +52,11 @@ public class LoginService
                 });
 
         // 해당 이메일로 발송된 인증번호가 있는지 체크
-        Code actualCode = codeRepository.findByEmail(dto.getEmail())
+        Code code = codeRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, dto.getEmail()));
 
         // 입력한 인증번호가 맞는지 체크
-        if(!Objects.equals(dto.getCode(), actualCode.getCode()))
+        if(!Objects.equals(dto.getCode(), code.getCode()))
             throw new AppException(ErrorCode.WRONG_CODE, dto.getEmail());
 
         // 학번이 7자리인지 체크
@@ -141,7 +138,25 @@ public class LoginService
         // 인증번호 발송
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
-            String content = String.format(new String(Files.readAllBytes(new ClassPathResource("email/AuthenticationNumber.txt").getFile().toPath())), authenticationNumber);
+            String content = String.format(
+                    """
+                        <div style="width: 95%%; display: flex; flex-direction: column; align-items: center; border: 1.61px solid #A2A2A2; border-radius: 12.92px;">
+                            <div style="height: 8vh;"></div>
+                            <div style="width: 100%%; height: 10.5vh; display: flex; justify-content: start; align-items: end;">
+                                <img src='cid:logoImage' style="height: 100%%; margin-left: 5.7%%;">
+                                <span style="font-size: 4vh; font-weight: 400; color: #373737; margin-left: 20px;">ACADEM</span>
+                            </div>
+                            <div style="height: 5.5vh;"></div>
+                            <div style="width: 95%%; height: 0.62px; background-color: #D4D4D4;"></div>
+                            <div style="height: 19vh;"></div>
+                            <div style="font-size: 7vh; font-weight: 600; letter-spacing: 1.2vh; color: #373737;">%s</div>
+                            <div style="height: 8vh;"></div>
+                            <div style="font-size: 3vh; font-weight: 400; color: #373737;">본인확인 인증번호를 입력해주세요</div>
+                            <div style="height: 15vh;"></div>
+                        </div>
+                    """,
+                    authenticationNumber
+            );
 
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             mimeMessageHelper.setTo(email + "@korea.ac.kr");    // 메일 수신자
@@ -149,16 +164,15 @@ public class LoginService
             mimeMessageHelper.setText(content, true);  // 메일 내용
 
             // 로고 이미지
-            mimeMessageHelper.addInline("logoImage", new ClassPathResource("email/logo.png"));
+            mimeMessageHelper.addInline("logoImage", new ClassPathResource("logo.png"));
 
+            // 이메일 전송
             javaMailSender.send(mimeMessage);
 
             // 이미 인증번호가 발송된 이메일인 경우, 데이터베이스에서 인증번호 정보 삭제
             Code code = codeRepository.findByEmail(email + "@korea.ac.kr").orElse(null);
             if(code != null)
-            {
                 codeRepository.delete(code);
-            }
 
             // 인증번호를 데이터베이스에 저장
             code = Code.builder()
@@ -220,30 +234,29 @@ public class LoginService
         }
         String newPassword = randomString.toString();
 
-        // 임시 비밀번호를 비밀번호로 하는 새로 추가할 계정 생성
-        Profile newProfile = Profile.builder()
-                .email(profile.getEmail())
-                .password(encoder.encode(newPassword))
-                .username(profile.getUsername())
-                .student_id(profile.getStudent_id())
-                .degree(profile.getDegree())
-                .semester(profile.getSemester())
-                .department(profile.getDepartment())
-                .point(profile.getPoint())
-                .created_at(profile.getCreated_at())
-                .role(profile.getRole())
-                .build();
-
-        // 기존의 계정을 데이터베이스에서 삭제
-        profileRepository.delete(profile);
-
-        // 임시 비밀번호를 비밀번호로 하는 새로운 계정을 데이터베이스에 반영
-        profileRepository.save(newProfile);
-
         // 임시 비밀번호를 이메일로 전송
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
-            String content = String.format(new String(Files.readAllBytes(new ClassPathResource("email/ResetPassword.txt").getFile().toPath())), newPassword);
+            String content = String.format(
+                    """
+                        <div style="width: 95%%; display: flex; flex-direction: column; align-items: center; border: 1.61px solid #A2A2A2; border-radius: 12.92px;">
+                            <div style="height: 8vh;"></div>
+                            <div style="width: 100%%; height: 10.5vh; display: flex; justify-content: start; align-items: end;">
+                                <img src='cid:logoImage' style="height: 100%%; margin-left: 5.7%%;">
+                                <span style="font-size: 4vh; font-weight: 400; color: #373737; margin-left: 20px;">ACADEM</span>
+                            </div>
+                            <div style="height: 5.5vh;"></div>
+                            <div style="width: 95%%; height: 0.62px; background-color: #D4D4D4;"></div>
+                            <div style="height: 19vh;"></div>
+                            <div style="font-size: 7vh; font-weight: 600; color: #373737;">%s</div>
+                            <div style="height: 8vh;"></div>
+                            <div style="font-size: 3vh; font-weight: 400; color: #373737;">임시 비밀번호입니다.</div>
+                            <div style="font-size: 3vh; font-weight: 400; color: #373737;">로그인 이후 변경하실 수 있습니다.</div>
+                            <div style="height: 15vh;"></div>
+                        </div>
+                    """,
+                    newPassword
+            );
 
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             mimeMessageHelper.setTo(email + "@korea.ac.kr");    // 메일 수신자
@@ -251,9 +264,16 @@ public class LoginService
             mimeMessageHelper.setText(content, true);  // 메일 내용
 
             // 로고 이미지
-            mimeMessageHelper.addInline("logoImage", new ClassPathResource("email/logo.png"));
+            mimeMessageHelper.addInline("logoImage", new ClassPathResource("logo.png"));
 
+            // 이메일 전송
             javaMailSender.send(mimeMessage);
+
+            // 해당 계정의 비밀번호 변경
+            profile.setPassword(encoder.encode(newPassword));
+
+            // 변경사항 저장
+            profileRepository.save(profile);
         }
         catch (Exception error) {
             throw new RuntimeException(error);
@@ -294,12 +314,12 @@ public class LoginService
         // 헤더에 JWT token이 존재하는지 체크
         if(authorizationHeader != null && authorizationHeader.startsWith("Bearer "))
         {
-            String token = authorizationHeader.substring(7);
+            String refreshToken = authorizationHeader.substring(7);
 
             // JWT 유효성 검증
-            if(jwtUtil.validateToken(token))
+            if(jwtUtil.validateToken(refreshToken))
             {
-                Long profile_id = jwtUtil.getProfileId(token);
+                Long profile_id = jwtUtil.getProfileId(refreshToken);
                 UserDetails userDetails = customUserDetailService.loadUserByProfileId(profile_id);
 
                 Profile profile = profileRepository.findById(profile_id)
