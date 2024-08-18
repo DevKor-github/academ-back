@@ -1,0 +1,35 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # 1) 워크플로우 실행 전 기본적으로 체크아웃 필요
+    - uses: actions/checkout@v3
+
+    # 2) JDK 21 버전 설치
+    - name: Set up JDK 21
+      uses: actions/checkout@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    # 3) Gradle 사용. "gradle clean build"를 수행
+    - name: Build with Gradle
+      uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
+      with:
+        arguments: clean build
