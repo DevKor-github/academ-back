@@ -6,11 +6,13 @@ import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.NoticeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.FileInputStream;
 import java.util.List;
 
 @Service
@@ -48,12 +50,21 @@ public class NoticeService
         Notice notice = noticeRepository.findById(notice_id)
                 .orElseThrow(() -> new AppException(ErrorCode.NOTICE_NOT_FOUND, notice_id));
 
-        return NoticeDto.Detail.builder()
-                .notice_id(notice.getNotice_id())
-                .title(notice.getTitle())
-                .detail(notice.getDetail())
-                .created_at(notice.getCreated_at())
-                .build();
+        try {
+            return NoticeDto.Detail.builder()
+                    .notice_id(notice.getNotice_id())
+                    .title(notice.getTitle())
+                    .detail(notice.getDetail())
+                    .created_at(notice.getCreated_at())
+                    .image_1(notice.getImage_1() != null ? (new ClassPathResource("notice_image/" + notice.getImage_1())).getInputStream().readAllBytes() : null)
+                    .image_2(notice.getImage_2() != null ? (new ClassPathResource("notice_image/" + notice.getImage_2())).getInputStream().readAllBytes() : null)
+                    .image_3(notice.getImage_3() != null ? (new ClassPathResource("notice_image/" + notice.getImage_3())).getInputStream().readAllBytes() : null)
+                    .image_4(notice.getImage_4() != null ? (new ClassPathResource("notice_image/" + notice.getImage_4())).getInputStream().readAllBytes() : null)
+                    .image_5(notice.getImage_5() != null ? (new ClassPathResource("notice_image/" + notice.getImage_5())).getInputStream().readAllBytes() : null)
+                    .build();
+        } catch (Exception error) {
+            throw new RuntimeException(error);
+        }
     }
 
     /* 공지사항 개수 서비스 */
