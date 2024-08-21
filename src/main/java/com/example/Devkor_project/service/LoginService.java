@@ -163,7 +163,7 @@ public class LoginService
             mimeMessageHelper.setText(content, true);  // 메일 내용
 
             // 로고 이미지
-            mimeMessageHelper.addInline("logoImage", new ClassPathResource("logo.png"));
+            mimeMessageHelper.addInline("logoImage", new ClassPathResource("email_image/logo.png"));
 
             // 이메일 전송
             javaMailSender.send(mimeMessage);
@@ -263,7 +263,7 @@ public class LoginService
             mimeMessageHelper.setText(content, true);  // 메일 내용
 
             // 로고 이미지
-            mimeMessageHelper.addInline("logoImage", new ClassPathResource("logo.png"));
+            mimeMessageHelper.addInline("logoImage", new ClassPathResource("email_image/logo.png"));
 
             // 이메일 전송
             javaMailSender.send(mimeMessage);
