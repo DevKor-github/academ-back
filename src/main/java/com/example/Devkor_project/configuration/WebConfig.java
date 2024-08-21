@@ -10,9 +10,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/*
-    CORS 설정
-*/
+// CORS 설정
 
 @Configuration
 @RequiredArgsConstructor
@@ -24,11 +22,18 @@ public class WebConfig implements WebMvcConfigurer {
                 .addMapping("/**")
                 .allowedHeaders("*")
                 .allowCredentials(true)
-                .allowedOrigins("https://localhost:4000", "http://localhost:4000", "https://localhost:3000",
-                        "http://localhost:3000", "http://localhost", "https://localhost",
-                        "https://academ-frontend.vercel.app", "https://13.124.249.107.nip.io") // added more origin
-                .allowedMethods("GET", "POST", "PUT", "DELETE"); // Wildcard method not works in some browsers, and
-                                                                 // HTTPS
+                .allowedOrigins(
+                        "https://localhost:4000",
+                        "http://localhost:4000",
+                        "https://localhost:3000",
+                        "http://localhost:3000",
+                        "http://localhost",
+                        "https://localhost",
+                        "https://academ-frontend.vercel.app",
+                        "https://13.124.249.107.nip.io",
+                        "https://academ.kr"
+                )   // CORS 허용 도메인
+                .allowedMethods("GET", "POST", "PUT", "DELETE"); // CORS 허용 메서드
     }
 
 }
