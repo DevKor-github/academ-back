@@ -21,4 +21,11 @@ public class Notice
     @Column(nullable = false) private String title;
     @Column(columnDefinition = "TEXT", nullable = false) private String detail;
     @Column(nullable = false) private LocalDate created_at;
+
+    @Column private String image_1;
+    @Column private String image_2;
+    @Column private String image_3;
+    @Column private String image_4;
+    @Column private String image_5;
+
 }
