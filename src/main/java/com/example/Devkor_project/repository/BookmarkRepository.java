@@ -19,4 +19,7 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long>
             countQuery = "SELECT * FROM bookmark WHERE profile_id = :profile_id",
             nativeQuery = true)
     Page<Bookmark> findByProfileId(@Param("profile_id") Long profile_id, Pageable pageable);
+
+    @Query(value = "SELECT count(*) FROM bookmark WHERE profile_id = :profile_id", nativeQuery = true)
+    int countBookmarkByProfileId(@Param("profile_id") Long profile_id);
 }

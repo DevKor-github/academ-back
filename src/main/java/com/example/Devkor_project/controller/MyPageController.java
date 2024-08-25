@@ -55,6 +55,22 @@ public class MyPageController {
                 );
     }
 
+    /* 내가 작성한 강의평 개수 컨트롤러 */
+    @GetMapping("/api/mypage/count-my-comments")
+    public ResponseEntity<ResponseDto.Success> countMyComments(Principal principal)
+    {
+        int num = myPageService.countMyComments(principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .message("내가 작성한 강의평 개수를 정상적으로 반환하였습니다.")
+                                .data(num)
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
+
     /* 내가 북마크한 강의 정보 조회 컨트롤러 */
     @GetMapping("/api/mypage/my-bookmarks")
     public ResponseEntity<ResponseDto.Success> myBookmarks(Principal principal, int page)
@@ -66,6 +82,22 @@ public class MyPageController {
                         ResponseDto.Success.builder()
                                 .message("내가 북마크한 강의 정보 조회를 정상적으로 완료하였습니다.")
                                 .data(my_bookmarks)
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
+
+    /* 내가 북마크한 강의 개수 컨트롤러 */
+    @GetMapping("/api/mypage/count-my-bookmarks")
+    public ResponseEntity<ResponseDto.Success> countMyBookmarks(Principal principal)
+    {
+        int num = myPageService.countMyBookmarks(principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .message("내가 북마크한 강의 개수를 정상적으로 반환하였습니다.")
+                                .data(num)
                                 .version(versionProvider.getVersion())
                                 .build()
                 );

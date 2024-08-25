@@ -87,6 +87,20 @@ public class MyPageService
         return commentDtos;
     }
 
+    /* 내가 작성한 강의평 개수 서비스 */
+    public int countMyComments(Principal principal)
+    {
+        // 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // 내가 작성한 강의평 개수 반환
+        return commentRepository.countCommentByProfileId(profile.getProfile_id());
+    }
+
     /* 내가 북마크한 강의 정보 조회 서비스 */
     public List<CourseDto.Basic> myBookmarks(Principal principal, int page)
     {
@@ -119,6 +133,20 @@ public class MyPageService
                 .toList();
 
         return courseDtos;
+    }
+
+    /* 내가 북마크한 강의 개수 서비스 */
+    public int countMyBookmarks(Principal principal)
+    {
+        // 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // 내가 북마크한 강의 개수 반환
+        return bookmarkRepository.countBookmarkByProfileId(profile.getProfile_id());
     }
 
     /* 비밀번호 확인 서비스 */
