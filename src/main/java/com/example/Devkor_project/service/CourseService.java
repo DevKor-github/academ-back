@@ -165,6 +165,8 @@ public class CourseService
                     CommentRating commentRating = commentRatingRepository.findById(comment.getCommentRating_id().getCommentRating_id())
                             .orElseThrow(() -> new AppException(ErrorCode.COMMENT_RATING_NOT_FOUND, comment.getCommentRating_id().getCommentRating_id()));
 
+                    CommentLike commentLike = commentLikeRepository.searchCommentLike(principalProfile_id, comment.getComment_id());
+
                     return CommentDto.Detail.builder()
                             .comment_id(comment.getComment_id())
                             .profile_id(profile.getProfile_id())
@@ -187,6 +189,7 @@ public class CourseService
                             .likes(comment.getLikes())
                             .created_at(comment.getCreated_at())
                             .updated_at(comment.getUpdated_at())
+                            .already_like(commentLike != null)
                             .build();
 
                 })
@@ -661,9 +664,9 @@ public class CourseService
 
         // 해당 좋아요 정보가 현재 존재하지 않으면, 좋아요 생성
         // 해당 좋아요 정보가 이미 존재하면, 좋아요 해제
-        List<CommentLike> commentLike = commentLikeRepository.searchCommentLike(profile.getProfile_id(), comment.getComment_id());
+        CommentLike commentLike = commentLikeRepository.searchCommentLike(profile.getProfile_id(), comment.getComment_id());
 
-        if(commentLike.isEmpty())
+        if(commentLike == null)
         {
             // CommentLike entity 생성
             CommentLike newCommentLike = CommentLike.builder()
@@ -692,7 +695,7 @@ public class CourseService
             // 강의평 좋아요 개수 감소
             comment.setLikes(comment.getLikes() - 1);
 
-            commentLikeRepository.delete(commentLike.getFirst());
+            commentLikeRepository.delete(commentLike);
             commentRepository.save(comment);
         }
 

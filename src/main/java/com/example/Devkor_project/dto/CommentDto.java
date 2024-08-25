@@ -123,6 +123,9 @@ public class CommentDto
         private LocalDate created_at;
         @NotNull(message = "[updated_at] cannot be null.")
         private LocalDate updated_at;
+
+        @NotNull(message = "[is_already_like] cannot be null.")
+        private boolean already_like;
     }
 
     @AllArgsConstructor

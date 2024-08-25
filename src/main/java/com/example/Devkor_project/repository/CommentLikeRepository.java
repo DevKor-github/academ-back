@@ -11,5 +11,5 @@ import java.util.List;
 public interface CommentLikeRepository extends JpaRepository<CommentLike, Long>
 {
     @Query(value = "SELECT * FROM comment_like WHERE profile_id = :profile_id AND comment_id = :comment_id", nativeQuery = true)
-    List<CommentLike> searchCommentLike(@Param("profile_id") Long profile_id, @Param("comment_id") Long comment_id);
+    CommentLike searchCommentLike(@Param("profile_id") Long profile_id, @Param("comment_id") Long comment_id);
 }
