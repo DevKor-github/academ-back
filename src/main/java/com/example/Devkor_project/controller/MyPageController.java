@@ -1,6 +1,8 @@
 package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.configuration.VersionProvider;
+import com.example.Devkor_project.dto.CommentDto;
+import com.example.Devkor_project.dto.CourseDto;
 import com.example.Devkor_project.dto.ProfileDto;
 import com.example.Devkor_project.dto.ResponseDto;
 import com.example.Devkor_project.service.MyPageService;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 public class MyPageController {
@@ -21,18 +24,82 @@ public class MyPageController {
     @Autowired MyPageService myPageService;
     @Autowired VersionProvider versionProvider;
 
-    /* 마이페이지 확인 컨트롤러 */
-    @GetMapping("/api/mypage")
-    public ResponseEntity<ResponseDto.Success> myPage(Principal principal)
+    /* 마이페이지 기본 정보 컨트롤러 */
+    @GetMapping("/api/mypage/info")
+    public ResponseEntity<ResponseDto.Success> myPageInfo(Principal principal)
     {
-        ProfileDto.MyPage dto = myPageService.myPage(principal);
+        ProfileDto.MyPage dto = myPageService.myPageInfo(principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
-                        .message("마이페이지 불러오기가 성공적으로 수행되었습니다.")
+                        .message("마이페이지 기본 정보 반환이 성공적으로 수행되었습니다.")
                         .data(dto)
                         .version(versionProvider.getVersion())
                         .build()
+                );
+    }
+
+    /* 내가 작성한 강의평 정보 조회 컨트롤러 */
+    @GetMapping("/api/mypage/my-comments")
+    public ResponseEntity<ResponseDto.Success> myComments(Principal principal, int page)
+    {
+        List<CommentDto.MyPage> my_comments = myPageService.myComments(principal, page - 1);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .message("내가 작성한 강의평 정보 조회를 정상적으로 완료하였습니다.")
+                                .data(my_comments)
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
+
+    /* 내가 작성한 강의평 개수 컨트롤러 */
+    @GetMapping("/api/mypage/count-my-comments")
+    public ResponseEntity<ResponseDto.Success> countMyComments(Principal principal)
+    {
+        int num = myPageService.countMyComments(principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .message("내가 작성한 강의평 개수를 정상적으로 반환하였습니다.")
+                                .data(num)
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
+
+    /* 내가 북마크한 강의 정보 조회 컨트롤러 */
+    @GetMapping("/api/mypage/my-bookmarks")
+    public ResponseEntity<ResponseDto.Success> myBookmarks(Principal principal, int page)
+    {
+        List<CourseDto.Basic> my_bookmarks = myPageService.myBookmarks(principal, page - 1);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .message("내가 북마크한 강의 정보 조회를 정상적으로 완료하였습니다.")
+                                .data(my_bookmarks)
+                                .version(versionProvider.getVersion())
+                                .build()
+                );
+    }
+
+    /* 내가 북마크한 강의 개수 컨트롤러 */
+    @GetMapping("/api/mypage/count-my-bookmarks")
+    public ResponseEntity<ResponseDto.Success> countMyBookmarks(Principal principal)
+    {
+        int num = myPageService.countMyBookmarks(principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .message("내가 북마크한 강의 개수를 정상적으로 반환하였습니다.")
+                                .data(num)
+                                .version(versionProvider.getVersion())
+                                .build()
                 );
     }
 

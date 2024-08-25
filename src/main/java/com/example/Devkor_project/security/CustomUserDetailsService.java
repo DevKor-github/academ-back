@@ -4,6 +4,7 @@ import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
