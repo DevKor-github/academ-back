@@ -190,22 +190,6 @@ public class CourseController
                 );
     }
 
-    /* 내가 작성한 강의평 전체 조회 컨트롤러 */
-    @GetMapping("/api/course/my-comments")
-    public ResponseEntity<ResponseDto.Success> myComments(Principal principal)
-    {
-        List<CommentDto.Comment> my_comments = courseService.myComments(principal);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        ResponseDto.Success.builder()
-                                .message("내가 작성한 강의평 전체 조회를 정상적으로 완료하였습니다.")
-                                .data(my_comments)
-                                .version(versionProvider.getVersion())
-                                .build()
-                );
-    }
-
     /* 강의평 좋아요 컨트롤러 */
     @PostMapping("/api/course/like-comment")
     public ResponseEntity<ResponseDto.Success> likeComment(Principal principal,

@@ -7,10 +7,14 @@ import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.BookmarkRepository;
+import com.example.Devkor_project.repository.CommentRatingRepository;
 import com.example.Devkor_project.repository.CommentRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,10 +28,11 @@ public class MyPageService
     @Autowired ProfileRepository profileRepository;
     @Autowired BookmarkRepository bookmarkRepository;
     @Autowired CommentRepository commentRepository;
+    @Autowired CommentRatingRepository commentRatingRepository;
     @Autowired BCryptPasswordEncoder encoder;
 
-    /* 마이페이지 확인 서비스 */
-    public ProfileDto.MyPage myPage(Principal principal)
+    /* 마이페이지 기본 정보 서비스 */
+    public ProfileDto.MyPage myPageInfo(Principal principal)
     {
         // 로그인 여부 확인 요청을 보낸 사용자의 계정 이메일
         String email = principal.getName();
@@ -36,10 +41,69 @@ public class MyPageService
         Profile profile = profileRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
 
-        // 사용자의 모든 Bookmark 엔티티 조회
-        List<Bookmark> bookmarks = bookmarkRepository.findByProfileId(profile.getProfile_id());
+        return ProfileDto.MyPage.builder()
+                .profile_id(profile.getProfile_id())
+                .email(profile.getEmail())
+                .username(profile.getUsername())
+                .student_id(profile.getStudent_id())
+                .degree(profile.getDegree())
+                .semester(profile.getSemester())
+                .department(profile.getDepartment())
+                .point(profile.getPoint())
+                .access_expiration_date(profile.getAccess_expiration_date())
+                .created_at(profile.getCreated_at())
+                .role(profile.getRole())
+                .build();
+    }
 
-        // Bookmark 엔티티 리스트를 CourseDto.Basic 리스트로 변환
+    /* 내가 작성한 강의평 정보 조회 서비스 */
+    public List<CommentDto.MyPage> myComments(Principal principal, int page)
+    {
+        // 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // Pageable 객체 생성 (size = 10개)
+        Pageable pageable = PageRequest.of(page, 10);
+
+        // 사용자가 작성한 강의평 엔티티 페이지 조회
+        Page<Comment> comments = commentRepository.findByProfileIdOrderNewest(profile.getProfile_id(), pageable);
+
+        // 강의평 엔티티 페이지를 강의평 dto 리스트로 변환
+        List<CommentDto.MyPage> commentDtos = comments.stream()
+                .map(comment -> {
+
+                    Course course = comment.getCourse_id();                         // 강의 정보
+                    CommentRating commentRating = comment.getCommentRating_id();    // 강의평 평점 정보
+
+                    return CommentDto.entityToMyPage(comment, course, commentRating);
+
+                })
+                .toList();
+
+        return commentDtos;
+    }
+
+    /* 내가 북마크한 강의 정보 조회 서비스 */
+    public List<CourseDto.Basic> myBookmarks(Principal principal, int page)
+    {
+        // 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // Pageable 객체 생성 (size = 10개)
+        Pageable pageable = PageRequest.of(page, 10);
+
+        // 사용자가 북마크한 강의 엔티티 페이지 조회
+        Page<Bookmark> bookmarks = bookmarkRepository.findByProfileId(profile.getProfile_id(), pageable);
+
+        // 강의 엔티티 페이지를 강의 dto 리스트로 변환
         List<CourseDto.Basic> courseDtos = bookmarks.stream()
                 .map(bookmark -> {
 
@@ -54,22 +118,7 @@ public class MyPageService
                 })
                 .toList();
 
-        // 사용자가 작성한 모든 Comment 엔티티 조회
-        List<Comment> comments = commentRepository.findByProfileId(profile.getProfile_id());
-
-        // Comment 엔티티 리스트를 CommentDto.MyPage 리스트로 변환
-        List<CommentDto.MyPage> commentDtos = comments.stream()
-                .map(comment -> {
-
-                    Course course = comment.getCourse_id();                         // 강의 정보
-                    CommentRating commentRating = comment.getCommentRating_id();    // 강의평 평점 정보
-
-                    return CommentDto.entityToMyPage(comment, course, commentRating);
-
-                })
-                .toList();
-
-        return ProfileDto.entityToMyPage(profile, courseDtos, commentDtos);
+        return courseDtos;
     }
 
     /* 비밀번호 확인 서비스 */

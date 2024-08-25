@@ -49,4 +49,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long>
             nativeQuery = true)
     Page<Comment> findByCourseIdOrderLikesAsc(@Param("course_id") Long course_id, Pageable pageable);
 
+    @Query(value = "SELECT * FROM comment WHERE profile_id = :profile_id ORDER BY created_at DESC",
+            countQuery = "SELECT * FROM comment WHERE profile_id = :profile_id",
+            nativeQuery = true)
+    Page<Comment> findByProfileIdOrderNewest(@Param("profile_id") Long profile_id, Pageable pageable);
+
 }

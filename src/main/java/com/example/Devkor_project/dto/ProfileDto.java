@@ -166,9 +166,6 @@ public class ProfileDto
 
         @NotBlank(message = "[role] cannot be blank.")
         private String role;
-
-        private List<CourseDto.Basic> courses;
-        private List<CommentDto.MyPage> comments;
     }
 
     @AllArgsConstructor
@@ -217,26 +214,5 @@ public class ProfileDto
 
         @NotBlank(message = "[newPassword] cannot be blank.")
         private String new_password;
-    }
-
-    public static ProfileDto.MyPage entityToMyPage(com.example.Devkor_project.entity.Profile profile,
-                                                   List<CourseDto.Basic> courseDtos,
-                                                   List<CommentDto.MyPage> commentDtos)
-    {
-        return MyPage.builder()
-                .profile_id(profile.getProfile_id())
-                .email(profile.getEmail())
-                .username(profile.getUsername())
-                .student_id(profile.getStudent_id())
-                .degree(profile.getDegree())
-                .semester(profile.getSemester())
-                .department(profile.getDepartment())
-                .point(profile.getPoint())
-                .access_expiration_date(profile.getAccess_expiration_date())
-                .created_at(profile.getCreated_at())
-                .role(profile.getRole())
-                .courses(courseDtos)
-                .comments(commentDtos)
-                .build();
     }
 }

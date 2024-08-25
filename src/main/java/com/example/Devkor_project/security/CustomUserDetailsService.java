@@ -18,7 +18,6 @@ import java.util.Optional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-@Slf4j
 public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
@@ -37,7 +36,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     public UserDetails loadUserByProfileId(Long profile_id) throws UsernameNotFoundException
     {
-        log.info(profile_id.toString());
         // profile 데이터베이스에서 해당 아이디의 계정 검색
         Profile profile = profileRepository.findById(profile_id)
                 .orElseThrow(() -> new AppException(ErrorCode.LOGIN_FAILURE, null));
