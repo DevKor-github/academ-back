@@ -10,10 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -41,7 +38,7 @@ public class MyPageController {
 
     /* 내가 작성한 강의평 정보 조회 컨트롤러 */
     @GetMapping("/api/mypage/my-comments")
-    public ResponseEntity<ResponseDto.Success> myComments(Principal principal, int page)
+    public ResponseEntity<ResponseDto.Success> myComments(@RequestParam("page") int page, Principal principal)
     {
         List<CommentDto.MyPage> my_comments = myPageService.myComments(principal, page - 1);
 
@@ -73,7 +70,7 @@ public class MyPageController {
 
     /* 내가 북마크한 강의 정보 조회 컨트롤러 */
     @GetMapping("/api/mypage/my-bookmarks")
-    public ResponseEntity<ResponseDto.Success> myBookmarks(Principal principal, int page)
+    public ResponseEntity<ResponseDto.Success> myBookmarks(@RequestParam("page") int page, Principal principal)
     {
         List<CourseDto.Basic> my_bookmarks = myPageService.myBookmarks(principal, page - 1);
 

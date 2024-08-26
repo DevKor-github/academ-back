@@ -1,6 +1,7 @@
 package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.configuration.VersionProvider;
+import com.example.Devkor_project.dto.NoticeDto;
 import com.example.Devkor_project.dto.ResponseDto;
 import com.example.Devkor_project.service.AdminService;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -55,6 +56,54 @@ public class AdminController {
                         .body(
                                 ResponseDto.Success.builder()
                                         .message("대학원 강의 데이터베이스 추가가 정상적으로 수행되었습니다.")
+                                        .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
+        }
+
+        /* 공지사항 추가 컨트톨러 */
+        @PostMapping("/api/admin/insert-notice")
+        public ResponseEntity<ResponseDto.Success> insertNotice(@Valid @RequestBody NoticeDto.Insert dto)
+        {
+                adminService.insertNotice(dto);
+
+                return ResponseEntity.status(HttpStatus.CREATED)
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("공지사항 추가가 정상적으로 수행되었습니다.")
+                                        .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
+        }
+
+        /* 공지사항 수정 컨트톨러 */
+        @PostMapping("/api/admin/update-notice")
+        public ResponseEntity<ResponseDto.Success> updateNotice(@Valid @RequestBody NoticeDto.Update dto)
+        {
+                adminService.updateNotice(dto);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("공지사항 수정이 정상적으로 수행되었습니다.")
+                                        .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
+        }
+
+        /* 공지사항 삭제 컨트톨러 */
+        @PostMapping("/api/admin/delete-notice")
+        public ResponseEntity<ResponseDto.Success> deleteNotice(@Valid @RequestBody NoticeDto.Delete dto)
+        {
+                adminService.deleteNotice(dto);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("공지사항 삭제가 정상적으로 수행되었습니다.")
                                         .data(null)
                                         .version(versionProvider.getVersion())
                                         .build()

@@ -50,4 +50,58 @@ public class NoticeDto
         private String image_4;
         private String image_5;
     }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Builder
+    @ToString
+    public static class Insert
+    {
+        @NotBlank(message = "[title] cannot be blank.")
+        private String title;
+
+        @NotBlank(message = "[detail] cannot be blank.")
+        private String detail;
+
+        private String image_1;
+        private String image_2;
+        private String image_3;
+        private String image_4;
+        private String image_5;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Builder
+    @ToString
+    public static class Update
+    {
+        @NotNull(message = "[notice_id] cannot be null.")
+        private Long notice_id;
+
+        @NotBlank(message = "[title] cannot be blank.")
+        private String title;
+
+        @NotBlank(message = "[detail] cannot be blank.")
+        private String detail;
+
+        private String image_1;
+        private String image_2;
+        private String image_3;
+        private String image_4;
+        private String image_5;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Builder
+    @ToString
+    public static class Delete
+    {
+        @NotNull(message = "[notice_id] cannot be null.")
+        private Long notice_id;
+    }
 }
