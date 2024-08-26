@@ -44,10 +44,10 @@ public class NoticeDto
         @NotNull(message = "[created_at] cannot be null.")
         private LocalDate created_at;
 
-        private byte[] image_1;
-        private byte[] image_2;
-        private byte[] image_3;
-        private byte[] image_4;
-        private byte[] image_5;
+        private String image_1;
+        private String image_2;
+        private String image_3;
+        private String image_4;
+        private String image_5;
     }
 }

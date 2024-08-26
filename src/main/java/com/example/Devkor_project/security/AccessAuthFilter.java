@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@Slf4j
 public class AccessAuthFilter extends OncePerRequestFilter {
 
     private final ProfileRepository profileRepository;
@@ -31,8 +30,6 @@ public class AccessAuthFilter extends OncePerRequestFilter {
     // 강의평 열람 권한 확인 필터
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
-        log.info("access filter!!!");
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = ((CustomUserDetails) principal).getUsername();
