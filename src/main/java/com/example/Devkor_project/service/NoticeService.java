@@ -56,11 +56,11 @@ public class NoticeService
                     .title(notice.getTitle())
                     .detail(notice.getDetail())
                     .created_at(notice.getCreated_at())
-                    .image_1(notice.getImage_1() != null ? (new ClassPathResource("notice_image/" + notice.getImage_1())).getInputStream().readAllBytes() : null)
-                    .image_2(notice.getImage_2() != null ? (new ClassPathResource("notice_image/" + notice.getImage_2())).getInputStream().readAllBytes() : null)
-                    .image_3(notice.getImage_3() != null ? (new ClassPathResource("notice_image/" + notice.getImage_3())).getInputStream().readAllBytes() : null)
-                    .image_4(notice.getImage_4() != null ? (new ClassPathResource("notice_image/" + notice.getImage_4())).getInputStream().readAllBytes() : null)
-                    .image_5(notice.getImage_5() != null ? (new ClassPathResource("notice_image/" + notice.getImage_5())).getInputStream().readAllBytes() : null)
+                    .image_1(notice.getImage_1())
+                    .image_2(notice.getImage_2())
+                    .image_3(notice.getImage_3())
+                    .image_4(notice.getImage_4())
+                    .image_5(notice.getImage_5())
                     .build();
         } catch (Exception error) {
             throw new RuntimeException(error);
