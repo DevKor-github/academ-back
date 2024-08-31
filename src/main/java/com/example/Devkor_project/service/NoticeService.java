@@ -27,6 +27,7 @@ public class NoticeService
         Pageable pageable = PageRequest.of(page, 10);
         Page<Notice> notices = noticeRepository.noticesByPage(pageable);
 
+        // 결과가 없으면 예외 발생
         if(notices.isEmpty())
             throw new AppException(ErrorCode.NO_NOTICE, null);
 

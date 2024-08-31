@@ -72,6 +72,10 @@ public class MyPageService
         // 사용자가 작성한 강의평 엔티티 페이지 조회
         Page<Comment> comments = commentRepository.findByProfileIdOrderNewest(profile.getProfile_id(), pageable);
 
+        // 결과가 없으면 예외 발생
+        if(comments.isEmpty())
+            throw new AppException(ErrorCode.NO_RESULT, page + 1);
+
         // 강의평 엔티티 페이지를 강의평 dto 리스트로 변환
         List<CommentDto.MyPage> commentDtos = comments.stream()
                 .map(comment -> {
@@ -116,6 +120,10 @@ public class MyPageService
 
         // 사용자가 북마크한 강의 엔티티 페이지 조회
         Page<Bookmark> bookmarks = bookmarkRepository.findByProfileId(profile.getProfile_id(), pageable);
+
+        // 결과가 없으면 예외 발생
+        if(bookmarks.isEmpty())
+            throw new AppException(ErrorCode.NO_RESULT, page + 1);
 
         // 강의 엔티티 페이지를 강의 dto 리스트로 변환
         List<CourseDto.Basic> courseDtos = bookmarks.stream()
