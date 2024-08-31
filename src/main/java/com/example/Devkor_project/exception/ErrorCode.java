@@ -22,7 +22,7 @@ public enum ErrorCode
     USERNAME_DUPLICATED(HttpStatus.BAD_REQUEST, "해당 닉네임은 이미 사용 중입니다."),
     SHORT_SEARCH_WORD(HttpStatus.BAD_REQUEST, "검색어는 2글자 이상이어야 합니다."),
     INVALID_ORDER(HttpStatus.BAD_REQUEST, "해당 결과 배치 순서는 유효하지 않습니다."),
-    NO_RESULT(HttpStatus.NOT_FOUND, "검색 결과가 없습니다."),
+    NO_RESULT(HttpStatus.NOT_FOUND, "결과가 없습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 profile_id에 해당하는 사용자가 존재하지 않습니다."),
     COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 course_id에 해당하는 강의가 존재하지 않습니다."),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 comment_id에 해당하는 강의평이 존재하지 않습니다."),
