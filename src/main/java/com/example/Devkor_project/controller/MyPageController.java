@@ -131,4 +131,20 @@ public class MyPageController {
                         .build()
                 );
     }
+
+    /* 회원 탈퇴 컨트롤러 */
+    @PostMapping("/api/mypage/delete-profile")
+    public ResponseEntity<ResponseDto.Success> deleteProfile(@Valid @RequestBody ProfileDto.Delete dto,
+                                                             Principal principal)
+    {
+        myPageService.deleteProfile(dto, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .data(null)
+                        .message("회원 탈퇴가 성공적으로 수행되었습니다.")
+                        .version(versionProvider.getVersion())
+                        .build()
+                );
+    }
 }

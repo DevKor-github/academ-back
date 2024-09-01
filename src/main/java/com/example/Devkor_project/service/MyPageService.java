@@ -241,4 +241,23 @@ public class MyPageService
         profile.setPassword(encoder.encode(dto.getNew_password()));
         profileRepository.save(profile);
     }
+
+    /* 회원 탈퇴 서비스 */
+    @Transactional
+    public void deleteProfile(ProfileDto.Delete dto, Principal principal)
+    {
+        // 요청을 보낸 사용자의 계정 이메일
+        String email = principal.getName();
+
+        // 해당 사용자의 계정이 존재하는지 확인
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // 기존 비밀번호가 맞는지 체크
+        if(!encoder.matches(dto.getPassword(), profile.getPassword()))
+            throw new AppException(ErrorCode.WRONG_PASSWORD, null);
+
+        // Profile 엔티티 삭제
+        profileRepository.delete(profile);
+    }
 }
