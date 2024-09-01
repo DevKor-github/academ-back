@@ -100,22 +100,6 @@ public class MyPageController {
                 );
     }
 
-    /* 비밀번호 확인 컨트롤러 */
-    @PostMapping("/api/mypage/check-password")
-    public ResponseEntity<ResponseDto.Success> checkPassword(@Valid @RequestBody ProfileDto.CheckPassword dto,
-                                                             Principal principal)
-    {
-        myPageService.checkPassword(dto, principal);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseDto.Success.builder()
-                        .message("비밀번호가 확인되었습니다.")
-                        .data(null)
-                        .version(versionProvider.getVersion())
-                        .build()
-                );
-    }
-
     /* 기본 프로필 정보 변경 컨트롤러 */
     @PostMapping("/api/mypage/update-basic")
     public ResponseEntity<ResponseDto.Success> updateBasic(@Valid @RequestBody ProfileDto.UpdateBasic dto,

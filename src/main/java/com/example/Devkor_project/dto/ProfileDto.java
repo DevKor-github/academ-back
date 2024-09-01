@@ -149,17 +149,6 @@ public class ProfileDto
     @Getter
     @Builder
     @ToString
-    public static class CheckPassword
-    {
-        @NotBlank(message = "[password] cannot be blank.")
-        private String password;
-    }
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter
-    @Builder
-    @ToString
     public static class UpdateBasic
     {
         @NotBlank(message = "[username] cannot be blank.")
