@@ -100,22 +100,6 @@ public class MyPageController {
                 );
     }
 
-    /* 비밀번호 확인 컨트롤러 */
-    @PostMapping("/api/mypage/check-password")
-    public ResponseEntity<ResponseDto.Success> checkPassword(@Valid @RequestBody ProfileDto.CheckPassword dto,
-                                                             Principal principal)
-    {
-        myPageService.checkPassword(dto, principal);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseDto.Success.builder()
-                        .message("비밀번호가 확인되었습니다.")
-                        .data(null)
-                        .version(versionProvider.getVersion())
-                        .build()
-                );
-    }
-
     /* 기본 프로필 정보 변경 컨트롤러 */
     @PostMapping("/api/mypage/update-basic")
     public ResponseEntity<ResponseDto.Success> updateBasic(@Valid @RequestBody ProfileDto.UpdateBasic dto,
@@ -143,6 +127,22 @@ public class MyPageController {
                 .body(ResponseDto.Success.builder()
                         .data(null)
                         .message("비밀번호가 변경되었습니다.")
+                        .version(versionProvider.getVersion())
+                        .build()
+                );
+    }
+
+    /* 회원 탈퇴 컨트롤러 */
+    @PostMapping("/api/mypage/delete-profile")
+    public ResponseEntity<ResponseDto.Success> deleteProfile(@Valid @RequestBody ProfileDto.Delete dto,
+                                                             Principal principal)
+    {
+        myPageService.deleteProfile(dto, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .data(null)
+                        .message("회원 탈퇴가 성공적으로 수행되었습니다.")
                         .version(versionProvider.getVersion())
                         .build()
                 );

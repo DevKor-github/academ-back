@@ -17,14 +17,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
     # 0) 워크플로우 실행 전 기본적으로 체크아웃 필요
     - uses: actions/checkout@v3
 
-    # 1) 권한 부여
+    # 1) 권한 부여: gradlew 파일이 존재할 경우 실행
     - name: Run chmod to make gradlew executable
-      run: chmod +x ./gradlew
-      if: fileExists('./gradlew')
+      run: if [ -f ./gradlew ]; then chmod +x ./gradlew; fi
 
     # 2) JDK 21 버전 설치
     - name: Set up JDK 21
