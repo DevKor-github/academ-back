@@ -70,7 +70,8 @@ public class LoginController {
 
         /* 닉네임 중복 확인 컨트롤러 */
         @GetMapping("/api/signup/check-username")
-        public ResponseEntity<ResponseDto.Success> checkUsername(@RequestParam("username") String username) {
+        public ResponseEntity<ResponseDto.Success> checkUsername(@RequestParam("username") String username)
+        {
                 loginService.checkUsername(username);
 
                 return ResponseEntity.status(HttpStatus.OK)
@@ -84,15 +85,16 @@ public class LoginController {
         }
 
         /* 임시 비밀번호 발급 컨트롤러 */
-        @GetMapping("/api/login/reset-password")
-        public ResponseEntity<ResponseDto.Success> resetPassword(@RequestParam("email") String email) {
-                loginService.resetPassword(email);
+        @PostMapping("/api/login/reset-password")
+        public ResponseEntity<ResponseDto.Success> resetPassword(@Valid @RequestBody ProfileDto.ResetPassword dto)
+        {
+                loginService.resetPassword(dto);
 
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(
                                 ResponseDto.Success.builder()
                                         .message("비밀번호가 성공적으로 초기화 되었습니다.")
-                                        .data(email + "@korea.ac.kr")
+                                        .data(dto.getEmail())
                                         .version(versionProvider.getVersion())
                                         .build()
                         );
@@ -100,7 +102,8 @@ public class LoginController {
 
         /* 로그인 여부 확인 컨트롤러 */
         @GetMapping("/api/check-login")
-        public ResponseEntity<ResponseDto.Success> checkLogin(Principal principal) {
+        public ResponseEntity<ResponseDto.Success> checkLogin(Principal principal)
+        {
                 ProfileDto.CheckLogin dto = loginService.checkLogin(principal);
 
                 return ResponseEntity.status(HttpStatus.OK)

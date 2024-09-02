@@ -89,6 +89,21 @@ public class ProfileDto
     @Getter
     @Builder
     @ToString
+    public static class ResetPassword
+    {
+        @NotBlank(message = "[email] cannot be blank.")
+        @Email(message = "[email] should be email format.")
+        private String email;
+
+        @NotBlank(message = "[code] cannot be blank.")
+        private String code;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Builder
+    @ToString
     public static class CheckLogin
     {
         @NotNull(message = "[profile_id] cannot be null.")
