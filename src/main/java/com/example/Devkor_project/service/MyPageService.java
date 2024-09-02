@@ -28,7 +28,7 @@ public class MyPageService
     @Autowired ProfileRepository profileRepository;
     @Autowired BookmarkRepository bookmarkRepository;
     @Autowired CommentRepository commentRepository;
-    @Autowired CommentRatingRepository commentRatingRepository;
+    @Autowired CourseService courseService;
     @Autowired BCryptPasswordEncoder encoder;
 
     /* 마이페이지 기본 정보 서비스 */
@@ -253,9 +253,24 @@ public class MyPageService
         Profile profile = profileRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
 
-        // 기존 비밀번호가 맞는지 체크
+        // 비밀번호가 맞는지 체크
         if(!encoder.matches(dto.getPassword(), profile.getPassword()))
             throw new AppException(ErrorCode.WRONG_PASSWORD, null);
+
+        // 해당 사용자의 모든 강의평 조회
+        List<Comment> comments = commentRepository.findAllByProfileId(profile.getProfile_id());
+
+        // 해당 사용자의 모든 강의평 삭제
+        comments.forEach(comment -> {
+
+            // Comment 엔티티 -> CommentDto.Delete 변환
+            CommentDto.Delete commentDto = CommentDto.Delete.builder()
+                    .comment_id(comment.getComment_id())
+                    .build();
+
+            courseService.deleteComment(principal, commentDto);
+
+        });
 
         // Profile 엔티티 삭제
         profileRepository.delete(profile);
