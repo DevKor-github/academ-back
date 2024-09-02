@@ -44,12 +44,6 @@ public class LoginService
     @Transactional
     public void signUp(ProfileDto.Signup dto)
     {
-        // 이메일 중복 체크
-        profileRepository.findByEmail(dto.getEmail())
-                .ifPresent(user -> {
-                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail());
-                });
-
         // 해당 이메일로 발송된 인증번호가 있는지 체크
         Code code = codeRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, dto.getEmail()));
@@ -57,6 +51,12 @@ public class LoginService
         // 입력한 인증번호가 맞는지 체크
         if(!Objects.equals(dto.getCode(), code.getCode()))
             throw new AppException(ErrorCode.WRONG_CODE, dto.getEmail());
+
+        // 이메일 중복 체크
+        profileRepository.findByEmail(dto.getEmail())
+                .ifPresent(user -> {
+                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail());
+                });
 
         // 학번이 7자리인지 체크
         if(dto.getStudent_id().length() != 7)
@@ -191,12 +191,6 @@ public class LoginService
     @Transactional
     public void checkAuthenticationNumber(String email, String code)
     {
-        // 이메일 중복 체크
-        profileRepository.findByEmail(email + "@korea.ac.kr")
-                .ifPresent(user -> {
-                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, email + "@korea.ac.kr");
-                });
-
         // 해당 이메일로 발송된 인증번호가 있는지 체크
         Code actualCode = codeRepository.findByEmail(email + "@korea.ac.kr")
                 .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, email + "@korea.ac.kr"));
@@ -204,6 +198,12 @@ public class LoginService
         // 입력한 인증번호가 맞는지 체크
         if(!Objects.equals(code, actualCode.getCode()))
             throw new AppException(ErrorCode.WRONG_CODE, email + "@korea.ac.kr");
+
+        // 이메일 중복 체크
+        profileRepository.findByEmail(email + "@korea.ac.kr")
+                .ifPresent(user -> {
+                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, email + "@korea.ac.kr");
+                });
     }
 
     /* 닉네임 중복 확인 서비스 */
@@ -218,11 +218,19 @@ public class LoginService
 
     /* 임시 비밀번호 발급 서비스 */
     @Transactional
-    public void resetPassword(String email)
+    public void resetPassword(ProfileDto.ResetPassword dto)
     {
         // 이메일에 해당하는 계정 존재 여부 체크
-        Profile profile = profileRepository.findByEmail(email + "@korea.ac.kr")
-                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email + "@korea.ac.kr"));
+        Profile profile = profileRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, dto.getEmail()));
+
+        // 해당 이메일로 발송된 인증번호가 있는지 체크
+        Code actualCode = codeRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, dto.getEmail()));
+
+        // 입력한 인증번호가 맞는지 체크
+        if(!Objects.equals(dto.getCode(), actualCode.getCode()))
+            throw new AppException(ErrorCode.WRONG_CODE, dto.getEmail());
 
         // 임시 비밀번호 생성
         Random random = new Random();
@@ -258,7 +266,7 @@ public class LoginService
             );
 
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            mimeMessageHelper.setTo(email + "@korea.ac.kr");    // 메일 수신자
+            mimeMessageHelper.setTo(dto.getEmail());    // 메일 수신자
             mimeMessageHelper.setSubject("Academ 임시 비밀번호 발급");   // 메일 제목
             mimeMessageHelper.setText(content, true);  // 메일 내용
 

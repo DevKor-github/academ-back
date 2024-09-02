@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Objects;
 
 @RequiredArgsConstructor
-@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter
 {
     private final CustomUserDetailsService customUserDetailService;
@@ -32,8 +31,6 @@ public class JwtAuthFilter extends OncePerRequestFilter
     // JWT 토큰 검증 필터
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
-        log.info("auth filter!!!");
 
         String authorizationHeader = request.getHeader("Authorization");
 
