@@ -47,7 +47,6 @@ public class SecurityConfig
                                 .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
                                 .requestMatchers("/notice/**", "/api/notice/**").permitAll()
                                 .requestMatchers("/api/refresh-token").permitAll()
-                                .requestMatchers("/health-check").permitAll()
                                 // 해당 요청은 인증된 사용자에게만 접근 권한 허용
                                 .requestMatchers("/api/logout").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/api/check-login").hasAnyRole("USER", "ADMIN")
