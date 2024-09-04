@@ -61,7 +61,6 @@ public class AccessAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String[] excludePath = {
-                "/health-check",
                 "/api/login", "/api/logout", "/api/signup",
                 "/api/check-login", "/api/refresh-token",
                 "/api/admin",
