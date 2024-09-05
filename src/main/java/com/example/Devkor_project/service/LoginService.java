@@ -228,6 +228,10 @@ public class LoginService
     @Transactional
     public void resetPassword(ProfileDto.ResetPassword dto)
     {
+        // 고려대 이메일인지 확인
+        if (!dto.getEmail().endsWith("@korea.ac.kr"))
+            throw new AppException(ErrorCode.EMAIL_NOT_KOREA, dto.getEmail());
+
         // 이메일에 해당하는 계정 존재 여부 체크
         Profile profile = profileRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, dto.getEmail()));
