@@ -125,6 +125,10 @@ public class LoginService
     @Transactional
     public void sendAuthenticationNumber(String email)
     {
+        // 고려대 이메일인지 확인
+        if (!email.endsWith("@korea.ac.kr"))
+            throw new AppException(ErrorCode.EMAIL_NOT_KOREA, email);
+
         // 인증번호 생성
         Random random = new Random();
         StringBuilder randomNumber = new StringBuilder();
@@ -191,6 +195,10 @@ public class LoginService
     @Transactional
     public void checkAuthenticationNumber(String email, String code)
     {
+        // 고려대 이메일인지 확인
+        if (!email.endsWith("@korea.ac.kr"))
+            throw new AppException(ErrorCode.EMAIL_NOT_KOREA, email);
+
         // 해당 이메일로 발송된 인증번호가 있는지 체크
         Code actualCode = codeRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, email));
