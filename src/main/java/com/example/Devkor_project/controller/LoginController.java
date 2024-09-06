@@ -46,7 +46,7 @@ public class LoginController {
                         .body(
                                 ResponseDto.Success.builder()
                                         .message("인증번호 이메일 발송에 성공하였습니다.")
-                                        .data(email + "@korea.ac.kr")
+                                        .data(email)
                                         .version(versionProvider.getVersion())
                                         .build()
                         );
@@ -55,14 +55,15 @@ public class LoginController {
         /* 인증번호 확인 컨트롤러 */
         @GetMapping("/api/signup/check-email")
         public ResponseEntity<ResponseDto.Success> checkAuthenticationNumber(@RequestParam("email") String email,
-                        @RequestParam("code") String code) {
+                                                                             @RequestParam("code") String code)
+        {
                 loginService.checkAuthenticationNumber(email, code);
 
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(
                                 ResponseDto.Success.builder()
                                         .message("인증번호 이메일 확인에 성공하였습니다.")
-                                        .data(email + "@korea.ac.kr")
+                                        .data(email)
                                         .version(versionProvider.getVersion())
                                         .build()
                         );

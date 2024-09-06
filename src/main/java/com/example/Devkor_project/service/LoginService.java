@@ -125,6 +125,10 @@ public class LoginService
     @Transactional
     public void sendAuthenticationNumber(String email)
     {
+        // 고려대 이메일인지 확인
+        if (!email.endsWith("@korea.ac.kr"))
+            throw new AppException(ErrorCode.EMAIL_NOT_KOREA, email);
+
         // 인증번호 생성
         Random random = new Random();
         StringBuilder randomNumber = new StringBuilder();
@@ -158,7 +162,7 @@ public class LoginService
             );
 
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            mimeMessageHelper.setTo(email + "@korea.ac.kr");    // 메일 수신자
+            mimeMessageHelper.setTo(email);    // 메일 수신자
             mimeMessageHelper.setSubject("Academ 인증 번호");   // 메일 제목
             mimeMessageHelper.setText(content, true);  // 메일 내용
 
@@ -169,13 +173,13 @@ public class LoginService
             javaMailSender.send(mimeMessage);
 
             // 이미 인증번호가 발송된 이메일인 경우, 데이터베이스에서 인증번호 정보 삭제
-            Code code = codeRepository.findByEmail(email + "@korea.ac.kr").orElse(null);
+            Code code = codeRepository.findByEmail(email).orElse(null);
             if(code != null)
                 codeRepository.delete(code);
 
             // 인증번호를 데이터베이스에 저장
             code = Code.builder()
-                    .email(email + "@korea.ac.kr")
+                    .email(email)
                     .code(authenticationNumber)
                     .created_at(LocalDate.now())
                     .build();
@@ -191,18 +195,22 @@ public class LoginService
     @Transactional
     public void checkAuthenticationNumber(String email, String code)
     {
+        // 고려대 이메일인지 확인
+        if (!email.endsWith("@korea.ac.kr"))
+            throw new AppException(ErrorCode.EMAIL_NOT_KOREA, email);
+
         // 해당 이메일로 발송된 인증번호가 있는지 체크
-        Code actualCode = codeRepository.findByEmail(email + "@korea.ac.kr")
-                .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, email + "@korea.ac.kr"));
+        Code actualCode = codeRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, email));
 
         // 입력한 인증번호가 맞는지 체크
         if(!Objects.equals(code, actualCode.getCode()))
-            throw new AppException(ErrorCode.WRONG_CODE, email + "@korea.ac.kr");
+            throw new AppException(ErrorCode.WRONG_CODE, email);
 
         // 이메일 중복 체크
-        profileRepository.findByEmail(email + "@korea.ac.kr")
+        profileRepository.findByEmail(email)
                 .ifPresent(user -> {
-                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, email + "@korea.ac.kr");
+                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, email);
                 });
     }
 
@@ -220,6 +228,10 @@ public class LoginService
     @Transactional
     public void resetPassword(ProfileDto.ResetPassword dto)
     {
+        // 고려대 이메일인지 확인
+        if (!dto.getEmail().endsWith("@korea.ac.kr"))
+            throw new AppException(ErrorCode.EMAIL_NOT_KOREA, dto.getEmail());
+
         // 이메일에 해당하는 계정 존재 여부 체크
         Profile profile = profileRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, dto.getEmail()));
