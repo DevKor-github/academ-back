@@ -32,15 +32,13 @@ Academ Back-end repository 입니다.
         │   │   ├── CourseController    // 강의, 강의평 관련 api 컨트롤러
         │   │   ├── LoginController     // 로그인, 권한 관련 api 컨트롤러
         │   │   ├── MyPageController    // 마이페이지 관련 api 컨트롤러
-        │   │   ├── NoticeController    // 공지사항 관련 api 컨트롤러
-        │   │   └── PointController     // 강의 열람권 구매 관련 api 컨트롤러
+        │   │   └── NoticeController    // 공지사항 관련 api 컨트롤러
         │   │
         │   │   ## dto 파일들
         │   └── dto
         │   │   ├── CommentDto          // 강의평 관련 dto
         │   │   ├── CourseDto           // 강의 관련 dto
         │   │   ├── NoticeDto           // 공지사항 관련 dto
-        │   │   ├── PointDto            // 강의 열람권 구매 관련 dto
         │   │   ├── ProfileDto          // 계정 관련 dto
         │   │   ├── ResponseDto         // 응답 dto
         │   │   └── TokenDto            // access token, refresh token dto
@@ -99,8 +97,7 @@ Academ Back-end repository 입니다.
         │       ├── LoginService        // 로그인, 권한 관련 api 서비스
         │       ├── MyPageService       // 마이페이지 관련 api 서비스
         │       ├── NoticeService       // 공지사항 관련 api 서비스
-        │       └── PointService        // 강의 열람권 구매 관련 api 서비스
-        │
+        │       └── SchedulerService    // 인증번호 자동 삭제 서비스
         │
         └── resources
             ├── email_image

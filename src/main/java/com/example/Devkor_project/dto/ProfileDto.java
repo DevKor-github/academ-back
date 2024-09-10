@@ -206,4 +206,15 @@ public class ProfileDto
         @NotBlank(message = "[password] cannot be blank.")
         private String password;
     }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    @Getter
+    @Builder
+    public static class BuyAccessAuth
+    {
+        @NotBlank(message = "[item] cannot be blank.")
+        private String item;
+    }
 }

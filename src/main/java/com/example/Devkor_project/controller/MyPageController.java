@@ -1,10 +1,7 @@
 package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.configuration.VersionProvider;
-import com.example.Devkor_project.dto.CommentDto;
-import com.example.Devkor_project.dto.CourseDto;
-import com.example.Devkor_project.dto.ProfileDto;
-import com.example.Devkor_project.dto.ResponseDto;
+import com.example.Devkor_project.dto.*;
 import com.example.Devkor_project.service.MyPageService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -33,6 +31,23 @@ public class MyPageController {
                         .data(dto)
                         .version(versionProvider.getVersion())
                         .build()
+                );
+    }
+
+    /* 강의평 열람 권한 구매 컨트롤러 */
+    @PostMapping("/api/mypage/buy-access-authority")
+    public ResponseEntity<ResponseDto.Success> buyAccessAuthority(Principal principal,
+                                                                  @Valid @RequestBody ProfileDto.BuyAccessAuth dto) {
+
+        LocalDate expirationDate = myPageService.buyAccessAuthority(principal, dto);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseDto.Success.builder()
+                                .message("강의평 열람 권한 구매를 성공하였습니다.")
+                                .data(expirationDate)
+                                .version(versionProvider.getVersion())
+                                .build()
                 );
     }
 

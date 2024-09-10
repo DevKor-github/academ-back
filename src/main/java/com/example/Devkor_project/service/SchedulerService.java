@@ -22,7 +22,6 @@ public class SchedulerService
     @Autowired
     private CodeRepository codeRepository;
 
-
     @Transactional
     @Async
     @Scheduled(cron = "0 0 12 * * *")
