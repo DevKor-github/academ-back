@@ -3,7 +3,7 @@ Academ Back-end repository 입니다.
 
 ---
 
-## 프로젝트 구조
+### 프로젝트 구조
 ( 최신화 : v1.0.10 )
 ```
 │
@@ -107,22 +107,22 @@ Academ Back-end repository 입니다.
             │   └── logo.png        // 이메일 전송 시, 첨부하는 로고 이미지
             └── application.yml     // 프로젝트 설정 파일
 ```
-##
+###
 
 ---
 
-## API 명세서
+### API 명세서
 https://www.notion.so/API-b95b340bd8b64f038c2d6a3a0156edff
-##
+###
 
 ---
 
-## 데이터베이스
+### 데이터베이스
 https://dbdiagram.io/d/Academ-6644b1eff84ecd1d2240076c
-##
+###
 
 ---
 
-## 배포 관련 설정
+### 배포 관련 설정
 https://www.notion.so/aws-8a16e766baac4f9498cc1e46383b5e2d
-##
+###
