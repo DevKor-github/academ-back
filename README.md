@@ -16,6 +16,8 @@ Academ Back-end repository 입니다.
 │   ├── start.sh    // CD 관련 파일 (새로운 서버 실행)
 │   └── stop.sh     // CD 관련 파일 (기존 서버 중단)
 │
+├── appsepc.yml     // CD 설정 파일 (start.sh/stop.sh 제어)
+│
 └── src
     └── main
         ├── java.com.example.Devkor_project
