@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source /home/ubuntu/.bashrc
+
 PROJECT_ROOT="/home/ubuntu/app"
 JAR_FILE="$PROJECT_ROOT/spring-webapp.jar"
 
