@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class ExceptionManager {
+public class ExceptionManager
+{
         @Autowired
         VersionProvider versionProvider;
 
+        // 커스텀 예외 처리
         @ExceptionHandler(AppException.class)
         public ResponseEntity<ResponseDto.Error> appExceptionHandler(AppException e) {
                 return ResponseEntity.status(e.getErrorCode().getHttpStatus())

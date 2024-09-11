@@ -12,6 +12,7 @@ public enum ErrorCode
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     UNEXPECTED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "예기치 못한 에러가 발생하였습니다."),
     EMAIL_NOT_KOREA(HttpStatus.BAD_REQUEST, "해당 이메일은 고려대 이메일이 아닙니다."),
+    INVALID_PURPOSE(HttpStatus.BAD_REQUEST, "해당 목적은 유효하지 않습니다."),
     EMAIL_DUPLICATED(HttpStatus.BAD_REQUEST, "해당 이메일은 이미 사용 중입니다."),
     EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 이메일로 생성된 계정이 존재하지 않습니다."),
     CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 이메일로 전송된 인증번호가 존재하지 않습니다."),

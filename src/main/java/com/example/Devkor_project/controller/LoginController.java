@@ -39,8 +39,10 @@ public class LoginController {
 
         /* 이메일 인증번호 발송 컨트롤러 */
         @GetMapping("/api/signup/send-email")
-        public ResponseEntity<ResponseDto.Success> sendAuthenticationNumber(@RequestParam("email") String email) {
-                loginService.sendAuthenticationNumber(email);
+        public ResponseEntity<ResponseDto.Success> sendAuthenticationNumber(@RequestParam("email") String email,
+                                                                            @RequestParam("purpose") String purpose)
+        {
+                loginService.sendAuthenticationNumber(email, purpose);
 
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(
