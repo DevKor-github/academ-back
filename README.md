@@ -25,6 +25,7 @@ Academ Back-end repository 입니다.
         │   │   ## 기본적인 설정 파일들
         │   ├── configuartion
         │   │   ├── RedisConfig         // Redis 설정 클래스
+        │   │   ├── SwaggerConfig       // Swagger 설정 클래스
         │   │   ├── VersionProvider     // 버전 공급 클래스
         │   │   └── WebConfig           // CORS 설정 클래스
         │   │
@@ -37,7 +38,7 @@ Academ Back-end repository 입니다.
         │   │   └── NoticeController    // 공지사항 관련 api 컨트롤러
         │   │
         │   │   ## dto 파일들
-        │   └── dto
+        │   ├── dto
         │   │   ├── CommentDto          // 강의평 관련 dto
         │   │   ├── CourseDto           // 강의 관련 dto
         │   │   ├── NoticeDto           // 공지사항 관련 dto
