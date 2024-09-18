@@ -56,7 +56,7 @@ public class MyPageService
                 .build();
     }
 
-    /* 강의평 열람 권한 구매 서비스 */
+    /* 강의평 열람권 구매 서비스 */
     @Transactional
     public LocalDate buyAccessAuthority(Principal principal, ProfileDto.BuyAccessAuth dto)
     {
