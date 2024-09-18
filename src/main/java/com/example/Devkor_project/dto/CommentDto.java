@@ -4,6 +4,7 @@ import com.example.Devkor_project.entity.Comment;
 import com.example.Devkor_project.entity.CommentRating;
 import com.example.Devkor_project.entity.Course;
 import com.example.Devkor_project.entity.CourseRating;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -19,53 +20,75 @@ public class CommentDto
     public static class Comment
     {
         @NotNull(message = "[comment_id] cannot be null.")
+        @Schema(description = "comment_id")
         private Long comment_id;
 
         @NotNull(message = "[profile_id] cannot be null.")
+        @Schema(description = "profile_id")
         private Long profile_id;
 
         @NotNull(message = "[course_id] cannot be null.")
+        @Schema(description = "course_id")
         private Long course_id;
 
         @NotBlank(message = "[review] cannot be blank.")
+        @Schema(description = "강의평 내용")
         private String review;
         @NotNull(message = "[likes] cannot be null.")
+        @Schema(description = "좋아요 개수")
         private int likes;
         @NotNull(message = "[created_at] cannot be null.")
+        @Schema(description = "생성 날짜")
         private LocalDate created_at;
         @NotNull(message = "[updated_at] cannot be null.")
+        @Schema(description = "수정 날짜")
         private LocalDate updated_at;
+        @Schema(description = "포인트 지급 여부")
         @NotNull(message = "[reward] cannot be null.")
         private boolean reward;
 
         @NotNull(message = "[rating] cannot be null.")
+        @Schema(description = "평점")
         private int rating;
         @NotNull(message = "[r1_amount_of_studying] cannot be null.")
+        @Schema(description = "학습량")
         private int r1_amount_of_studying;
         @NotNull(message = "[r2_difficulty] cannot be null.")
+        @Schema(description = "난이도")
         private int r2_difficulty;
         @NotNull(message = "[r3_delivery_power] cannot be null.")
+        @Schema(description = "전달력")
         private int r3_delivery_power;
         @NotNull(message = "[r4_grading] cannot be null.")
+        @Schema(description = "성적 관대함")
         private int r4_grading;
 
         @NotNull(message = "[teach_t1_theory] cannot be null.")
+        @Schema(description = "수업 진행방식-이론 강의 태그 선택 여부")
         private boolean teach_t1_theory;
         @NotNull(message = "[teach_t2_practice] cannot be null.")
+        @Schema(description = "수업 진행방식-실습 및 실험 태그 선택 여부")
         private boolean teach_t2_practice;
         @NotNull(message = "[teach_t3_seminar] cannot be null.")
+        @Schema(description = "수업 진행방식-세미나 태그 선택 여부")
         private boolean teach_t3_seminar;
         @NotNull(message = "[teach_t4_discussion] cannot be null.")
+        @Schema(description = "수업 진행방식-토론 태그 선택 여부")
         private boolean teach_t4_discussion;
         @NotNull(message = "[teach_t5_presentation] cannot be null.")
+        @Schema(description = "수업 진행방식-발표 태그 선택 여부")
         private boolean teach_t5_presentation;
         @NotNull(message = "[learn_t1_theory] cannot be null.")
+        @Schema(description = "학습 내용-이론 지식 습득 태그 선택 여부")
         private boolean learn_t1_theory;
         @NotNull(message = "[learn_t2_thesis] cannot be null.")
+        @Schema(description = "학습 내용-논문 작성 도움 태그 선택 여부")
         private boolean learn_t2_thesis;
         @NotNull(message = "[learn_t3_exam] cannot be null.")
+        @Schema(description = "학습 내용-졸업 시험 대비 태그 선택 여부")
         private boolean learn_t3_exam;
         @NotNull(message = "[learn_t4_industry] cannot be null.")
+        @Schema(description = "학습 내용-현업 적용 태그 선택 여부")
         private boolean learn_t4_industry;
     }
 
@@ -76,55 +99,77 @@ public class CommentDto
     public static class Detail
     {
         @NotNull(message = "[comment_id] cannot be null.")
+        @Schema(description = "comment_id")
         private Long comment_id;
 
         @NotNull(message = "[profile_id] cannot be null.")
+        @Schema(description = "profile_id")
         private Long profile_id;
 
         @NotBlank(message = "[username] cannot be blank.")
+        @Schema(description = "닉네임")
         private String username;
 
         @NotNull(message = "[rating] cannot be null.")
+        @Schema(description = "평점")
         private int rating;
         @NotNull(message = "[r1_amount_of_studying] cannot be null.")
+        @Schema(description = "학습량")
         private int r1_amount_of_studying;
         @NotNull(message = "[r2_difficulty] cannot be null.")
+        @Schema(description = "난이도")
         private int r2_difficulty;
         @NotNull(message = "[r3_delivery_power] cannot be null.")
+        @Schema(description = "전달력")
         private int r3_delivery_power;
         @NotNull(message = "[r4_grading] cannot be null.")
+        @Schema(description = "성적 관대함")
         private int r4_grading;
 
         @NotBlank(message = "[review] cannot be blank.")
+        @Schema(description = "강의평 내용")
         private String review;
 
         @NotNull(message = "[teach_t1_theory] cannot be null.")
+        @Schema(description = "수업 진행방식-이론 강의 태그 선택 여부")
         private boolean teach_t1_theory;
         @NotNull(message = "[teach_t2_practice] cannot be null.")
+        @Schema(description = "수업 진행방식-실습 및 실험 태그 선택 여부")
         private boolean teach_t2_practice;
         @NotNull(message = "[teach_t3_seminar] cannot be null.")
+        @Schema(description = "수업 진행방식-세미나 태그 선택 여부")
         private boolean teach_t3_seminar;
         @NotNull(message = "[teach_t4_discussion] cannot be null.")
+        @Schema(description = "수업 진행방식-토론 태그 선택 여부")
         private boolean teach_t4_discussion;
         @NotNull(message = "[teach_t5_presentation] cannot be null.")
+        @Schema(description = "수업 진행방식-발표 태그 선택 여부")
         private boolean teach_t5_presentation;
         @NotNull(message = "[learn_t1_theory] cannot be null.")
+        @Schema(description = "학습 내용-이론 지식 습득 태그 선택 여부")
         private boolean learn_t1_theory;
         @NotNull(message = "[learn_t2_thesis] cannot be null.")
+        @Schema(description = "학습 내용-논문 작성 도움 태그 선택 여부")
         private boolean learn_t2_thesis;
         @NotNull(message = "[learn_t3_exam] cannot be null.")
+        @Schema(description = "학습 내용-졸업 시험 대비 태그 선택 여부")
         private boolean learn_t3_exam;
         @NotNull(message = "[learn_t4_industry] cannot be null.")
+        @Schema(description = "학습 내용-현업 적용 태그 선택 여부")
         private boolean learn_t4_industry;
 
         @NotNull(message = "[likes] cannot be null.")
+        @Schema(description = "좋아요 개수")
         private int likes;
         @NotNull(message = "[created_at] cannot be null.")
+        @Schema(description = "생성 날짜")
         private LocalDate created_at;
         @NotNull(message = "[updated_at] cannot be null.")
+        @Schema(description = "수정 날짜")
         private LocalDate updated_at;
 
         @NotNull(message = "[is_already_like] cannot be null.")
+        @Schema(description = "해당 강의평을 이미 좋아요 눌렀는지 여부")
         private boolean already_like;
     }
 
@@ -134,39 +179,55 @@ public class CommentDto
     public static class Insert
     {
         @NotNull(message = "[course_id] cannot be null.")
+        @Schema(description = "course_id")
         private Long course_id;
 
         @NotNull(message = "[rating] cannot be null.")
+        @Schema(description = "평점")
         private int rating;
         @NotNull(message = "[r1_amount_of_studying] cannot be null.")
+        @Schema(description = "학습량")
         private int r1_amount_of_studying;
         @NotNull(message = "[r2_difficulty] cannot be null.")
+        @Schema(description = "난이도")
         private int r2_difficulty;
         @NotNull(message = "[r3_delivery_power] cannot be null.")
+        @Schema(description = "전달력")
         private int r3_delivery_power;
         @NotNull(message = "[r4_grading] cannot be null.")
+        @Schema(description = "성적 관대함")
         private int r4_grading;
 
         @NotBlank(message = "[review] cannot be blank.")
+        @Schema(description = "강의평 내용")
         private String review;
 
         @NotNull(message = "[teach_t1_theory] cannot be null.")
+        @Schema(description = "수업 진행방식-이론 강의 태그 선택 여부")
         private boolean teach_t1_theory;
         @NotNull(message = "[teach_t2_practice] cannot be null.")
+        @Schema(description = "수업 진행방식-실습 및 실험 태그 선택 여부")
         private boolean teach_t2_practice;
         @NotNull(message = "[teach_t3_seminar] cannot be null.")
+        @Schema(description = "수업 진행방식-세미나 태그 선택 여부")
         private boolean teach_t3_seminar;
         @NotNull(message = "[teach_t4_discussion] cannot be null.")
+        @Schema(description = "수업 진행방식-토론 태그 선택 여부")
         private boolean teach_t4_discussion;
         @NotNull(message = "[teach_t5_presentation] cannot be null.")
+        @Schema(description = "수업 진행방식-발표 태그 선택 여부")
         private boolean teach_t5_presentation;
         @NotNull(message = "[learn_t1_theory] cannot be null.")
+        @Schema(description = "학습 내용-이론 지식 습득 태그 선택 여부")
         private boolean learn_t1_theory;
         @NotNull(message = "[learn_t2_thesis] cannot be null.")
+        @Schema(description = "학습 내용-논문 작성 도움 태그 선택 여부")
         private boolean learn_t2_thesis;
         @NotNull(message = "[learn_t3_exam] cannot be null.")
+        @Schema(description = "학습 내용-졸업 시험 대비 태그 선택 여부")
         private boolean learn_t3_exam;
         @NotNull(message = "[learn_t4_industry] cannot be null.")
+        @Schema(description = "학습 내용-현업 적용 태그 선택 여부")
         private boolean learn_t4_industry;
     }
 
@@ -178,91 +239,132 @@ public class CommentDto
     {
         // CourseDto.Basic
         @NotNull(message = "course_id는 null일 수 없습니다.")
+        @Schema(description = "course_id")
         private Long course_id;
         @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
+        @Schema(description = "학수번호")
         private String course_code;
         @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
+        @Schema(description = "대학원")
         private String graduate_school;
         @NotBlank(message = "department는 빈 문자열일 수 없습니다.")
+        @Schema(description = "학과")
         private String department;
         @NotBlank(message = "year은 빈 문자열일 수 없습니다.")
+        @Schema(description = "연도")
         private String year;
         @NotBlank(message = "semester은 빈 문자열일 수 없습니다.")
+        @Schema(description = "학기")
         private String semester;
         @NotBlank(message = "name은 빈 문자열일 수 없습니다.")
+        @Schema(description = "강의명")
         private String name;
         @NotBlank(message = "professor은 빈 문자열일 수 없습니다.")
+        @Schema(description = "교수명")
         private String professor;
+        @Schema(description = "학점")
         private String credit;
+        @Schema(description = "시간, 장소")
         private String time_location;
         @NotNull(message = "COUNT_comments는 null일 수 없습니다.")
+        @Schema(description = "강의평 개수")
         private int COUNT_comments;
 
         @NotNull(message = "AVG_rating은 null일 수 없습니다.")
+        @Schema(description = "평균 평점")
         private double AVG_rating;
         @NotNull(message = "AVG_r1_amount_of_studying은 null일 수 없습니다.")
+        @Schema(description = "평균 학습량")
         private double AVG_r1_amount_of_studying;
         @NotNull(message = "AVG_r2_difficulty는 null일 수 없습니다.")
+        @Schema(description = "평균 난이도")
         private double AVG_r2_difficulty;
         @NotNull(message = "AVG_r3_delivery_power은 null일 수 없습니다.")
+        @Schema(description = "평균 전달력")
         private double AVG_r3_delivery_power;
         @NotNull(message = "AVG_r4_grading은 null일 수 없습니다.")
+        @Schema(description = "평균 성적 관대함")
         private double AVG_r4_grading;
 
         @NotNull(message = "COUNT_teach_t1_theory는 null일 수 없습니다.")
+        @Schema(description = "수업 진행방식-이론 강의 태그 개수")
         private int COUNT_teach_t1_theory;
         @NotNull(message = "COUNT_teach_t2_practice는 null일 수 없습니다.")
+        @Schema(description = "수업 진행방식-실습 및 실험 태그 개수")
         private int COUNT_teach_t2_practice;
         @NotNull(message = "COUNT_teach_t3_seminar는 null일 수 없습니다.")
+        @Schema(description = "수업 진행방식-세미나 태그 개수")
         private int COUNT_teach_t3_seminar;
         @NotNull(message = "COUNT_teach_t4_discussion는 null일 수 없습니다.")
+        @Schema(description = "수업 진행방식-토론 태그 개수")
         private int COUNT_teach_t4_discussion;
         @NotNull(message = "COUNT_teach_t5_presentation는 null일 수 없습니다.")
+        @Schema(description = "수업 진행방식-발표 태그 개수")
         private int COUNT_teach_t5_presentation;
         @NotNull(message = "COUNT_learn_t1_theory는 null일 수 없습니다.")
+        @Schema(description = "학습 내용-이론 지식 습득 태그 개수")
         private int COUNT_learn_t1_theory;
         @NotNull(message = "COUNT_learn_t2_thesis는 null일 수 없습니다.")
+        @Schema(description = "학습 내용-논문 작성 도움 태그 개수")
         private int COUNT_learn_t2_thesis;
         @NotNull(message = "COUNT_learn_t3_exam는 null일 수 없습니다.")
+        @Schema(description = "학습 내용-졸업 시험 대비 태그 개수")
         private int COUNT_learn_t3_exam;
         @NotNull(message = "COUNT_learn_t4_industry는 null일 수 없습니다.")
+        @Schema(description = "학습 내용-현업 적용 태그 개수")
         private int COUNT_learn_t4_industry;
 
         // CommentDto.Update
         @NotNull(message = "[comment_id] cannot be null.")
+        @Schema(description = "comment_id")
         private Long comment_id;
 
         @NotNull(message = "[rating] cannot be null.")
+        @Schema(description = "평점")
         private int rating;
         @NotNull(message = "[r1_amount_of_studying] cannot be null.")
+        @Schema(description = "학습량")
         private int r1_amount_of_studying;
         @NotNull(message = "[r2_difficulty] cannot be null.")
+        @Schema(description = "난이도")
         private int r2_difficulty;
         @NotNull(message = "[r3_delivery_power] cannot be null.")
+        @Schema(description = "전달력")
         private int r3_delivery_power;
         @NotNull(message = "[r4_grading] cannot be null.")
+        @Schema(description = "성적 관대함")
         private int r4_grading;
 
         @NotBlank(message = "[review] cannot be blank.")
+        @Schema(description = "강의평 내용")
         private String review;
 
         @NotNull(message = "[teach_t1_theory] cannot be null.")
+        @Schema(description = "수업 진행방식-이론 강의 태그 선택 여부")
         private boolean teach_t1_theory;
         @NotNull(message = "[teach_t2_practice] cannot be null.")
+        @Schema(description = "수업 진행방식-실습 및 실험 태그 선택 여부")
         private boolean teach_t2_practice;
         @NotNull(message = "[teach_t3_seminar] cannot be null.")
+        @Schema(description = "수업 진행방식-세미나 태그 선택 여부")
         private boolean teach_t3_seminar;
         @NotNull(message = "[teach_t4_discussion] cannot be null.")
+        @Schema(description = "수업 진행방식-토론 태그 선택 여부")
         private boolean teach_t4_discussion;
         @NotNull(message = "[teach_t5_presentation] cannot be null.")
+        @Schema(description = "수업 진행방식-발표 태그 선택 여부")
         private boolean teach_t5_presentation;
         @NotNull(message = "[learn_t1_theory] cannot be null.")
+        @Schema(description = "학습 내용-이론 지식 습득 태그 선택 여부")
         private boolean learn_t1_theory;
         @NotNull(message = "[learn_t2_thesis] cannot be null.")
+        @Schema(description = "학습 내용-논문 작성 도움 태그 선택 여부")
         private boolean learn_t2_thesis;
         @NotNull(message = "[learn_t3_exam] cannot be null.")
+        @Schema(description = "학습 내용-졸업 시험 대비 태그 선택 여부")
         private boolean learn_t3_exam;
         @NotNull(message = "[learn_t4_industry] cannot be null.")
+        @Schema(description = "학습 내용-현업 적용 태그 선택 여부")
         private boolean learn_t4_industry;
     }
 
@@ -273,39 +375,55 @@ public class CommentDto
     public static class Update
     {
         @NotNull(message = "[comment_id] cannot be null.")
+        @Schema(description = "comment_id")
         private Long comment_id;
 
         @NotNull(message = "[rating] cannot be null.")
+        @Schema(description = "평점")
         private int rating;
         @NotNull(message = "[r1_amount_of_studying] cannot be null.")
+        @Schema(description = "학습량")
         private int r1_amount_of_studying;
         @NotNull(message = "[r2_difficulty] cannot be null.")
+        @Schema(description = "난이도")
         private int r2_difficulty;
         @NotNull(message = "[r3_delivery_power] cannot be null.")
+        @Schema(description = "전달력")
         private int r3_delivery_power;
         @NotNull(message = "[r4_grading] cannot be null.")
+        @Schema(description = "성적 관대함")
         private int r4_grading;
 
         @NotBlank(message = "[review] cannot be blank.")
+        @Schema(description = "강의평 내용")
         private String review;
 
         @NotNull(message = "[teach_t1_theory] cannot be null.")
+        @Schema(description = "수업 진행방식-이론 강의 태그 선택 여부")
         private boolean teach_t1_theory;
         @NotNull(message = "[teach_t2_practice] cannot be null.")
+        @Schema(description = "수업 진행방식-실습 및 실험 태그 선택 여부")
         private boolean teach_t2_practice;
         @NotNull(message = "[teach_t3_seminar] cannot be null.")
+        @Schema(description = "수업 진행방식-세미나 태그 선택 여부")
         private boolean teach_t3_seminar;
         @NotNull(message = "[teach_t4_discussion] cannot be null.")
+        @Schema(description = "수업 진행방식-토론 태그 선택 여부")
         private boolean teach_t4_discussion;
         @NotNull(message = "[teach_t5_presentation] cannot be null.")
+        @Schema(description = "수업 진행방식-발표 태그 선택 여부")
         private boolean teach_t5_presentation;
         @NotNull(message = "[learn_t1_theory] cannot be null.")
+        @Schema(description = "학습 내용-이론 지식 습득 태그 선택 여부")
         private boolean learn_t1_theory;
         @NotNull(message = "[learn_t2_thesis] cannot be null.")
+        @Schema(description = "학습 내용-논문 작성 도움 태그 선택 여부")
         private boolean learn_t2_thesis;
         @NotNull(message = "[learn_t3_exam] cannot be null.")
+        @Schema(description = "학습 내용-졸업 시험 대비 태그 선택 여부")
         private boolean learn_t3_exam;
         @NotNull(message = "[learn_t4_industry] cannot be null.")
+        @Schema(description = "학습 내용-현업 적용 태그 선택 여부")
         private boolean learn_t4_industry;
     }
 
@@ -317,6 +435,7 @@ public class CommentDto
     public static class Delete
     {
         @NotNull(message = "[comment_id] cannot be null.")
+        @Schema(description = "comment_id")
         private Long comment_id;
     }
 
@@ -328,6 +447,7 @@ public class CommentDto
     public static class Like
     {
         @NotNull(message = "[comment_id] cannot be null.")
+        @Schema(description = "comment_id")
         private Long comment_id;
     }
 
@@ -339,12 +459,15 @@ public class CommentDto
     public static class Report
     {
         @NotNull(message = "[comment_id] cannot be null.")
+        @Schema(description = "comment_id")
         private Long comment_id;
 
         @NotBlank(message = "[reason] cannot be blank.")
+        @Schema(description = "신고 사유")
         private String reason;
 
         @NotBlank(message = "[detail] cannot be blank.")
+        @Schema(description = "신고 내용")
         private String detail;
     }
 
@@ -355,66 +478,96 @@ public class CommentDto
     public static class MyPage
     {
         @NotNull(message = "[comment_id] cannot be null.")
+        @Schema(description = "comment_id")
         private Long comment_id;
 
         @NotNull(message = "course_id는 null일 수 없습니다.")
+        @Schema(description = "course_id")
         private Long course_id;
         @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
+        @Schema(description = "학수번호")
         private String course_code;
         @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
+        @Schema(description = "대학원")
         private String graduate_school;
         @NotBlank(message = "department는 빈 문자열일 수 없습니다.")
+        @Schema(description = "학과")
         private String department;
         @NotBlank(message = "year은 빈 문자열일 수 없습니다.")
+        @Schema(description = "연도")
         private String year;
         @NotBlank(message = "semester은 빈 문자열일 수 없습니다.")
+        @Schema(description = "학기")
         private String semester;
         @NotBlank(message = "name은 빈 문자열일 수 없습니다.")
+        @Schema(description = "강의명")
         private String name;
         @NotBlank(message = "professor은 빈 문자열일 수 없습니다.")
+        @Schema(description = "교수명")
         private String professor;
+        @Schema(description = "학점")
         private String credit;
+        @Schema(description = "시간, 장소")
         private String time_location;
 
         @NotBlank(message = "[review] cannot be blank.")
+        @Schema(description = "강의평 내용")
         private String review;
         @NotNull(message = "[likes] cannot be null.")
+        @Schema(description = "좋아요 개수")
         private int likes;
         @NotNull(message = "[created_at] cannot be null.")
+        @Schema(description = "생성 날짜")
         private LocalDate created_at;
         @NotNull(message = "[updated_at] cannot be null.")
+        @Schema(description = "수정 날짜")
         private LocalDate updated_at;
+        @Schema(description = "포인트 지급 여부")
         @NotNull(message = "[reward] cannot be null.")
         private boolean reward;
 
         @NotNull(message = "[rating] cannot be null.")
+        @Schema(description = "평점")
         private int rating;
         @NotNull(message = "[r1_amount_of_studying] cannot be null.")
+        @Schema(description = "학습량")
         private int r1_amount_of_studying;
         @NotNull(message = "[r2_difficulty] cannot be null.")
+        @Schema(description = "난이도")
         private int r2_difficulty;
         @NotNull(message = "[r3_delivery_power] cannot be null.")
+        @Schema(description = "전달력")
         private int r3_delivery_power;
         @NotNull(message = "[r4_grading] cannot be null.")
+        @Schema(description = "성적 관대함")
         private int r4_grading;
 
         @NotNull(message = "[teach_t1_theory] cannot be null.")
+        @Schema(description = "수업 진행방식-이론 강의 태그 선택 여부")
         private boolean teach_t1_theory;
         @NotNull(message = "[teach_t2_practice] cannot be null.")
+        @Schema(description = "수업 진행방식-실습 및 실험 태그 선택 여부")
         private boolean teach_t2_practice;
         @NotNull(message = "[teach_t3_seminar] cannot be null.")
+        @Schema(description = "수업 진행방식-세미나 태그 선택 여부")
         private boolean teach_t3_seminar;
         @NotNull(message = "[teach_t4_discussion] cannot be null.")
+        @Schema(description = "수업 진행방식-토론 태그 선택 여부")
         private boolean teach_t4_discussion;
         @NotNull(message = "[teach_t5_presentation] cannot be null.")
+        @Schema(description = "수업 진행방식-발표 태그 선택 여부")
         private boolean teach_t5_presentation;
         @NotNull(message = "[learn_t1_theory] cannot be null.")
+        @Schema(description = "학습 내용-이론 지식 습득 태그 선택 여부")
         private boolean learn_t1_theory;
         @NotNull(message = "[learn_t2_thesis] cannot be null.")
+        @Schema(description = "학습 내용-논문 작성 도움 태그 선택 여부")
         private boolean learn_t2_thesis;
         @NotNull(message = "[learn_t3_exam] cannot be null.")
+        @Schema(description = "학습 내용-졸업 시험 대비 태그 선택 여부")
         private boolean learn_t3_exam;
         @NotNull(message = "[learn_t4_industry] cannot be null.")
+        @Schema(description = "학습 내용-현업 적용 태그 선택 여부")
         private boolean learn_t4_industry;
     }
 
