@@ -471,6 +471,58 @@ public class CommentDto
         private String detail;
     }
 
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    @Getter
+    @Builder
+    public static class ReportList
+    {
+        @NotNull(message = "[comment_id] cannot be null.")
+        @Schema(description = "comment_id")
+        private Long comment_id;
+
+        @NotNull(message = "[reporter_profile_id] cannot be null.")
+        @Schema(description = "신고자 profile_id")
+        private Long reporter_profile_id;
+
+        @NotNull(message = "[reporter_email] cannot be null.")
+        @Schema(description = "신고자 이메일")
+        private String reporter_email;
+
+        @NotNull(message = "[reporter_username] cannot be null.")
+        @Schema(description = "신고자 닉네임")
+        private String reporter_username;
+
+        @NotNull(message = "[writer_profile_id] cannot be null.")
+        @Schema(description = "작성자 profile_id")
+        private Long writer_profile_id;
+
+        @NotNull(message = "[writer_email] cannot be null.")
+        @Schema(description = "작성자 이메일")
+        private String writer_email;
+
+        @NotNull(message = "[writer_username] cannot be null.")
+        @Schema(description = "작성자 닉네임")
+        private String writer_username;
+
+        @NotBlank(message = "[review] cannot be blank.")
+        @Schema(description = "강의평 내용")
+        private String review;
+
+        @NotBlank(message = "[reason] cannot be blank.")
+        @Schema(description = "신고 사유")
+        private String reason;
+
+        @NotBlank(message = "[detail] cannot be blank.")
+        @Schema(description = "신고 내용")
+        private String detail;
+
+        @NotNull(message = "[created_at] cannot be null.")
+        @Schema(description = "생성 날짜")
+        private LocalDate created_at;
+    }
+
     @AllArgsConstructor
     @Getter
     @ToString
