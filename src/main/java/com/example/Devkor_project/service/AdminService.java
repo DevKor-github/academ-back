@@ -174,4 +174,10 @@ public class AdminService
 
         return reportListDtos;
     }
+
+    /* 강의평 신고 내역 개수 서비스 */
+    public Long countReport()
+    {
+        return commentReportRepository.countAllReports();
+    }
 }

@@ -165,6 +165,28 @@ public class AdminController
                         );
         }
 
+        /* 강의평 신고 내역 개수 컨트롤러 */
+        @GetMapping("/api/admin/count-report")
+        @Operation(summary = "강의평 신고 내역 개수")
+        @Parameters(value = {
+                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
+        })
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "강의평 신고 내역 개수를 반환합니다.", content = @Content(schema = @Schema(implementation = Long.class))),
+        })
+        public ResponseEntity<ResponseDto.Success> countNotice()
+        {
+                Long number = adminService.countReport();
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ResponseDto.Success.builder()
+                                .data(number)
+                                .message("강의평 신고 내역 개수 반환에 성공하였습니다.")
+                                .version(versionProvider.getVersion())
+                                .build()
+                        );
+        }
+
         @GetMapping("/api/is-secure")
         public ResponseEntity<ResponseDto.Success> getHTTPSStatus(HttpServletRequest request) {
                 String st;
