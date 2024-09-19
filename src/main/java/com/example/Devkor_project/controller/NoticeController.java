@@ -38,7 +38,7 @@ public class NoticeController
     })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "NoticeDto.List 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = NoticeDto.List.class))),
-            @ApiResponse(responseCode = "실패: 404 (NO_RESULT)", description = "공지사항이 존재하지 않는 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
+            @ApiResponse(responseCode = "실패: 404 (NO_RESULT)", description = "공지사항이 존재하지 않는 경우 (페이지를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
     })
     public ResponseEntity<ResponseDto.Success> noticeList(@RequestParam("page") int page)
     {
