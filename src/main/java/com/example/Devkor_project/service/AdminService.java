@@ -5,10 +5,7 @@ import com.example.Devkor_project.dto.NoticeDto;
 import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
-import com.example.Devkor_project.repository.CommentReportRepository;
-import com.example.Devkor_project.repository.CourseRatingRepository;
-import com.example.Devkor_project.repository.CourseRepository;
-import com.example.Devkor_project.repository.NoticeRepository;
+import com.example.Devkor_project.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +25,11 @@ public class AdminService
 {
     @Autowired CourseRepository courseRepository;
     @Autowired CourseRatingRepository courseRatingRepository;
+    @Autowired CommentRepository commentRepository;
     @Autowired NoticeRepository noticeRepository;
     @Autowired CommentReportRepository commentReportRepository;
+
+    @Autowired CourseService courseService;
 
     /* 대학원 강의 데이터베이스 추가 서비스 */
     @Transactional
@@ -179,5 +180,26 @@ public class AdminService
     public Long countReport()
     {
         return commentReportRepository.countAllReports();
+    }
+
+    /* 강의평 삭제 서비스 */
+    public Long deleteComment(CommentDto.Delete dto)
+    {
+        // 강의평 데이터
+        Comment comment = commentRepository.findById(dto.getComment_id())
+                .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND, dto.getComment_id()));
+
+        // 강의평 작성자 이메일
+        String writerEmail = comment.getProfile_id().getEmail();
+
+        // 강의평 작성자 이메일을 반환하는 새로운 Principal 객체
+        Principal principal = new Principal() {
+            @Override
+            public String getName() {
+                return writerEmail;
+            }
+        };
+
+        return courseService.deleteComment(principal, dto);
     }
 }
