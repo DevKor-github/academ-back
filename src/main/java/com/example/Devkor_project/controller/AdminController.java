@@ -1,6 +1,7 @@
 package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.configuration.VersionProvider;
+import com.example.Devkor_project.dto.CommentDto;
 import com.example.Devkor_project.dto.NoticeDto;
 import com.example.Devkor_project.dto.ProfileDto;
 import com.example.Devkor_project.dto.ResponseDto;
@@ -22,11 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -134,6 +133,33 @@ public class AdminController
                                 ResponseDto.Success.builder()
                                         .message("공지사항 삭제가 정상적으로 수행되었습니다.")
                                         .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
+        }
+
+        /* 강의평 신고 내역 조회 컨트롤러 */
+        @GetMapping("/api/admin/report-list")
+        @Operation(summary = "강의평 신고 내역 조회", description = "페이지 하나 당 10개의 정보를 반환합니다.")
+        @Parameters(value = {
+                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
+                @Parameter(name = "page", description = "페이지 번호 ( 1부터 시작 )"),
+        })
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "CommentDto.ReportList 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = CommentDto.ReportList.class))),
+                @ApiResponse(responseCode = "실패: 401 (UNAUTHORIZED)", description = "로그인하지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
+                @ApiResponse(responseCode = "실패: 401 (LOW_AUTHORITY)", description = "권한이 부족한 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
+                @ApiResponse(responseCode = "실패: 404 (NO_RESULT)", description = "신고 내역이 존재하지 않는 경우 (페이지를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
+        })
+        public ResponseEntity<ResponseDto.Success> reportCommentList(@RequestParam("page") int page)
+        {
+                List<CommentDto.ReportList> data = adminService.reportCommentList(page - 1);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("강의평 신고 내역 조회가 정상적으로 수행되었습니다.")
+                                        .data(data)
                                         .version(versionProvider.getVersion())
                                         .build()
                         );

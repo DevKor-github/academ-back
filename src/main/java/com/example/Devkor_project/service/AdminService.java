@@ -1,17 +1,20 @@
 package com.example.Devkor_project.service;
 
+import com.example.Devkor_project.dto.CommentDto;
 import com.example.Devkor_project.dto.NoticeDto;
-import com.example.Devkor_project.entity.Course;
-import com.example.Devkor_project.entity.CourseRating;
-import com.example.Devkor_project.entity.Notice;
+import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
+import com.example.Devkor_project.repository.CommentReportRepository;
 import com.example.Devkor_project.repository.CourseRatingRepository;
 import com.example.Devkor_project.repository.CourseRepository;
 import com.example.Devkor_project.repository.NoticeRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,6 +28,7 @@ public class AdminService
     @Autowired CourseRepository courseRepository;
     @Autowired CourseRatingRepository courseRatingRepository;
     @Autowired NoticeRepository noticeRepository;
+    @Autowired CommentReportRepository commentReportRepository;
 
     /* 대학원 강의 데이터베이스 추가 서비스 */
     @Transactional
@@ -137,5 +141,37 @@ public class AdminService
 
         // 공지사항 삭제
         noticeRepository.delete(notice);
+    }
+
+    /* 강의평 신고 내역 조회 서비스 */
+    public List<CommentDto.ReportList> reportCommentList(int page)
+    {
+        // Pageable 객체 생성 (size = 10개)
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<CommentReport> reports = commentReportRepository.reportsByPage(pageable);
+
+        // 결과가 없으면 예외 발생
+        if(reports.isEmpty())
+            throw new AppException(ErrorCode.NO_RESULT, page);
+
+        List<CommentDto.ReportList> reportListDtos = reports.stream()
+                .map(report -> {
+                    return CommentDto.ReportList.builder()
+                            .comment_id(report.getComment_id().getComment_id())
+                            .reporter_profile_id(report.getProfile_id().getProfile_id())
+                            .reporter_email(report.getProfile_id().getEmail())
+                            .reporter_username(report.getProfile_id().getUsername())
+                            .writer_profile_id(report.getComment_id().getProfile_id().getProfile_id())
+                            .writer_email(report.getComment_id().getProfile_id().getEmail())
+                            .writer_username(report.getComment_id().getProfile_id().getUsername())
+                            .review(report.getComment_id().getReview())
+                            .reason(report.getReason())
+                            .detail(report.getDetail())
+                            .created_at(report.getCreated_at())
+                            .build();
+                })
+                .toList();
+
+        return reportListDtos;
     }
 }
