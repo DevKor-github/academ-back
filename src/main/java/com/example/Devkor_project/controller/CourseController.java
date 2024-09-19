@@ -367,6 +367,7 @@ public class CourseController
             @ApiResponse(responseCode = "실패: 401 (NO_ACCESS_AUTHORITY)", description = "강의평 열람권이 만료된 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 400 (INVALID_REASON)", description = "신고 사유가 적절하지 않은 경우 (입력받은 신고 사유를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 404 (COMMENT_NOT_FOUND)", description = "신고할 강의평이 존재하지 않는 경우 (입력받은 comment_id를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
+            @ApiResponse(responseCode = "실패: 400 (TOO_MANY_REPORT)", description = "해당 강의평을 이미 5번 신고한 경우 (입력받은 comment_id를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 404 (EMAIL_NOT_FOUND)", description = "요청을 보낸 사용자의 계정이 존재하지 않는 경우 (이메일을 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
     })
     public ResponseEntity<ResponseDto.Success> reportComment(Principal principal,

@@ -683,5 +683,11 @@ public class CourseService
         else {
             throw new AppException(ErrorCode.INVALID_REASON, dto.getReason());
         }
+
+        // 이미 신고 정보가 존재한다면 예외 처리
+        if(commentReportRepository.searchCommentReport(profile.getProfile_id(), comment.getComment_id()).size() >= 5)
+        {
+            throw new AppException(ErrorCode.TOO_MANY_REPORT, dto.getComment_id());
+        }
     }
 }
