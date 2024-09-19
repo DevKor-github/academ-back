@@ -31,40 +31,10 @@ import java.util.Map;
 
 @RestController
 @Tag(name = "ADMIN", description = "ADMIN 권한의 계정만 요청 가능한 api입니다.")
-public class AdminController {
-
-        @Autowired
-        AdminService adminService;
-
-        @Autowired
-        VersionProvider versionProvider;
-
-        /* 대학원 강의 데이터베이스 초기화 컨트톨러 */
-        @PostMapping("/api/admin/init-course-database")
-        @JsonProperty("data") // data JSON 객체를 MAP<String, Object> 형식으로 매핑
-        @Operation(summary = "대학원 강의 데이터베이스 초기화")
-        @Parameters(value = {
-                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-        })
-        @ApiResponses(value = {
-                @ApiResponse(responseCode = "200", description = "아무 데이터도 반환하지 않습니다."),
-                @ApiResponse(responseCode = "실패: 401 (UNAUTHORIZED)", description = "로그인하지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-                @ApiResponse(responseCode = "실패: 401 (LOW_AUTHORITY)", description = "권한이 부족한 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-                @ApiResponse(responseCode = "실패: 500 (UNEXPECTED_ERROR)", description = "예기치 못한 에러가 발생한 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-        })
-        public ResponseEntity<ResponseDto.Success> initCourseDatabase(@Valid @RequestBody Map<String, Object> data) {
-                adminService.initCourseDatabase(data);
-
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(
-                                ResponseDto.Success.builder()
-                                        .message("대학원 강의 데이터베이스 초기화가 정상적으로 수행되었습니다.")
-                                        .data(null)
-                                        .version(versionProvider.getVersion())
-                                        .build()
-                        );
-
-        }
+public class AdminController
+{
+        @Autowired AdminService adminService;
+        @Autowired VersionProvider versionProvider;
 
         /* 대학원 강의 데이터베이스 추가 컨트톨러 */
         @PostMapping("/api/admin/insert-course-database")
