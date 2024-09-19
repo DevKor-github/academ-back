@@ -29,7 +29,7 @@ public class NoticeService
 
         // 결과가 없으면 예외 발생
         if(notices.isEmpty())
-            throw new AppException(ErrorCode.NO_RESULT, null);
+            throw new AppException(ErrorCode.NO_RESULT, page + 1);
 
         List<NoticeDto.List> noticeDtos = notices.stream()
                 .map(notice -> {

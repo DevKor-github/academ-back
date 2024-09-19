@@ -152,7 +152,7 @@ public class AdminService
 
         // 결과가 없으면 예외 발생
         if(reports.isEmpty())
-            throw new AppException(ErrorCode.NO_RESULT, page);
+            throw new AppException(ErrorCode.NO_RESULT, page + 1);
 
         List<CommentDto.ReportList> reportListDtos = reports.stream()
                 .map(report -> {
