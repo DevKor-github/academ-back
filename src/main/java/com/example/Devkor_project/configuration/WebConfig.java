@@ -32,7 +32,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://academ-frontend.vercel.app",
                         "https://13.124.249.107.nip.io",
                         "https://academ.kr",
-                        "https://academ.devkor.club"
+                        "https://academ.devkor.club",
+                        "https://academ-frontend-beta.vercel.app/"
                 )   // CORS 허용 도메인
                 .allowedMethods("GET", "POST", "PUT", "DELETE"); // CORS 허용 메서드
     }

@@ -4,7 +4,7 @@ Academ Back-end repository 입니다.
 ---
 
 ### 프로젝트 구조
-( 최신화 : v1.0.14 )
+( 최신화 : v1.1.0 )
 ```
 │
 ├── .github
@@ -35,13 +35,12 @@ Academ Back-end repository 입니다.
         │   │   ├── CourseController    // 강의, 강의평 관련 api 컨트롤러
         │   │   ├── LoginController     // 로그인, 권한 관련 api 컨트롤러
         │   │   ├── MyPageController    // 마이페이지 관련 api 컨트롤러
-        │   │   └── NoticeController    // 공지사항 관련 api 컨트롤러
+        │   │   └── VersionController   // 버전 관련 api 컨트롤러
         │   │
         │   │   ## dto 파일들
         │   ├── dto
         │   │   ├── CommentDto          // 강의평 관련 dto
         │   │   ├── CourseDto           // 강의 관련 dto
-        │   │   ├── NoticeDto           // 공지사항 관련 dto
         │   │   ├── ProfileDto          // 계정 관련 dto
         │   │   ├── ResponseDto         // 응답 dto
         │   │   └── TokenDto            // access token, refresh token dto
@@ -56,7 +55,6 @@ Academ Back-end repository 입니다.
         │   │   ├── CommentReport       // 강의평 신고 정보 entity
         │   │   ├── Course              // 강의 entity
         │   │   ├── CourseRating        // 강의 평점 entity
-        │   │   ├── Notice              // 공지사항 entity
         │   │   └── Profile             // 계정 entity
         │   │
         │   │   ## 예외 처리 파일들
@@ -75,7 +73,6 @@ Academ Back-end repository 입니다.
         │   │   ├── CommentRepository               // 강의평 repository
         │   │   ├── CourseRatingRepository          // 강의 평점 repository
         │   │   ├── CourseRepository                // 강의 repository
-        │   │   ├── NoticeRepository                // 공지사항 repository
         │   │   └── ProfileRepository               // 계정 repository
         │   │
         │   │   ## 보안 설정 파일들 (Spring Security)
@@ -99,7 +96,6 @@ Academ Back-end repository 입니다.
         │       ├── CourseService       // 강의, 강의평 관련 api 서비스
         │       ├── LoginService        // 로그인, 권한 관련 api 서비스
         │       ├── MyPageService       // 마이페이지 관련 api 서비스
-        │       ├── NoticeService       // 공지사항 관련 api 서비스
         │       └── SchedulerService    // 인증번호 자동 삭제 서비스
         │
         └── resources
