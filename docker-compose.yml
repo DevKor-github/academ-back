@@ -31,12 +31,3 @@ services:
     environment:
       - PROFILE=production
 
-  academ-nginx:
-    build:
-      context: .
-      dockerfile: Dockerfile.nginx
-    container_name: academ-nginx
-    depends_on:
-      - java-app
-    ports:
-      - "80:80"
