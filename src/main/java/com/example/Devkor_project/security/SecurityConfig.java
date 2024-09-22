@@ -42,24 +42,40 @@ public class SecurityConfig
                 // 경로별 권한 설정
                 httpSecurity
                         .authorizeHttpRequests((requests) -> (requests)
-                                // 해당 요청은 모든 사용자에게 접근 권한 허용
-                                .requestMatchers("/", "/login", "/signup").permitAll()
-                                .requestMatchers("/api/login/**", "/api/signup/**").permitAll()
-                                .requestMatchers("/notice/**", "/api/notice/**").permitAll()
+                                // 로그인
+                                .requestMatchers("/api/signup").permitAll()
+                                .requestMatchers("/api/login").permitAll()
+                                .requestMatchers("/api/logout").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/signup/send-email").permitAll()
+                                .requestMatchers("/api/signup/check-email").permitAll()
+                                .requestMatchers("/api/signup/check-username").permitAll()
+                                .requestMatchers("/api/login/reset-password").permitAll()
+                                .requestMatchers("/api/check-login").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/api/refresh-token").permitAll()
+                                // ADMIN
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                // 강의
+                                .requestMatchers("/api/course/search").permitAll()
+                                .requestMatchers("/api/course/search/count-result").permitAll()
+                                .requestMatchers("/api/course/detail").permitAll()
+                                .requestMatchers("/api/course/count-comment").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/course/bookmark").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/course/start-insert-comment").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/course/insert-comment").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/course/start-update-comment").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/course/update-comment").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/course/delete-comment").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/course/like-comment").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/course/report-comment").hasAnyRole("USER", "ADMIN")
+                                // 마이페이지
+                                .requestMatchers("/api/mypage/**").hasAnyRole("USER", "ADMIN")
+                                // 공지사항
+                                .requestMatchers("/api/notice/**").permitAll()
+                                // 기타
+                                .requestMatchers("/").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
-                                // 해당 요청은 인증된 사용자에게만 접근 권한 허용
-                                .requestMatchers("/api/logout").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/api/check-login").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/course/**").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/api/course/**").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/mypage/**").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/api/mypage/**").hasAnyRole("USER", "ADMIN")
-                                // 해당 요청은 관리자에게만 접근 권한 허용
-                                .requestMatchers("/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                // 그 외의 요청은 모든 사용자에게 접근 권한 허용
+                                // 그 외의 요청은 로그인을 수행한 사용자에게 접근 권한 허용
                                 .anyRequest().authenticated()
                         );
 
