@@ -1,8 +1,6 @@
 package com.example.Devkor_project.repository;
 
-import com.example.Devkor_project.entity.CommentLike;
 import com.example.Devkor_project.entity.CommentReport;
-import com.example.Devkor_project.entity.Notice;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

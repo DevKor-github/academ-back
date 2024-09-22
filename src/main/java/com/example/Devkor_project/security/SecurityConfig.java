@@ -68,8 +68,6 @@ public class SecurityConfig
                                 .requestMatchers("/api/course/report-comment").hasAnyRole("USER", "ADMIN")
                                 // 마이페이지
                                 .requestMatchers("/api/mypage/**").hasAnyRole("USER", "ADMIN")
-                                // 공지사항
-                                .requestMatchers("/api/notice/**").permitAll()
                                 // 기타
                                 .requestMatchers("/").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()

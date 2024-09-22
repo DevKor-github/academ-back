@@ -65,7 +65,6 @@ public class AccessAuthFilter extends OncePerRequestFilter {
                 "/api/check-login", "/api/refresh-token",
                 "/api/admin",
                 "/api/mypage",
-                "/api/notice",
                 "/api/course/search",
                 "/api/course/detail",
                 "/api/course/bookmark",

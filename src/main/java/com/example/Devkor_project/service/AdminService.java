@@ -1,13 +1,11 @@
 package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.CommentDto;
-import com.example.Devkor_project.dto.NoticeDto;
 import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.*;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,10 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 public class AdminService
@@ -26,7 +22,6 @@ public class AdminService
     @Autowired CourseRepository courseRepository;
     @Autowired CourseRatingRepository courseRatingRepository;
     @Autowired CommentRepository commentRepository;
-    @Autowired NoticeRepository noticeRepository;
     @Autowired CommentReportRepository commentReportRepository;
 
     @Autowired CourseService courseService;
@@ -92,56 +87,6 @@ public class AdminService
                 }
             }
         }
-    }
-
-    /* 공지사항 추가 서비스 */
-    public void insertNotice(NoticeDto.Insert dto)
-    {
-        // 공지사항 엔티티 생성
-        Notice notice = Notice.builder()
-                .title(dto.getTitle())
-                .detail(dto.getDetail())
-                .created_at(LocalDate.now())
-                .image_1(dto.getImage_1())
-                .image_2(dto.getImage_2())
-                .image_3(dto.getImage_3())
-                .image_4(dto.getImage_4())
-                .image_5(dto.getImage_5())
-                .build();
-
-        // 공지사항 저장
-        noticeRepository.save(notice);
-    }
-
-    /* 공지사항 수정 서비스 */
-    public void updateNotice(NoticeDto.Update dto)
-    {
-        // 해당 공지사항이 존재하는지 확인
-        Notice notice = noticeRepository.findById(dto.getNotice_id())
-            .orElseThrow(() -> new AppException(ErrorCode.NOTICE_NOT_FOUND, dto.getNotice_id()));
-
-        // 변경사항 적용
-        notice.setTitle(dto.getTitle());
-        notice.setDetail(dto.getDetail());
-        notice.setImage_1(dto.getImage_1());
-        notice.setImage_2(dto.getImage_2());
-        notice.setImage_3(dto.getImage_3());
-        notice.setImage_4(dto.getImage_4());
-        notice.setImage_5(dto.getImage_5());
-
-        // 변경사항 저장
-        noticeRepository.save(notice);
-    }
-
-    /* 공지사항 삭제 서비스 */
-    public void deleteNotice(NoticeDto.Delete dto)
-    {
-        // 해당 공지사항이 존재하는지 확인
-        Notice notice = noticeRepository.findById(dto.getNotice_id())
-                .orElseThrow(() -> new AppException(ErrorCode.NOTICE_NOT_FOUND, dto.getNotice_id()));
-
-        // 공지사항 삭제
-        noticeRepository.delete(notice);
     }
 
     /* 강의평 신고 내역 조회 서비스 */
