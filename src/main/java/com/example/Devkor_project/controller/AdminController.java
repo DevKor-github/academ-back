@@ -135,25 +135,4 @@ public class AdminController
                         );
         }
 
-        @GetMapping("/api/is-secure")
-        public ResponseEntity<ResponseDto.Success> getHTTPSStatus(HttpServletRequest request) {
-                String st;
-
-                boolean isHttps = request.isSecure();
-                if (isHttps) {
-                        st = "Connection is secure (HTTPS).";
-                } else {
-                        st = "Connection is not secure (not HTTPS).";
-                }
-
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(
-                                ResponseDto.Success.builder()
-                                        .message(st)
-                                        .data(null)
-                                        .version(versionProvider.getVersion())
-                                        .build()
-                        );
-        }
-
 }

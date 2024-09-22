@@ -34,7 +34,8 @@ Academ Back-end repository 입니다.
         │   │   ├── AdminController     // Admin 권한 계정만 요청 가능한 api 컨트롤러
         │   │   ├── CourseController    // 강의, 강의평 관련 api 컨트롤러
         │   │   ├── LoginController     // 로그인, 권한 관련 api 컨트롤러
-        │   │   └── MyPageController    // 마이페이지 관련 api 컨트롤러
+        │   │   ├── MyPageController    // 마이페이지 관련 api 컨트롤러
+        │   │   └── VersionController   // 버전 관련 api 컨트롤러
         │   │
         │   │   ## dto 파일들
         │   ├── dto

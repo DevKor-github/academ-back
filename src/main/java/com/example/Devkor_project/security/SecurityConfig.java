@@ -70,6 +70,7 @@ public class SecurityConfig
                                 .requestMatchers("/api/mypage/**").hasAnyRole("USER", "ADMIN")
                                 // 기타
                                 .requestMatchers("/").permitAll()
+                                .requestMatchers("/api/is-secure").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
                                 // 그 외의 요청은 로그인을 수행한 사용자에게 접근 권한 허용
