@@ -119,32 +119,6 @@ public class CourseController
                 );
     }
 
-    /* 강의평 개수 컨트롤러 */
-    @GetMapping("/api/course/count-comment")
-    @Operation(summary = "강의평 개수")
-    @Parameters(value = {
-            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
-            @Parameter(name = "course_id", description = "강의평 개수를 요청할 강의의 course_id")
-    })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "강의평 개수를 반환합니다.", content = @Content(schema = @Schema(implementation = int.class))),
-            @ApiResponse(responseCode = "실패: 401 (UNAUTHORIZED)", description = "로그인하지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-            @ApiResponse(responseCode = "실패: 401 (NO_ACCESS_AUTHORITY)", description = "강의평 열람권이 만료된 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-            @ApiResponse(responseCode = "실패: 404 (COURSE_NOT_FOUND)", description = "강의평 개수를 요청한 course_id에 대한 강의가 존재하지 않는 경우 (입력받은 course_id를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-    })
-    public ResponseEntity<ResponseDto.Success> countComment(@RequestParam("course_id") Long course_id)
-    {
-        int number = courseService.countComment(course_id);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseDto.Success.builder()
-                        .message("강의평 개수 확인이 성공적으로 수행되었습니다.")
-                        .data(number)
-                        .version(versionProvider.getVersion())
-                        .build()
-                );
-    }
-
     /* 강의 북마크 컨트롤러 */
     @GetMapping("/api/course/bookmark")
     @Operation(summary = "강의 북마크")

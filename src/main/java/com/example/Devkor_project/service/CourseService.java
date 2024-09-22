@@ -239,17 +239,6 @@ public class CourseService
         }
     }
 
-    /* 강의평 개수 서비스 */
-    public int countComment(Long course_id)
-    {
-        // 사용자가 강의평 개수를 요청한 강의가 존재하지 않으면 예외 처리
-        Course course = courseRepository.findById(course_id)
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id));
-
-        // 강의평 개수 반환
-        return commentRepository.countCommentByCourseId(course_id);
-    }
-
     /* 강의 북마크 서비스 */
     @Transactional
     public void bookmark(Principal principal, Long course_id)

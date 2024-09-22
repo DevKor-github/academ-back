@@ -58,7 +58,6 @@ public class SecurityConfig
                                 .requestMatchers("/api/course/search").permitAll()
                                 .requestMatchers("/api/course/search/count-result").permitAll()
                                 .requestMatchers("/api/course/detail").permitAll()
-                                .requestMatchers("/api/course/count-comment").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/api/course/bookmark").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/api/course/start-insert-comment").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/api/course/insert-comment").hasAnyRole("USER", "ADMIN")
