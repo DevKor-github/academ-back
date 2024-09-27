@@ -21,9 +21,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long>
     @Query(value = "SELECT * FROM comment WHERE profile_id = :profile_id", nativeQuery = true)
     List<Comment> findAllByProfileId(@Param("profile_id") Long profile_id);
 
-    @Query(value = "SELECT count(*) FROM comment WHERE course_id = :course_id", nativeQuery = true)
-    int countCommentByCourseId(@Param("course_id") Long course_id);
-
     @Query(value = "SELECT count(*) FROM comment WHERE profile_id = :profile_id", nativeQuery = true)
     int countCommentByProfileId(@Param("profile_id") Long profile_id);
 

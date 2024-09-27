@@ -34,15 +34,13 @@ public class CourseController
     @GetMapping("/api/course/search")
     @Operation(summary = "강의 검색", description = "**avg_rating, avg_r1_amount_of_studying, avg_r2_difficulty, avg_r3_delivery_power, avg_r4_grading**의 경우, 등록된 강의평이 존재하지 않는다면 0.0 값을 가집니다.\n\n**credit, time_location**의 경우, 값이 null일 수 있습니다.\n\n**time_location**의 경우, 값이 여러 개일 수도 있습니다. ( ‘\\n’으로 구분 )\n\n**semester**의 경우 다음과 같은 값을 가집니다.\n- 1R : 1학기\n- 1S : 여름계절\n- 2R : 2학기\n- 2W : 겨울계절\n- M0 : Module0\n- M1 : Module1\n- M2 : Module2\n- M3 : Module3\n- M4 : Module4\n- M5 : Module5\n- M6 : Module6\n- M7 : Module7\n\n페이지 하나 당 10개의 결과를 반환합니다.")
     @Parameters(value = {
-            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
             @Parameter(name = "keyword", description = "검색어"),
             @Parameter(name = "order", description = "검색 결과 배치 순서 ( NEWEST : 최신순 | RATING_DESC : 평점 높은순 | RATING_ASC : 평점 낮은순 )"),
             @Parameter(name = "page", description = "페이지 번호 ( 1부터 시작 )")
     })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200 (열람권 보유)", description = "CourseDto.Basic 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = CourseDto.Basic.class))),
-            @ApiResponse(responseCode = "200 (열람권 만료)", description = "CourseDto.ExpiredBasic 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = CourseDto.ExpiredBasic.class))),
-            @ApiResponse(responseCode = "실패: 401 (UNAUTHORIZED)", description = "로그인하지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
+            @ApiResponse(responseCode = "200 (열람권 만료, 비로그인)", description = "CourseDto.ExpiredBasic 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = CourseDto.ExpiredBasic.class))),
             @ApiResponse(responseCode = "실패: 400 (SHORT_SEARCH_WORD)", description = "검색어가 1글자 이하인 경우 (입력받은 검색어를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 400 (INVALID_ORDER)", description = "입력받은 order 인자가 올바르지 않은 경우 (입력받은 배치 순서를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 404 (NO_RESULT)", description = "검색 결과가 존재하지 않는 경우 (입력받은 검색어를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
@@ -68,12 +66,10 @@ public class CourseController
     @GetMapping("/api/course/search/count-result")
     @Operation(summary = "강의 검색 결과 개수")
     @Parameters(value = {
-            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
             @Parameter(name = "keyword", description = "검색어")
     })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "결과 개수를 반환합니다.", content = @Content(schema = @Schema(implementation = int.class))),
-            @ApiResponse(responseCode = "실패: 401 (UNAUTHORIZED)", description = "로그인하지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 400 (SHORT_SEARCH_WORD)", description = "검색어가 1글자 이하인 경우 (입력받은 검색어를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 404 (NO_RESULT)", description = "검색 결과가 존재하지 않는 경우 (입력받은 검색어를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
     })
@@ -94,14 +90,12 @@ public class CourseController
     @GetMapping("api/course/detail")
     @Operation(summary = "강의 상세 정보", description = "**avg_rating, avg_r1_amount_of_studying, avg_r2_difficulty, avg_r3_delivery_power, avg_r4_grading**의 경우, 등록된 강의평이 존재하지 않는다면 0.0 값을 가집니다.\n\n**credit, time_location**의 경우, 값이 null일 수 있습니다.\n\n**time_location**의 경우, 값이 여러 개일 수도 있습니다. ( ‘\\n’으로 구분 )\n\n**semester**의 경우 다음과 같은 값을 가집니다.\n- 1R : 1학기\n- 1S : 여름계절\n- 2R : 2학기\n- 2W : 겨울계절\n- M0 : Module0\n- M1 : Module1\n- M2 : Module2\n- M3 : Module3\n- M4 : Module4\n- M5 : Module5\n- M6 : Module6\n- M7 : Module7\n\n페이지 하나 당 10개의 강의평 정보를 반환합니다.")
     @Parameters(value = {
-            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
             @Parameter(name = "course_id", description = "상세 정보를 요청할 강의의 course_id"),
             @Parameter(name = "order", description = "강의평 배치 순서 ( NEWEST : 최신순 | RATING_DESC : 평점 높은순 | RATING_ASC : 평점 낮은순 | LIKES_DESC : 좋아요 많은순 | LIKES_ASC : 좋아요 적은순 )"),
             @Parameter(name = "page", description = "페이지 번호 ( 1부터 시작 )"),
     })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "CourseDto.Detail 데이터를 반환합니다.", content = @Content(schema = @Schema(implementation = CourseDto.Detail.class))),
-            @ApiResponse(responseCode = "실패: 401 (UNAUTHORIZED)", description = "로그인하지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
+            @ApiResponse(responseCode = "200 (열람권 보유)", description = "CourseDto.Detail 데이터를 반환합니다.", content = @Content(schema = @Schema(implementation = CourseDto.Detail.class))),
             @ApiResponse(responseCode = "실패: 401 (NO_ACCESS_AUTHORITY)", description = "강의평 열람권이 만료된 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 404 (COURSE_NOT_FOUND)", description = "상세 정보를 요청한 course_id에 대한 강의가 존재하지 않는 경우 (입력받은 course_id를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 404 (USER_NOT_FOUND)", description = "특정 강의평에 대한 사용자 데이터가 존재하지 않는 경우 (profile_id를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
@@ -113,7 +107,7 @@ public class CourseController
                                                             @RequestParam("page") int page,
                                                             Principal principal)
     {
-        CourseDto.Detail dto = courseService.courseDetail(course_id, order, page - 1, principal);
+        Object dto = courseService.courseDetail(course_id, order, page - 1, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
@@ -122,32 +116,6 @@ public class CourseController
                                 .data(dto)
                                 .version(versionProvider.getVersion())
                                 .build()
-                );
-    }
-
-    /* 강의평 개수 컨트롤러 */
-    @GetMapping("/api/course/count-comment")
-    @Operation(summary = "강의평 개수")
-    @Parameters(value = {
-            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
-            @Parameter(name = "course_id", description = "강의평 개수를 요청할 강의의 course_id")
-    })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "강의평 개수를 반환합니다.", content = @Content(schema = @Schema(implementation = int.class))),
-            @ApiResponse(responseCode = "실패: 401 (UNAUTHORIZED)", description = "로그인하지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-            @ApiResponse(responseCode = "실패: 401 (NO_ACCESS_AUTHORITY)", description = "강의평 열람권이 만료된 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-            @ApiResponse(responseCode = "실패: 404 (COURSE_NOT_FOUND)", description = "강의평 개수를 요청한 course_id에 대한 강의가 존재하지 않는 경우 (입력받은 course_id를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-    })
-    public ResponseEntity<ResponseDto.Success> countComment(@RequestParam("course_id") Long course_id)
-    {
-        int number = courseService.countComment(course_id);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseDto.Success.builder()
-                        .message("강의평 개수 확인이 성공적으로 수행되었습니다.")
-                        .data(number)
-                        .version(versionProvider.getVersion())
-                        .build()
                 );
     }
 

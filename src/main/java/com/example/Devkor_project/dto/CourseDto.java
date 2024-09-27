@@ -103,6 +103,48 @@ public class CourseDto
     @Getter
     @ToString
     @Builder
+    public static class ExpiredBasic
+    {
+        @NotNull(message = "course_id는 null일 수 없습니다.")
+        @Schema(description = "course_id")
+        private Long course_id;
+        @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
+        @Schema(description = "학수번호")
+        private String course_code;
+        @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
+        @Schema(description = "대학원")
+        private String graduate_school;
+        @NotBlank(message = "department는 빈 문자열일 수 없습니다.")
+        @Schema(description = "학과")
+        private String department;
+        @NotBlank(message = "year은 빈 문자열일 수 없습니다.")
+        @Schema(description = "연도")
+        private String year;
+        @NotBlank(message = "semester은 빈 문자열일 수 없습니다.")
+        @Schema(description = "학기")
+        private String semester;
+        @NotBlank(message = "name은 빈 문자열일 수 없습니다.")
+        @Schema(description = "강의명")
+        private String name;
+        @NotBlank(message = "professor은 빈 문자열일 수 없습니다.")
+        @Schema(description = "교수명")
+        private String professor;
+        @Schema(description = "학점")
+        private String credit;
+        @Schema(description = "시간, 장소")
+        private String time_location;
+        @NotNull(message = "COUNT_comments는 null일 수 없습니다.")
+        @Schema(description = "강의평 개수")
+        private int COUNT_comments;
+        @Schema(description = "북마크 여부")
+        private Boolean isBookmark;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @ToString
+    @Builder
     public static class Detail
     {
         @NotNull(message = "course_id는 null일 수 없습니다.")
@@ -192,7 +234,7 @@ public class CourseDto
     @Getter
     @ToString
     @Builder
-    public static class ExpiredBasic
+    public static class ExpiredDetail
     {
         @NotNull(message = "course_id는 null일 수 없습니다.")
         @Schema(description = "course_id")
@@ -260,6 +302,23 @@ public class CourseDto
                 .build();
     }
 
+    public static CourseDto.ExpiredBasic entityToExpiredBasic(Course course, Boolean isBookmark) {
+        return ExpiredBasic.builder()
+                .course_id(course.getCourse_id())
+                .course_code(course.getCourse_code())
+                .graduate_school(course.getGraduate_school())
+                .department(course.getDepartment())
+                .year(course.getYear())
+                .semester(course.getSemester())
+                .name(course.getName())
+                .professor(course.getProfessor())
+                .credit(course.getCredit())
+                .time_location(course.getTime_location())
+                .COUNT_comments(course.getCOUNT_comments())
+                .isBookmark(isBookmark)
+                .build();
+    }
+
     public static CourseDto.Detail entityToDetail(Course course,
                                                   CourseRating courseRating,
                                                   List<CommentDto.Detail> commentDtos,
@@ -296,8 +355,10 @@ public class CourseDto
                 .build();
     }
 
-    public static CourseDto.ExpiredBasic entityToExpiredBasic(Course course, Boolean isBookmark) {
-        return ExpiredBasic.builder()
+    public static CourseDto.ExpiredDetail entityToExpiredDetail(Course course,
+                                                                Boolean isBookmark)
+    {
+        return ExpiredDetail.builder()
                 .course_id(course.getCourse_id())
                 .course_code(course.getCourse_code())
                 .graduate_school(course.getGraduate_school())

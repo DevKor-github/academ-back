@@ -34,12 +34,6 @@ public class CourseService
     /* 강의 검색 서비스 */
     public List<?> searchCourse(String keyword, String order, int page, Principal principal)
     {
-        // 요청을 보낸 사용자의 계정 정보
-        String email = principal.getName();
-        Profile profile = profileRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
-        Long profile_id = profile.getProfile_id();
-
         // 검색어가 2글자 미만이면 예외 발생
         if(keyword.length() < 2)
             throw new AppException(ErrorCode.SHORT_SEARCH_WORD, keyword);
@@ -63,21 +57,13 @@ public class CourseService
         if(courses.isEmpty())
             throw new AppException(ErrorCode.NO_RESULT, keyword);
 
-        // 열람권 보유 시, 평점 데이터도 전달
-        // 열람권 만료 시, 평점 데이터는 전달하지 않음
-        if (profile.getAccess_expiration_date().isAfter(LocalDate.now()))
+        // 비로그인 시, 평점 데이터를 전달하지 않으며, 북마크 여부가 항상 false
+        if(principal == null)
         {
-            // Course 엔티티 리스트 -> courseDto.Basic 리스트
-            List<CourseDto.Basic> courseDtos = courses.stream()
+            // Course 엔티티 리스트 -> courseDto.ExpiredBasic 리스트
+            List<CourseDto.ExpiredBasic> courseDtos = courses.stream()
                     .map(course -> {
-
-                        // 해당 강의의 평점 데이터
-                        CourseRating courseRating = course.getCourseRating_id();
-
-                        // 사용자의 해당 강의 북마크 여부
-                        boolean isBookmark = !bookmarkRepository.searchBookmark(profile_id, course.getCourse_id()).isEmpty();
-
-                        return CourseDto.entityToBasic(course, courseRating, isBookmark);
+                        return CourseDto.entityToExpiredBasic(course, false);
                     })
                     .toList();
 
@@ -85,18 +71,47 @@ public class CourseService
         }
         else
         {
-            // Course 엔티티 리스트 -> courseDto.Basic 리스트
-            List<CourseDto.ExpiredBasic> courseDtos = courses.stream()
-                    .map(course -> {
+            // 사용자 정보 확인
+            String email = principal.getName();
+            Profile profile = profileRepository.findByEmail(email)
+                    .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+            Long profile_id = profile.getProfile_id();
 
-                        // 사용자의 해당 강의 북마크 여부
-                        boolean isBookmark = !bookmarkRepository.searchBookmark(profile_id, course.getCourse_id()).isEmpty();
+            // 열람권 보유 시, 평점 데이터도 전달
+            // 열람권 만료 시, 평점 데이터는 전달하지 않음
+            if(profile.getAccess_expiration_date().isAfter(LocalDate.now()))
+            {
+                // Course 엔티티 리스트 -> courseDto.Basic 리스트
+                List<CourseDto.Basic> courseDtos = courses.stream()
+                        .map(course -> {
 
-                        return CourseDto.entityToExpiredBasic(course, isBookmark);
-                    })
-                    .toList();
+                            // 해당 강의의 평점 데이터
+                            CourseRating courseRating = course.getCourseRating_id();
 
-            return courseDtos;
+                            // 사용자의 해당 강의 북마크 여부
+                            boolean isBookmark = !bookmarkRepository.searchBookmark(profile_id, course.getCourse_id()).isEmpty();
+
+                            return CourseDto.entityToBasic(course, courseRating, isBookmark);
+                        })
+                        .toList();
+
+                return courseDtos;
+            }
+            else
+            {
+                // Course 엔티티 리스트 -> courseDto.ExpiredBasic 리스트
+                List<CourseDto.ExpiredBasic> courseDtos = courses.stream()
+                        .map(course -> {
+
+                            // 사용자의 해당 강의 북마크 여부
+                            boolean isBookmark = !bookmarkRepository.searchBookmark(profile_id, course.getCourse_id()).isEmpty();
+
+                            return CourseDto.entityToExpiredBasic(course, isBookmark);
+                        })
+                        .toList();
+
+                return courseDtos;
+            }
         }
     }
 
@@ -118,99 +133,110 @@ public class CourseService
     }
 
     /* 강의 상세 정보 서비스 */
-    public CourseDto.Detail courseDetail(Long course_id, String order, int page, Principal principal)
+    public Object courseDetail(Long course_id, String order, int page, Principal principal)
     {
-        // 요청을 보낸 사용자의 계정 정보
-        String principalEmail = principal.getName();
-        Profile principalProfile = profileRepository.findByEmail(principalEmail)
-                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, principalEmail));
-        Long principalProfile_id = principalProfile.getProfile_id();
-
         // 사용자가 상세 정보를 요청한 강의가 존재하지 않으면 예외 처리
         Course course = courseRepository.findById(course_id)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id));
 
-        // 해당 강의의 평점 데이터가 존재하지 않으면 예외 처리
-        CourseRating courseRating = courseRatingRepository.findById(course.getCourseRating_id().getCourseRating_id())
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_RATING_NOT_FOUND, course.getCourseRating_id().getCourseRating_id()));
-
-        // Pageable 객체 생성 (size = 10개)
-        Pageable pageable = PageRequest.of(page, 10);
-
-        // 해당 강의의 강의평들 검색
-        Page<Comment> comments = null;
-
-        if(order.equals("NEWEST"))
-            comments = commentRepository.findByCourseIdOrderNewest(course_id, pageable);
-        else if(order.equals("RATING_DESC"))
-            comments = commentRepository.findByCourseIdOrderRatingDesc(course_id, pageable);
-        else if(order.equals("RATING_ASC"))
-            comments = commentRepository.findByCourseIdOrderRatingAsc(course_id, pageable);
-        else if(order.equals("LIKES_DESC"))
-            comments = commentRepository.findByCourseIdOrderLikesDesc(course_id, pageable);
-        else if(order.equals("LIKES_ASC"))
-            comments = commentRepository.findByCourseIdOrderLikesAsc(course_id, pageable);
+        // 비로그인 시, 평점 데이터와 강의평 리스트를 전달하지 않으며, 북마크 여부가 항상 false
+        if(principal == null)
+        {
+            // CourseDto.ExpiredDetail 반환
+            return CourseDto.entityToExpiredDetail(course, false);
+        }
         else
-            throw new AppException(ErrorCode.INVALID_ORDER, order);
+        {
+            // 요청을 보낸 사용자의 계정 정보
+            String principalEmail = principal.getName();
+            Profile principalProfile = profileRepository.findByEmail(principalEmail)
+                    .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, principalEmail));
+            Long principalProfile_id = principalProfile.getProfile_id();
 
-        // 강의평 엔티티 리스트를 강의평 dto 리스트로 변환
-        List<CommentDto.Detail> commentDtos = comments.stream()
-                .map(comment -> {
+            // 열람권 보유 시, 평점 데이터와 강의평 리스트도 전달
+            // 열람권 만료 시, 평점 데이터와 강의평 리스트를 전달하지 않음
+            if(principalProfile.getAccess_expiration_date().isAfter(LocalDate.now()))
+            {
+                // 해당 강의의 평점 데이터가 존재하지 않으면 예외 처리
+                CourseRating courseRating = courseRatingRepository.findById(course.getCourseRating_id().getCourseRating_id())
+                        .orElseThrow(() -> new AppException(ErrorCode.COURSE_RATING_NOT_FOUND, course.getCourseRating_id().getCourseRating_id()));
 
-                    // 해당 강의평을 작성한 사용자의 profile_id가 존재하지 않으면 예외 처리
-                    Profile profile = profileRepository.findById(comment.getProfile_id().getProfile_id())
-                            .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, comment.getProfile_id().getProfile_id()));
+                // Pageable 객체 생성 (size = 10개)
+                Pageable pageable = PageRequest.of(page, 10);
 
-                    // 해당 강의평의 평점 데이터가 존재하지 않으면 예외 처리
-                    CommentRating commentRating = commentRatingRepository.findById(comment.getCommentRating_id().getCommentRating_id())
-                            .orElseThrow(() -> new AppException(ErrorCode.COMMENT_RATING_NOT_FOUND, comment.getCommentRating_id().getCommentRating_id()));
+                // 해당 강의의 강의평들 검색
+                Page<Comment> comments = null;
 
-                    CommentLike commentLike = commentLikeRepository.searchCommentLike(principalProfile_id, comment.getComment_id());
+                if(order.equals("NEWEST"))
+                    comments = commentRepository.findByCourseIdOrderNewest(course_id, pageable);
+                else if(order.equals("RATING_DESC"))
+                    comments = commentRepository.findByCourseIdOrderRatingDesc(course_id, pageable);
+                else if(order.equals("RATING_ASC"))
+                    comments = commentRepository.findByCourseIdOrderRatingAsc(course_id, pageable);
+                else if(order.equals("LIKES_DESC"))
+                    comments = commentRepository.findByCourseIdOrderLikesDesc(course_id, pageable);
+                else if(order.equals("LIKES_ASC"))
+                    comments = commentRepository.findByCourseIdOrderLikesAsc(course_id, pageable);
+                else
+                    throw new AppException(ErrorCode.INVALID_ORDER, order);
 
-                    return CommentDto.Detail.builder()
-                            .comment_id(comment.getComment_id())
-                            .profile_id(profile.getProfile_id())
-                            .username(profile.getUsername())
-                            .rating(commentRating.getRating())
-                            .r1_amount_of_studying(commentRating.getR1_amount_of_studying())
-                            .r2_difficulty(commentRating.getR2_difficulty())
-                            .r3_delivery_power(commentRating.getR3_delivery_power())
-                            .r4_grading(commentRating.getR4_grading())
-                            .review(comment.getReview())
-                            .teach_t1_theory(commentRating.isTeach_t1_theory())
-                            .teach_t2_practice(commentRating.isTeach_t2_practice())
-                            .teach_t3_seminar(commentRating.isTeach_t3_seminar())
-                            .teach_t4_discussion(commentRating.isTeach_t4_discussion())
-                            .teach_t5_presentation(commentRating.isTeach_t5_presentation())
-                            .learn_t1_theory(commentRating.isLearn_t1_theory())
-                            .learn_t2_thesis(commentRating.isLearn_t2_thesis())
-                            .learn_t3_exam(commentRating.isLearn_t3_exam())
-                            .learn_t4_industry(commentRating.isLearn_t4_industry())
-                            .likes(comment.getLikes())
-                            .created_at(comment.getCreated_at())
-                            .updated_at(comment.getUpdated_at())
-                            .already_like(commentLike != null)
-                            .build();
+                // 강의평 엔티티 리스트를 강의평 dto 리스트로 변환
+                List<CommentDto.Detail> commentDtos = comments.stream()
+                        .map(comment -> {
 
-                })
-                .toList();
+                            // 해당 강의평을 작성한 사용자의 profile_id가 존재하지 않으면 예외 처리
+                            Profile profile = profileRepository.findById(comment.getProfile_id().getProfile_id())
+                                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, comment.getProfile_id().getProfile_id()));
 
-        // 사용자의 해당 강의 북마크 여부
-        boolean isBookmark = !bookmarkRepository.searchBookmark(principalProfile_id, course.getCourse_id()).isEmpty();
+                            // 해당 강의평의 평점 데이터가 존재하지 않으면 예외 처리
+                            CommentRating commentRating = commentRatingRepository.findById(comment.getCommentRating_id().getCommentRating_id())
+                                    .orElseThrow(() -> new AppException(ErrorCode.COMMENT_RATING_NOT_FOUND, comment.getCommentRating_id().getCommentRating_id()));
 
-        // course 엔티티와 강의평 dto 리스트로 CourseDto.Detail 만들어서 반환
-        return CourseDto.entityToDetail(course, courseRating, commentDtos, isBookmark);
-    }
+                            CommentLike commentLike = commentLikeRepository.searchCommentLike(principalProfile_id, comment.getComment_id());
 
-    /* 강의평 개수 서비스 */
-    public int countComment(Long course_id)
-    {
-        // 사용자가 강의평 개수를 요청한 강의가 존재하지 않으면 예외 처리
-        Course course = courseRepository.findById(course_id)
-                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id));
+                            return CommentDto.Detail.builder()
+                                    .comment_id(comment.getComment_id())
+                                    .profile_id(profile.getProfile_id())
+                                    .username(profile.getUsername())
+                                    .rating(commentRating.getRating())
+                                    .r1_amount_of_studying(commentRating.getR1_amount_of_studying())
+                                    .r2_difficulty(commentRating.getR2_difficulty())
+                                    .r3_delivery_power(commentRating.getR3_delivery_power())
+                                    .r4_grading(commentRating.getR4_grading())
+                                    .review(comment.getReview())
+                                    .teach_t1_theory(commentRating.isTeach_t1_theory())
+                                    .teach_t2_practice(commentRating.isTeach_t2_practice())
+                                    .teach_t3_seminar(commentRating.isTeach_t3_seminar())
+                                    .teach_t4_discussion(commentRating.isTeach_t4_discussion())
+                                    .teach_t5_presentation(commentRating.isTeach_t5_presentation())
+                                    .learn_t1_theory(commentRating.isLearn_t1_theory())
+                                    .learn_t2_thesis(commentRating.isLearn_t2_thesis())
+                                    .learn_t3_exam(commentRating.isLearn_t3_exam())
+                                    .learn_t4_industry(commentRating.isLearn_t4_industry())
+                                    .likes(comment.getLikes())
+                                    .created_at(comment.getCreated_at())
+                                    .updated_at(comment.getUpdated_at())
+                                    .already_like(commentLike != null)
+                                    .build();
 
-        // 강의평 개수 반환
-        return commentRepository.countCommentByCourseId(course_id);
+                        })
+                        .toList();
+
+                // 사용자의 해당 강의 북마크 여부
+                boolean isBookmark = !bookmarkRepository.searchBookmark(principalProfile_id, course.getCourse_id()).isEmpty();
+
+                // course 엔티티와 강의평 dto 리스트로 CourseDto.Detail 만들어서 반환
+                return CourseDto.entityToDetail(course, courseRating, commentDtos, isBookmark);
+            }
+            else
+            {
+                // 사용자의 해당 강의 북마크 여부
+                boolean isBookmark = !bookmarkRepository.searchBookmark(principalProfile_id, course.getCourse_id()).isEmpty();
+
+                // CourseDto.ExpiredDetail 반환
+                return CourseDto.entityToExpiredDetail(course, isBookmark);
+            }
+        }
     }
 
     /* 강의 북마크 서비스 */
