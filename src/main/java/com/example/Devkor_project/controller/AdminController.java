@@ -163,4 +163,28 @@ public class AdminController
                         );
         }
 
+        /* 연도 단위 월별 트래픽 확인 컨트롤러 */
+        @GetMapping("/api/admin/traffic-yearly")
+        @Operation(summary = "연도 단위 월별 트래픽 확인")
+        @Parameters(value = {
+                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
+                @Parameter(name = "year", description = "연도"),
+        })
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "TrafficDto.Year 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = TrafficDto.Year.class))),
+        })
+        public ResponseEntity<ResponseDto.Success> trafficYearly(@RequestParam("year") String year)
+        {
+                List<TrafficDto.Year> data = adminService.trafficYearly(year);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("연도 단위 월별 트래픽 확인을 정상적으로 완료하였습니다.")
+                                        .data(data)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
+        }
+
 }

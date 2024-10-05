@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -171,5 +172,38 @@ public class AdminService
                 .toList();
 
         return trafficDtos;
+    }
+
+    /* 연도 단위 월별 트래픽 확인 서비스 */
+    public List<TrafficDto.Year> trafficYearly(String year)
+    {
+        // 반환할 데이터 변수
+        List<TrafficDto.Year> data = new ArrayList<>();
+
+        for(byte i = 1; i <= 12; i++)
+        {
+            // 총 요청 횟수를 저장하는 변수
+            int total = 0;
+
+            // 해당 월 동안의 트래픽 정보 검색
+            List<Traffic> traffics = trafficRepository.findByMonth(year, i);
+
+            // 각 트래픽 정보마다의 요청 횟수를 total 변수에 추가
+            if(!traffics.isEmpty())
+            {
+                for (Traffic traffic : traffics) {
+                    total += traffic.getCount();
+                }
+            }
+
+            data.add(
+                    TrafficDto.Year.builder()
+                            .month(i)
+                            .count(total)
+                            .build()
+            );
+        }
+
+        return data;
     }
 }
