@@ -1,6 +1,7 @@
 package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.CommentDto;
+import com.example.Devkor_project.dto.TrafficDto;
 import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ public class AdminService
     @Autowired CourseRatingRepository courseRatingRepository;
     @Autowired CommentRepository commentRepository;
     @Autowired CommentReportRepository commentReportRepository;
+    @Autowired TrafficRepository trafficRepository;
 
     @Autowired CourseService courseService;
 
@@ -146,5 +149,61 @@ public class AdminService
         };
 
         return courseService.deleteComment(principal, dto);
+    }
+
+    /* 월 단위 경로별 트래픽 확인 서비스 */
+    public List<TrafficDto.Month> trafficMonthly(String year, Byte month)
+    {
+        // 해당 기간 동안의 트래픽 정보 검색
+        List<Traffic> traffics = trafficRepository.findByMonth(year, month);
+
+        // 트래픽 정보가 존재하지 않는다면 예외 발생
+        if(traffics.isEmpty())
+            throw new AppException(ErrorCode.TRAFFIC_NOT_FOUND, null);
+
+        // 엔티티 리스트를 dto 리스트로 변환
+        List<TrafficDto.Month> trafficDtos = traffics.stream()
+                .map(traffic -> {
+                    return TrafficDto.Month.builder()
+                            .api_path(traffic.getApi_path())
+                            .count(traffic.getCount())
+                            .build();
+                })
+                .toList();
+
+        return trafficDtos;
+    }
+
+    /* 연도 단위 월별 트래픽 확인 서비스 */
+    public List<TrafficDto.Year> trafficYearly(String year)
+    {
+        // 반환할 데이터 변수
+        List<TrafficDto.Year> data = new ArrayList<>();
+
+        for(byte i = 1; i <= 12; i++)
+        {
+            // 총 요청 횟수를 저장하는 변수
+            int total = 0;
+
+            // 해당 월 동안의 트래픽 정보 검색
+            List<Traffic> traffics = trafficRepository.findByMonth(year, i);
+
+            // 각 트래픽 정보마다의 요청 횟수를 total 변수에 추가
+            if(!traffics.isEmpty())
+            {
+                for (Traffic traffic : traffics) {
+                    total += traffic.getCount();
+                }
+            }
+
+            data.add(
+                    TrafficDto.Year.builder()
+                            .month(i)
+                            .count(total)
+                            .build()
+            );
+        }
+
+        return data;
     }
 }

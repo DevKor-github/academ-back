@@ -38,7 +38,7 @@ public enum ErrorCode
     INVALID_ITEM(HttpStatus.BAD_REQUEST, "해당 아이템은 유효하지 않습니다."),
     NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "포인트가 부족합니다."),
     WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 틀렸습니다."),
-    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 공지사항이 존재하지 않습니다.");
+    TRAFFIC_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 기간 동안 요청이 들어오지 않았습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
