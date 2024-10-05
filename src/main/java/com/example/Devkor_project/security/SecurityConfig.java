@@ -2,6 +2,7 @@ package com.example.Devkor_project.security;
 
 import com.example.Devkor_project.configuration.VersionProvider;
 import com.example.Devkor_project.repository.ProfileRepository;
+import com.example.Devkor_project.repository.TrafficRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ public class SecurityConfig
         @Autowired JwtUtil jwtUtil;
         @Autowired RedisTemplate<String, String> redisTemplate;
         @Autowired ProfileRepository profileRepository;
+        @Autowired TrafficRepository trafficRepository;
         @Autowired VersionProvider versionProvider;
         @Autowired ObjectMapper objectMapper = new ObjectMapper();
 
@@ -91,6 +93,10 @@ public class SecurityConfig
                 // AccessAuthFilter 앞에 JwtAuthFilter 추가
                 httpSecurity
                         .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil, redisTemplate, profileRepository), AccessAuthFilter.class);
+
+                // JwtAuthFilter 앞에 TrafficFilter 추가
+                httpSecurity
+                        .addFilterBefore(new TrafficFilter(trafficRepository), JwtAuthFilter.class);
 
                 // 로그인, 로그아웃 설정
                 httpSecurity
