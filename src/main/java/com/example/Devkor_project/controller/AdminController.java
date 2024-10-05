@@ -3,6 +3,7 @@ package com.example.Devkor_project.controller;
 import com.example.Devkor_project.configuration.VersionProvider;
 import com.example.Devkor_project.dto.CommentDto;
 import com.example.Devkor_project.dto.ResponseDto;
+import com.example.Devkor_project.dto.TrafficDto;
 import com.example.Devkor_project.service.AdminService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -130,6 +131,33 @@ public class AdminController
                                 ResponseDto.Success.builder()
                                         .message("강의평 삭제를 정상적으로 완료하였습니다.")
                                         .data(course_id)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
+        }
+
+        /* 월 단위 경로별 트래픽 확인 컨트롤러 */
+        @GetMapping("/api/admin/traffic-monthly")
+        @Operation(summary = "월 단위 경로별 트래픽 확인")
+        @Parameters(value = {
+                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
+                @Parameter(name = "year", description = "연도"),
+                @Parameter(name = "month", description = "월"),
+        })
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "TrafficDto.Month 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = TrafficDto.Month.class))),
+                @ApiResponse(responseCode = "실패: 404 (TRAFFIC_NOT_FOUND)", description = "해당 기간 동안 요청이 들어오지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
+        })
+        public ResponseEntity<ResponseDto.Success> trafficMonthly(@RequestParam("year") String year,
+                                                                  @RequestParam("month") Byte month)
+        {
+                List<TrafficDto.Month> data = adminService.trafficMonthly(year, month);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("월 단위 경로별 트래픽 확인을 정상적으로 완료하였습니다.")
+                                        .data(data)
                                         .version(versionProvider.getVersion())
                                         .build()
                         );
