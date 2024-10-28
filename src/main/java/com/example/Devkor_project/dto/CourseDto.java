@@ -287,9 +287,6 @@ public class CourseDto
         @NotNull(message = "count는 null일 수 없습니다.")
         @Schema(description = "count")
         private int count;
-        @NotNull(message = "count2는 null일 수 없습니다.")
-        @Schema(description = "count2")
-        private int count2;
     }
 
     public static CourseDto.Basic entityToBasic(Course course, CourseRating courseRating, Boolean isBookmark) {
