@@ -1,10 +1,7 @@
 package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.configuration.VersionProvider;
-import com.example.Devkor_project.dto.CommentDto;
-import com.example.Devkor_project.dto.CourseDto;
-import com.example.Devkor_project.dto.ResponseDto;
-import com.example.Devkor_project.dto.TrafficDto;
+import com.example.Devkor_project.dto.*;
 import com.example.Devkor_project.service.AdminService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -69,9 +66,9 @@ public class AdminController
         @ApiResponses(value = {
                 @ApiResponse(responseCode = "200", description = "CourseDto.CheckSynchronization 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = CourseDto.CheckSynchronization.class))),
         })
-        public ResponseEntity<ResponseDto.Success> checkCourseSynchronization()
+        public ResponseEntity<ResponseDto.Success> checkCourseSynchronization(@Valid @RequestBody CrawlingDto.Synchronization dto)
         {
-                List<CourseDto.CheckSynchronization> data = adminService.checkCourseSynchronization();
+                CourseDto.CheckSynchronization data = adminService.checkCourseSynchronization(dto);
 
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(

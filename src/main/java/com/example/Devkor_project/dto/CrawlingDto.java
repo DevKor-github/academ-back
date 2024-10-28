@@ -9,6 +9,19 @@ import java.util.List;
 public class CrawlingDto
 {
     @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    @Builder
+    public static class Synchronization
+    {
+        @NotBlank(message = "year는 빈 문자열일 수 없습니다.")
+        private String year;
+        @NotBlank(message = "semester은 빈 문자열일 수 없습니다.")
+        private String semester;
+    }
+
+    @AllArgsConstructor
     @Getter
     @Builder
     public static class Condition

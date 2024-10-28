@@ -27,6 +27,7 @@ public class Course
 
     @Column(nullable = false) private String name;
     @Column(nullable = false) private String course_code;
+    @Column(nullable = false) private String class_number;
     @Column(nullable = false) private String professor;
     @Column(nullable = false) private String graduate_school;
     @Column(nullable = false) private String department;
