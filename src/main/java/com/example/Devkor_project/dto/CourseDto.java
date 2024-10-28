@@ -271,6 +271,27 @@ public class CourseDto
         private Boolean isBookmark;
     }
 
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @ToString
+    @Builder
+    public static class CheckSynchronization
+    {
+        @NotBlank(message = "year은 빈 문자열일 수 없습니다.")
+        @Schema(description = "연도")
+        private String year;
+        @NotBlank(message = "semester은 빈 문자열일 수 없습니다.")
+        @Schema(description = "학기")
+        private String semester;
+        @NotNull(message = "count는 null일 수 없습니다.")
+        @Schema(description = "count")
+        private int count;
+        @NotNull(message = "count2는 null일 수 없습니다.")
+        @Schema(description = "count2")
+        private int count2;
+    }
+
     public static CourseDto.Basic entityToBasic(Course course, CourseRating courseRating, Boolean isBookmark) {
         return Basic.builder()
                 .course_id(course.getCourse_id())
