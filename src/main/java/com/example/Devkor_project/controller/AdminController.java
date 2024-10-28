@@ -2,6 +2,7 @@ package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.configuration.VersionProvider;
 import com.example.Devkor_project.dto.CommentDto;
+import com.example.Devkor_project.dto.CourseDto;
 import com.example.Devkor_project.dto.ResponseDto;
 import com.example.Devkor_project.dto.TrafficDto;
 import com.example.Devkor_project.service.AdminService;
@@ -54,6 +55,29 @@ public class AdminController
                                 ResponseDto.Success.builder()
                                         .message("대학원 강의 데이터베이스 추가가 정상적으로 수행되었습니다.")
                                         .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
+        }
+
+        /* 강의 정보 동기화 컨트톨러 */
+        @PostMapping("/api/admin/check-course-synchronization")
+        @Operation(summary = "강의 정보 동기화")
+        @Parameters(value = {
+                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
+        })
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "CourseDto.CheckSynchronization 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = CourseDto.CheckSynchronization.class))),
+        })
+        public ResponseEntity<ResponseDto.Success> checkCourseSynchronization()
+        {
+                List<CourseDto.CheckSynchronization> data = adminService.checkCourseSynchronization();
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("강의 정보 동기화를 성공적으로 수행하였습니다.")
+                                        .data(data)
                                         .version(versionProvider.getVersion())
                                         .build()
                         );

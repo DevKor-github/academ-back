@@ -34,4 +34,17 @@ public interface CourseRepository extends JpaRepository<Course, Long>
 
     @Query(value = "SELECT count(*) FROM course WHERE name LIKE %:word% OR professor LIKE %:word% OR course_code LIKE %:word%", nativeQuery = true)
     int countCourseByKeyword(@Param("word") String word);
+
+    // 크롤링 강의 데이터와 일치하는 Course 조회
+    @Query(value = "SELECT * FROM course WHERE name = :name AND course_code = :course_code AND professor = :professor AND graduate_school = :graduate_school AND department = :department AND year = :year AND semester = :semester AND (time_location = :time_location OR (time_location IS NULL AND :time_location IS NULL))", nativeQuery = true)
+    List<Course> compareWithCrawlingData(
+            @Param("name") String name,
+            @Param("course_code") String course_code,
+            @Param("professor") String professor,
+            @Param("graduate_school") String graduate_school,
+            @Param("department") String department,
+            @Param("year") String year,
+            @Param("semester") String semester,
+            @Param("time_location") String time_location
+    );
 }

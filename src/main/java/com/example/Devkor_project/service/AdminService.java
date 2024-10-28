@@ -1,24 +1,31 @@
 package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.CommentDto;
+import com.example.Devkor_project.dto.CourseDto;
+import com.example.Devkor_project.dto.CrawlingDto;
 import com.example.Devkor_project.dto.TrafficDto;
 import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
+@Slf4j
 public class AdminService
 {
     @Autowired CourseRepository courseRepository;
@@ -90,6 +97,148 @@ public class AdminService
                 }
             }
         }
+    }
+
+    /* 강의 정보 동기화 서비스 */
+    public List<CourseDto.CheckSynchronization> checkCourseSynchronization()
+    {
+        // 최종 결과를 담을 변수
+        List<CourseDto.CheckSynchronization> result = new ArrayList<>();
+
+        // 확인할 연도와 학기
+        List<String> years = List.of("2020", "2021", "2022", "2023", "2024");
+        List<String> semesters = List.of("1R", "1S", "2R", "2W", "M0", "M1", "M2", "M3", "M4", "M5", "M6", "M7");
+
+        for(String year:years)
+        {
+            for(String semester:semesters)
+            {
+                if(Objects.equals(year, "2024") && Objects.equals(semester, "2W"))
+                {
+                    continue;
+                }
+
+                WebClient webClient = WebClient.builder().build();  // HTTP 요청을 보내기 위한 WebClient 인스턴스
+                ObjectMapper objectMapper = new ObjectMapper();     // 문자열을 dto로 변환하기 위한 ObjectMapper
+                int count = 0;      // 동기화 되지 않은 강의 개수
+                int count2 = 0;     // 정보가 완전히 겹치는 강의 정보 개수
+
+                // 대학원 리스트를 요청한 후, 응답을 문자열로 저장
+                String response = webClient.post()
+                        .uri("https://sugang.korea.ac.kr/view?attribute=combo&fake=1712483560986")
+                        .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                        .header("Referer", "https://sugang.korea.ac.kr/graduate/core?attribute=coreMain&flagx=X&fake=1712483556643")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .body(BodyInserters.fromFormData("obj", "pColCd")
+                                .with("args", "KOR")
+                                .with("args", year)
+                                .with("args", semester)
+                                .with("args", "1"))
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
+
+                try {
+                    // 대학원 리스트 응답 문자열을 dto로 변환
+                    CrawlingDto.Response_GraduateSchool response_graduateSchool = objectMapper.readValue(response, CrawlingDto.Response_GraduateSchool.class);
+                    List<CrawlingDto.GraduateSchool> graduateSchools = response_graduateSchool.getData();
+
+                    for(CrawlingDto.GraduateSchool graduateSchool:graduateSchools)
+                    {
+                        // 학과 리스트를 요청한 후, 응답을 문자열로 저장
+                        response = webClient.post()
+                                .uri("https://sugang.korea.ac.kr/view?attribute=combo&fake=1712483560986")
+                                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                                .header("Referer", "https://sugang.korea.ac.kr/graduate/core?attribute=coreMain&flagx=X&fake=1712483556643")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .body(BodyInserters.fromFormData("obj", "pDeptCd")
+                                        .with("args", "KOR")
+                                        .with("args", year)
+                                        .with("args", semester)
+                                        .with("args", graduateSchool.getCode())
+                                        .with("args", "1"))
+                                .retrieve()
+                                .bodyToMono(String.class)
+                                .block();
+
+                        try {
+                            // 학과 리스트 응답 문자열을 dto로 변환
+                            CrawlingDto.Response_Department response_department = objectMapper.readValue(response, CrawlingDto.Response_Department.class);
+                            List<CrawlingDto.Department> departments = response_department.getData();
+
+                            for(CrawlingDto.Department department:departments)
+                            {
+                                // 강의 리스트를 요청한 후, 응답을 문자열로 저장
+                                response = webClient.post()
+                                        .uri("https://sugang.korea.ac.kr/graduate/view?attribute=lectGradData&fake=1712483595039")
+                                        .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                                        .header("Referer", "https://sugang.korea.ac.kr/graduate/core?attribute=coreMain&flagx=X&fake=1712483556643")
+                                        .accept(MediaType.APPLICATION_JSON)
+                                        .body(BodyInserters.fromFormData("pYear", year)
+                                                .with("pTerm", semester)
+                                                .with("pCampus", "1")
+                                                .with("pColCd", graduateSchool.getCode())
+                                                .with("pDeptCd", department.getCode()))
+                                        .retrieve()
+                                        .bodyToMono(String.class)
+                                        .block();
+
+                                try {
+                                    // 강의 리스트 응답 문자열을 dto로 변환
+                                    CrawlingDto.Response_Course response_course = objectMapper.readValue(response, CrawlingDto.Response_Course.class);
+                                    List<CrawlingDto.Course> courses = response_course.getData();
+
+                                    for(CrawlingDto.Course course:courses)
+                                    {
+                                        // 해당 크롤링 강의 데이터와 일치하는 데이터를 데이터베이스에서 조회
+                                        List<Course> coursesInDatabase = courseRepository.compareWithCrawlingData(
+                                                course.getCour_nm(),
+                                                course.getCour_cd(),
+                                                course.getProf_nm(),
+                                                graduateSchool.getName(),
+                                                department.getName(),
+                                                year,
+                                                semester,
+                                                course.getTime_room().isEmpty() ? null : course.getTime_room().replaceAll("<.*?>", "")
+                                        );
+
+                                        if(coursesInDatabase.isEmpty())
+                                        {
+                                            log.info(course.toString());
+                                            count++;
+                                        }
+                                        else if(coursesInDatabase.size() >= 2)
+                                        {
+                                            count2++;
+                                        }
+                                    }
+                                } catch (Exception error) {
+                                    throw new RuntimeException(error);
+                                }
+                            }
+                        } catch (Exception error) {
+                            throw new RuntimeException(error);
+                        }
+                    }
+                } catch (Exception error) {
+                    throw new RuntimeException(error);
+                }
+
+                log.info(String.valueOf(count));
+                log.info(String.valueOf(count2));
+
+                result.add(
+                        CourseDto.CheckSynchronization.builder()
+                                .year(year)
+                                .semester(semester)
+                                .count(count)
+                                .count2(count2)
+                                .build()
+                );
+            }
+        }
+
+        return result;
     }
 
     /* 강의평 신고 내역 조회 서비스 */
