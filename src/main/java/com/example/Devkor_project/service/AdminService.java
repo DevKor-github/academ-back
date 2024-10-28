@@ -174,12 +174,11 @@ public class AdminService
 
                             for(CrawlingDto.Course course:courses)
                             {
-                                count++;
-
                                 // 해당 크롤링 강의 데이터와 일치하는 데이터를 데이터베이스에서 조회
-                                List<Course> coursesInDatabase = courseRepository.compareWithCrawlingData(
+                                Course coursesInDatabase = courseRepository.compareWithCrawlingData(
                                         course.getCour_nm(),
                                         course.getCour_cd(),
+                                        course.getCour_cls(),
                                         course.getProf_nm(),
                                         graduateSchool.getName(),
                                         department.getName(),
@@ -188,17 +187,58 @@ public class AdminService
                                         course.getTime_room().isEmpty() ? null : course.getTime_room().replaceAll("<.*?>", "")
                                 );
 
-                                if(!coursesInDatabase.isEmpty())
+                                // 현재 데이터베이스에 해당 강의 정보가 존재하지 않는다면 강의 평점 레코드와 함께 추가
+                                if(coursesInDatabase == null)
                                 {
-                                    for(Course courseInDatabase:coursesInDatabase)
-                                    {
-                                        if(Objects.equals(courseInDatabase.getClass_number(), "abcd"))
-                                        {
-                                            courseInDatabase.setClass_number(course.getCour_cls());
-                                            courseRepository.save(courseInDatabase);
-                                            break;
-                                        }
-                                    }
+                                    // 동기화 처리 횟수 증가
+                                    count++;
+
+                                    String credit = null;           // 학점
+                                    String time_location = null;    // 강의 시간, 강의실
+
+                                    if (!course.getTime().isEmpty())
+                                        credit = course.getTime().replaceAll("\\(.*?\\)", "");
+
+                                    if (!course.getTime_room().isEmpty())
+                                        time_location = course.getTime_room().replaceAll("<.*?>", "");
+
+                                    // 강의 평점 레코드 추가
+                                    CourseRating courseRating = CourseRating.builder()
+                                            .AVG_rating(0.0)
+                                            .AVG_r1_amount_of_studying(0.0)
+                                            .AVG_r2_difficulty(0.0)
+                                            .AVG_r3_delivery_power(0.0)
+                                            .AVG_r4_grading(0.0)
+                                            .COUNT_teach_t1_theory(0)
+                                            .COUNT_teach_t2_practice(0)
+                                            .COUNT_teach_t3_seminar(0)
+                                            .COUNT_teach_t4_discussion(0)
+                                            .COUNT_teach_t5_presentation(0)
+                                            .COUNT_learn_t1_theory(0)
+                                            .COUNT_learn_t2_thesis(0)
+                                            .COUNT_learn_t3_exam(0)
+                                            .COUNT_learn_t4_industry(0)
+                                            .build();
+
+                                    courseRatingRepository.save(courseRating);
+
+                                    // 강의 레코드 추가
+                                    Course newCourse = Course.builder()
+                                            .courseRating_id(courseRating)
+                                            .name(course.getCour_nm())
+                                            .course_code(course.getCour_cd())
+                                            .class_number(course.getCour_cls())
+                                            .professor(course.getProf_nm())
+                                            .graduate_school(graduateSchool.getName())
+                                            .department(department.getName())
+                                            .year(course.getYear())
+                                            .semester(course.getTerm())
+                                            .credit(credit)
+                                            .time_location(time_location)
+                                            .COUNT_comments(0)
+                                            .build();
+
+                                    courseRepository.save(newCourse);
                                 }
                             }
                         } catch (Exception error) {
