@@ -105,7 +105,14 @@ public class AdminService
     {
         WebClient webClient = WebClient.builder().build();  // HTTP 요청을 보내기 위한 WebClient 인스턴스
         ObjectMapper objectMapper = new ObjectMapper();     // 문자열을 dto로 변환하기 위한 ObjectMapper
-        int count = 0;      // 동기화 되지 않은 강의 개수
+        int insert_count = 0;      // 추가한 강의 정보 개수
+        int update_count = 0;      // 수정한 강의 정보 개수
+        int delete_count = 0;      // 삭제한 강의 정보 개수
+
+        // 현재 데이터베이스에 존재하는 해당 연도와 학기의 모든 강의 정보
+        // 현재 데이터베이스에는 존재하지만, 크롤링한 데이터에는 존재하지 않는 강의 정보를 데이터베이스에서 삭제하지 위함
+        // 즉, 삭제할 강의 리스트
+        List<Course> allCourseInDatabase = courseRepository.findCourseByYearAndSemester(dto.getYear(), dto.getSemester());
 
         // 대학원 리스트를 요청한 후, 응답을 문자열로 저장
         String response = webClient.post()
@@ -175,34 +182,30 @@ public class AdminService
                             for(CrawlingDto.Course course:courses)
                             {
                                 // 해당 크롤링 강의 데이터와 일치하는 데이터를 데이터베이스에서 조회
-                                Course coursesInDatabase = courseRepository.compareWithCrawlingData(
-                                        course.getCour_nm(),
+                                Course courseInDatabase = courseRepository.compareWithCrawlingData(
                                         course.getCour_cd(),
                                         course.getCour_cls(),
-                                        course.getProf_nm(),
-                                        graduateSchool.getName(),
-                                        department.getName(),
                                         dto.getYear(),
-                                        dto.getSemester(),
-                                        course.getTime_room().isEmpty() ? null : course.getTime_room().replaceAll("<.*?>", "")
+                                        dto.getSemester()
                                 );
 
-                                // 현재 데이터베이스에 해당 강의 정보가 존재하지 않는다면 강의 평점 레코드와 함께 추가
-                                if(coursesInDatabase == null)
+                                // 현재 데이터베이스에 해당 강의 정보가 존재하지 않는다면, 강의 평점 데이터와 함께 추가
+                                // 현재 데이터베이스에 해당 강의 정보가 존재한다면, 정보가 일치하는지 확인하고 일치하지 않는다면 수정
+                                if(courseInDatabase == null)
                                 {
-                                    // 동기화 처리 횟수 증가
-                                    count++;
+                                    // 추가한 횟수 증가
+                                    insert_count++;
 
                                     String credit = null;           // 학점
                                     String time_location = null;    // 강의 시간, 강의실
 
-                                    if (!course.getTime().isEmpty())
+                                    if(!course.getTime().isEmpty())
                                         credit = course.getTime().replaceAll("\\(.*?\\)", "");
 
-                                    if (!course.getTime_room().isEmpty())
+                                    if(!course.getTime_room().isEmpty())
                                         time_location = course.getTime_room().replaceAll("<.*?>", "");
 
-                                    // 강의 평점 레코드 추가
+                                    // 강의 평점 데이터 추가
                                     CourseRating courseRating = CourseRating.builder()
                                             .AVG_rating(0.0)
                                             .AVG_r1_amount_of_studying(0.0)
@@ -222,7 +225,7 @@ public class AdminService
 
                                     courseRatingRepository.save(courseRating);
 
-                                    // 강의 레코드 추가
+                                    // 강의 데이터 추가
                                     Course newCourse = Course.builder()
                                             .courseRating_id(courseRating)
                                             .name(course.getCour_nm())
@@ -240,6 +243,47 @@ public class AdminService
 
                                     courseRepository.save(newCourse);
                                 }
+                                else
+                                {
+                                    // 수정을 했는지에 대한 여부
+                                    boolean isUpdate = false;
+
+                                    // 현재 데이터베이스에 존재하는 해당 강의 정보와 크롤링해온 데이터가 일치하는지 확인 후, 일치하지 않는다면 동기화
+                                    if(!Objects.equals(courseInDatabase.getGraduate_school(), graduateSchool.getName())) {
+                                        courseInDatabase.setGraduate_school(graduateSchool.getName());
+                                        isUpdate = true;
+                                    }
+                                    if(!Objects.equals(courseInDatabase.getDepartment(), department.getName())) {
+                                        courseInDatabase.setDepartment(department.getName());
+                                        isUpdate = true;
+                                    }
+                                    if(!Objects.equals(courseInDatabase.getName(), course.getCour_nm())) {
+                                        courseInDatabase.setName(course.getCour_nm());
+                                        isUpdate = true;
+                                    }
+                                    if(!Objects.equals(courseInDatabase.getProfessor(), course.getProf_nm())) {
+                                        courseInDatabase.setProfessor(course.getProf_nm());
+                                        isUpdate = true;
+                                    }
+                                    if(!Objects.equals(courseInDatabase.getCredit(), course.getTime().isEmpty() ? null : course.getTime().replaceAll("\\(.*?\\)", ""))) {
+                                        courseInDatabase.setCredit(course.getTime().isEmpty() ? null : course.getTime().replaceAll("\\(.*?\\)", ""));
+                                        isUpdate = true;
+                                    }
+                                    if(!Objects.equals(courseInDatabase.getTime_location(), course.getTime_room().isEmpty() ? null : course.getTime_room().replaceAll("<.*?>", ""))) {
+                                        courseInDatabase.setTime_location(course.getTime_room().isEmpty() ? null : course.getTime_room().replaceAll("<.*?>", ""));
+                                        isUpdate = true;
+                                    }
+
+                                    // 수정한 횟수 증가
+                                    if(isUpdate)
+                                        update_count++;
+
+                                    // 변경사항 반영
+                                    courseRepository.save(courseInDatabase);
+
+                                    // 삭제할 강의 리스트에서 해당 강의 제외
+                                    allCourseInDatabase.remove(courseInDatabase);
+                                }
                             }
                         } catch (Exception error) {
                             throw new RuntimeException(error);
@@ -253,10 +297,21 @@ public class AdminService
             throw new RuntimeException(error);
         }
 
+        // 크롤링해온 강의 정보에 존재하지 않는 정보들은 전부 삭제
+        for(Course unknownCourse: allCourseInDatabase)
+        {
+            CourseRating courseRating = unknownCourse.getCourseRating_id();
+            courseRepository.delete(unknownCourse);
+            courseRatingRepository.delete(courseRating);
+            delete_count++;
+        }
+
         return CourseDto.CheckSynchronization.builder()
                 .year(dto.getYear())
                 .semester(dto.getSemester())
-                .count(count)
+                .insert_count(insert_count)
+                .update_count(update_count)
+                .delete_count(delete_count)
                 .build();
     }
 

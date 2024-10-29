@@ -12,6 +12,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 @ToString
 @Builder
 public class Course
