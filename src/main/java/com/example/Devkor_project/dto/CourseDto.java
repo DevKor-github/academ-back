@@ -284,9 +284,15 @@ public class CourseDto
         @NotBlank(message = "semester은 빈 문자열일 수 없습니다.")
         @Schema(description = "학기")
         private String semester;
-        @NotNull(message = "count는 null일 수 없습니다.")
-        @Schema(description = "count")
-        private int count;
+        @NotNull(message = "insert_count는 null일 수 없습니다.")
+        @Schema(description = "insert_count")
+        private int insert_count;
+        @NotNull(message = "update_count null일 수 없습니다.")
+        @Schema(description = "update_count")
+        private int update_count;
+        @NotNull(message = "delete_count null일 수 없습니다.")
+        @Schema(description = "delete_count")
+        private int delete_count;
     }
 
     public static CourseDto.Basic entityToBasic(Course course, CourseRating courseRating, Boolean isBookmark) {
