@@ -41,6 +41,7 @@ Academ Back-end repository 입니다.
         │   ├── dto
         │   │   ├── CommentDto          // 강의평 관련 dto
         │   │   ├── CourseDto           // 강의 관련 dto
+        │   │   ├── CrawlingDto         // 웹 크롤링 관련 dto
         │   │   ├── ProfileDto          // 계정 관련 dto
         │   │   ├── ResponseDto         // 응답 dto
         │   │   └── TokenDto            // access token, refresh token dto

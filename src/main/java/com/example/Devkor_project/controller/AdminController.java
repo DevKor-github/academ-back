@@ -1,9 +1,7 @@
 package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.configuration.VersionProvider;
-import com.example.Devkor_project.dto.CommentDto;
-import com.example.Devkor_project.dto.ResponseDto;
-import com.example.Devkor_project.dto.TrafficDto;
+import com.example.Devkor_project.dto.*;
 import com.example.Devkor_project.service.AdminService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -33,27 +31,24 @@ public class AdminController
         @Autowired AdminService adminService;
         @Autowired VersionProvider versionProvider;
 
-        /* 대학원 강의 데이터베이스 추가 컨트톨러 */
-        @PostMapping("/api/admin/insert-course-database")
-        @JsonProperty("data") // data JSON 객체를 MAP<String, Object> 형식으로 매핑
-        @Operation(summary = "대학원 강의 데이터베이스 추가")
+        /* 강의 정보 동기화 컨트톨러 */
+        @PostMapping("/api/admin/check-course-synchronization")
+        @Operation(summary = "강의 정보 동기화")
         @Parameters(value = {
-                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
+                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
         })
         @ApiResponses(value = {
-                @ApiResponse(responseCode = "201", description = "아무 데이터도 반환하지 않습니다."),
-                @ApiResponse(responseCode = "실패: 401 (UNAUTHORIZED)", description = "로그인하지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-                @ApiResponse(responseCode = "실패: 401 (LOW_AUTHORITY)", description = "권한이 부족한 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-                @ApiResponse(responseCode = "실패: 500 (UNEXPECTED_ERROR)", description = "예기치 못한 에러가 발생한 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
+                @ApiResponse(responseCode = "200", description = "CourseDto.CheckSynchronization 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = CourseDto.CheckSynchronization.class))),
         })
-        public ResponseEntity<ResponseDto.Success> insertCourseDatabase(@Valid @RequestBody Map<String, Object> data) {
-                adminService.insertCourseDatabase(data);
+        public ResponseEntity<ResponseDto.Success> checkCourseSynchronization(@Valid @RequestBody CrawlingDto.Synchronization dto)
+        {
+                CourseDto.CheckSynchronization data = adminService.checkCourseSynchronization(dto);
 
-                return ResponseEntity.status(HttpStatus.CREATED)
+                return ResponseEntity.status(HttpStatus.OK)
                         .body(
                                 ResponseDto.Success.builder()
-                                        .message("대학원 강의 데이터베이스 추가가 정상적으로 수행되었습니다.")
-                                        .data(null)
+                                        .message("강의 정보 동기화를 성공적으로 수행하였습니다.")
+                                        .data(data)
                                         .version(versionProvider.getVersion())
                                         .build()
                         );
