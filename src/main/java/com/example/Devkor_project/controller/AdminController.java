@@ -32,7 +32,7 @@ public class AdminController
         @Autowired VersionProvider versionProvider;
 
         /* 강의 정보 동기화 컨트톨러 */
-        @PostMapping("/api/admin/check-course-synchronization")
+        @PostMapping("/api/admin/course-synchronization")
         @Operation(summary = "강의 정보 동기화")
         @Parameters(value = {
                 @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),

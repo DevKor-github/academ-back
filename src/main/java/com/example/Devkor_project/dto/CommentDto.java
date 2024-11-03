@@ -244,6 +244,9 @@ public class CommentDto
         @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
         @Schema(description = "학수번호")
         private String course_code;
+        @NotBlank(message = "class_number는 빈 문자열일 수 없습니다.")
+        @Schema(description = "분반")
+        private String class_number;
         @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
         @Schema(description = "대학원")
         private String graduate_school;
@@ -539,6 +542,9 @@ public class CommentDto
         @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
         @Schema(description = "학수번호")
         private String course_code;
+        @NotBlank(message = "class_number는 빈 문자열일 수 없습니다.")
+        @Schema(description = "분반")
+        private String class_number;
         @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
         @Schema(description = "대학원")
         private String graduate_school;
@@ -628,9 +634,10 @@ public class CommentDto
                                                              com.example.Devkor_project.entity.Comment comment,
                                                              CommentRating commentRating)
     {
-        return CommentDto.StartUpdate.builder()
+        return StartUpdate.builder()
                 .course_id(course.getCourse_id())
                 .course_code(course.getCourse_code())
+                .class_number(course.getClass_number())
                 .graduate_school(course.getGraduate_school())
                 .department(course.getDepartment())
                 .year(course.getYear())
@@ -681,6 +688,7 @@ public class CommentDto
                 .comment_id(comment.getComment_id())
                 .course_id(course.getCourse_id())
                 .course_code(course.getCourse_code())
+                .class_number(course.getClass_number())
                 .graduate_school(course.getGraduate_school())
                 .department(course.getDepartment())
                 .year(course.getYear())
