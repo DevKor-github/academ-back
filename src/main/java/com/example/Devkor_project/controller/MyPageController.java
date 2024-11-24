@@ -254,9 +254,8 @@ public class MyPageController {
             @ApiResponse(responseCode = "실패: 401 (UNAUTHORIZED)", description = "로그인하지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 400 (WRONG_PASSWORD)", description = "기존 비밀번호가 틀렸을 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 400 (NOT_COMMENT_BY_USER)", description = "특정 강의평이 해당 사용자가 작성한 강의평이 아닌 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-            @ApiResponse(responseCode = "실패: 404 (COURSE_NOT_FOUND)", description = "특정 강의평이 속한 강의가 존재하지 않는 경우 (course_id를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
-            @ApiResponse(responseCode = "실패: 404 (COMMENT_NOT_FOUND)", description = "특정 comment_id에 해당하는 강의평이 존재하지 않는 경우 (comment_id를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 404 (EMAIL_NOT_FOUND)", description = "요청을 보낸 비밀번호가 숫자 또는 영문을 포함하지 않았거나, 8~24자리가 아닌 경우 (요청으로 보낸 새로운 비밀번호를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
+            @ApiResponse(responseCode = "실패: 404 (UNKNOWN_NOT_FOUND)", description = "알 수 없음 계정이 존재하지 않는 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
     })
     public ResponseEntity<ResponseDto.Success> deleteProfile(@Valid @RequestBody ProfileDto.Delete dto,
                                                              Principal principal)

@@ -6,9 +6,7 @@ import com.example.Devkor_project.dto.ProfileDto;
 import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
-import com.example.Devkor_project.repository.BookmarkRepository;
-import com.example.Devkor_project.repository.CommentRepository;
-import com.example.Devkor_project.repository.ProfileRepository;
+import com.example.Devkor_project.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +27,10 @@ public class MyPageService
 {
     private final ProfileRepository profileRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final CourseRepository courseRepository;
     private final CommentRepository commentRepository;
-    private final CourseService courseService;
+    private final CourseRatingRepository courseRatingRepository;
+    private final CommentRatingRepository commentRatingRepository;
     private final BCryptPasswordEncoder encoder;
 
     /* 마이페이지 기본 정보 서비스 */
@@ -320,15 +320,18 @@ public class MyPageService
         // 해당 사용자의 모든 강의평 조회
         List<Comment> comments = commentRepository.findAllByProfileId(profile.getProfile_id());
 
+        // 알 수 없음 사용자 계정
+        Profile unknownProfile = profileRepository.getUnknownProfile()
+                .orElseThrow(() -> new AppException(ErrorCode.UNKNOWN_NOT_FOUND, null));
+
         // 해당 사용자의 모든 강의평 삭제
         comments.forEach(comment -> {
 
-            // Comment 엔티티 -> CommentDto.Delete 변환
-            CommentDto.Delete commentDto = CommentDto.Delete.builder()
-                    .comment_id(comment.getComment_id())
-                    .build();
+            // 해당 강의평이 해당 사용자가 작성한 강의평이 아니라면, 예외 처리
+            if(!Objects.equals(comment.getProfile_id().getProfile_id(), profile.getProfile_id()))
+                throw new AppException(ErrorCode.NOT_COMMENT_BY_USER, comment.getProfile_id().getProfile_id());
 
-            courseService.deleteComment(principal, commentDto);
+            comment.setProfile_id(unknownProfile);
 
         });
 

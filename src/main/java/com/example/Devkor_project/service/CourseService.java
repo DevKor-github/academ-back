@@ -549,18 +549,18 @@ public class CourseService
     @Transactional
     public Long deleteComment(Principal principal, CommentDto.Delete dto)
     {
-        // 강의평 작성 수정 요청을 보낸 사용자의 계정 이메일
+        // 강의평 작성 삭제 요청을 보낸 사용자의 계정 이메일
         String email = principal.getName();
 
-        // 강의평 작성 수정 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
+        // 강의평 작성 삭제 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
         Profile profile = profileRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
 
-        // 사용자가 삭제할 강의평이 존재하지 않으면 예외 처리
+        // 삭제할 강의평이 존재하지 않으면 예외 처리
         Comment comment = commentRepository.findById(dto.getComment_id())
                 .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND, dto.getComment_id()));
 
-        // 사용자가 강의평을 삭제할 강의가 존재하지 않으면 예외 처리
+        // 삭제할 강의평이 작성된 강의가 존재하지 않으면 예외 처리
         Course course = courseRepository.findById(comment.getCourse_id().getCourse_id())
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, comment.getCourse_id().getCourse_id()));
 
