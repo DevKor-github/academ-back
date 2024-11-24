@@ -1,9 +1,6 @@
 package com.example.Devkor_project.service;
 
-import com.example.Devkor_project.dto.CommentDto;
-import com.example.Devkor_project.dto.CourseDto;
-import com.example.Devkor_project.dto.CrawlingDto;
-import com.example.Devkor_project.dto.TrafficDto;
+import com.example.Devkor_project.dto.*;
 import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
@@ -18,11 +15,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -30,10 +29,13 @@ import java.util.*;
 @Slf4j
 public class AdminService
 {
+    private final BCryptPasswordEncoder encoder;
+
     private final CourseRepository courseRepository;
     private final CourseRatingRepository courseRatingRepository;
     private final CommentRepository commentRepository;
     private final CommentReportRepository commentReportRepository;
+    private final ProfileRepository profileRepository;
     private final TrafficRepository trafficRepository;
 
     private final CourseService courseService;
@@ -367,5 +369,34 @@ public class AdminService
         }
 
         return data;
+    }
+
+    /* 테스트 계정 생성 서비스 */
+    @Transactional
+    public void createTestAccount(ProfileDto.CreateTestAccount dto)
+    {
+        // 이메일 중복 체크
+        profileRepository.findByEmail(dto.getEmail())
+                .ifPresent(user -> {
+                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail());
+                });
+
+        // Profile 엔티티 생성
+        Profile profile = Profile.builder()
+                .email(dto.getEmail())
+                .password(encoder.encode(dto.getPassword()))
+                .username("테스트")
+                .student_id("0000000")
+                .degree("MASTER")
+                .semester(1)
+                .department("컴퓨터학과")
+                .role("ROLE_ADMIN")
+                .point(10000000)
+                .access_expiration_date(LocalDate.now().plusYears(100))
+                .created_at(LocalDate.now())
+                .build();
+
+        // 해당 엔티티를 데이터베이스에 저장
+        profileRepository.save(profile);
     }
 }
