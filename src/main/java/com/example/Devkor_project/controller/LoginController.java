@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,11 +28,12 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 @RestController
+@RequiredArgsConstructor
 @Tag(name = "로그인", description = "회원가입/로그인/로그아웃, 권한 관련 api입니다.")
 public class LoginController
 {
-        @Autowired LoginService loginService;
-        @Autowired VersionProvider versionProvider;
+        private final LoginService loginService;
+        private final VersionProvider versionProvider;
 
         /* 회원가입 컨트롤러 */
         @PostMapping("/api/signup")

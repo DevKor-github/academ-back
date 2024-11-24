@@ -10,6 +10,7 @@ import com.example.Devkor_project.repository.BookmarkRepository;
 import com.example.Devkor_project.repository.CommentRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,13 +24,14 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class MyPageService
 {
-    @Autowired ProfileRepository profileRepository;
-    @Autowired BookmarkRepository bookmarkRepository;
-    @Autowired CommentRepository commentRepository;
-    @Autowired CourseService courseService;
-    @Autowired BCryptPasswordEncoder encoder;
+    private final ProfileRepository profileRepository;
+    private final BookmarkRepository bookmarkRepository;
+    private final CommentRepository commentRepository;
+    private final CourseService courseService;
+    private final BCryptPasswordEncoder encoder;
 
     /* 마이페이지 기본 정보 서비스 */
     public ProfileDto.MyPage myPageInfo(Principal principal)

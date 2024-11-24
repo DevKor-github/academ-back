@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +24,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @Tag(name = "마이페이지", description = "마이페이지 관련 api입니다.")
 public class MyPageController {
 
-    @Autowired MyPageService myPageService;
-    @Autowired VersionProvider versionProvider;
+    private final MyPageService myPageService;
+    private final VersionProvider versionProvider;
 
     /* 마이페이지 기본 정보 컨트롤러 */
     @GetMapping("/api/mypage/info")

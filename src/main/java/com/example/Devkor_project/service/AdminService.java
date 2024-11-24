@@ -11,6 +11,7 @@ import com.example.Devkor_project.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,16 +26,17 @@ import java.security.Principal;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class AdminService
 {
-    @Autowired CourseRepository courseRepository;
-    @Autowired CourseRatingRepository courseRatingRepository;
-    @Autowired CommentRepository commentRepository;
-    @Autowired CommentReportRepository commentReportRepository;
-    @Autowired TrafficRepository trafficRepository;
+    private final CourseRepository courseRepository;
+    private final CourseRatingRepository courseRatingRepository;
+    private final CommentRepository commentRepository;
+    private final CommentReportRepository commentReportRepository;
+    private final TrafficRepository trafficRepository;
 
-    @Autowired CourseService courseService;
+    private final CourseService courseService;
 
     /* 강의 정보 동기화 서비스 */
     @Transactional

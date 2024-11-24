@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,11 +25,12 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @Tag(name = "강의", description = "강의, 강의평 관련 api입니다.")
 public class CourseController
 {
-    @Autowired CourseService courseService;
-    @Autowired VersionProvider versionProvider;
+    private final CourseService courseService;
+    private final VersionProvider versionProvider;
 
     /* 강의 검색 컨트롤러 */
     @GetMapping("/api/course/search")

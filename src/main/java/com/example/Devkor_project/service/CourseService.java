@@ -7,6 +7,7 @@ import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.*;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,17 +20,18 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class CourseService
 {
-    @Autowired ProfileRepository profileRepository;
-    @Autowired CourseRepository courseRepository;
-    @Autowired CourseRatingRepository courseRatingRepository;
-    @Autowired BookmarkRepository bookmarkRepository;
-    @Autowired CommentRepository commentRepository;
-    @Autowired CommentRatingRepository commentRatingRepository;
-    @Autowired CommentLikeRepository commentLikeRepository;
-    @Autowired CommentReportRepository commentReportRepository;
+    private final ProfileRepository profileRepository;
+    private final CourseRepository courseRepository;
+    private final CourseRatingRepository courseRatingRepository;
+    private final BookmarkRepository bookmarkRepository;
+    private final CommentRepository commentRepository;
+    private final CommentRatingRepository commentRatingRepository;
+    private final CommentLikeRepository commentLikeRepository;
+    private final CommentReportRepository commentReportRepository;
 
     /* 강의 검색 서비스 */
     public List<?> searchCourse(String keyword, String order, int page, Principal principal)
