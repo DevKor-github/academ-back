@@ -262,4 +262,19 @@ public class ProfileDto
         @Schema(description = "구매 상품")
         private String item;
     }
+
+    @AllArgsConstructor
+    @ToString
+    @Getter
+    public static class CreateTestAccount
+    {
+        @NotBlank(message = "[email] cannot be blank.")
+        @Email(message = "[email] should be email format.")
+        @Schema(description = "이메일")
+        private String email;
+
+        @NotBlank(message = "[password] cannot be blank.")
+        @Schema(description = "비밀번호")
+        private String password;
+    }
 }

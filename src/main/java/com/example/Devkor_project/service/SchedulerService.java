@@ -19,8 +19,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class SchedulerService
 {
-    @Autowired
-    private CodeRepository codeRepository;
+    private final CodeRepository codeRepository;
 
     @Transactional
     @Async

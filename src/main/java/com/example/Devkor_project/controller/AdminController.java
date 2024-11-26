@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +26,12 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @Tag(name = "ADMIN", description = "ADMIN 권한의 계정만 요청 가능한 api입니다.")
 public class AdminController
 {
-        @Autowired AdminService adminService;
-        @Autowired VersionProvider versionProvider;
+        private final AdminService adminService;
+        private final VersionProvider versionProvider;
 
         /* 강의 정보 동기화 컨트톨러 */
         @PostMapping("/api/admin/course-synchronization")
@@ -177,6 +179,29 @@ public class AdminController
                                 ResponseDto.Success.builder()
                                         .message("연도 단위 월별 트래픽 확인을 정상적으로 완료하였습니다.")
                                         .data(data)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
+        }
+
+        /* 테스트 계정 생성 컨트롤러 */
+        @PostMapping("/api/admin/create-test-account")
+        @Operation(summary = "테스트 계정 생성")
+        @Parameters(value = {
+                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
+        })
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "201", description = "이메일을 반환합니다.", content = @Content(schema = @Schema(implementation = String.class))),
+                @ApiResponse(responseCode = "실패: 400 (EMAIL_DUPLICATED)", description = "해당 이메일로 생성된 계정이 이미 존재하는 경우 (입력받은 이메일을 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
+        })
+        public ResponseEntity<ResponseDto.Success> createTestAccount(@Valid @RequestBody ProfileDto.CreateTestAccount dto) {
+                adminService.createTestAccount(dto);
+
+                return ResponseEntity.status(HttpStatus.CREATED)
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("테스트 계정 생성을 성공하였습니다.")
+                                        .data(dto.getEmail())
                                         .version(versionProvider.getVersion())
                                         .build()
                         );
