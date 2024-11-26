@@ -7,6 +7,7 @@ import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.*;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,17 +20,18 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class CourseService
 {
-    @Autowired ProfileRepository profileRepository;
-    @Autowired CourseRepository courseRepository;
-    @Autowired CourseRatingRepository courseRatingRepository;
-    @Autowired BookmarkRepository bookmarkRepository;
-    @Autowired CommentRepository commentRepository;
-    @Autowired CommentRatingRepository commentRatingRepository;
-    @Autowired CommentLikeRepository commentLikeRepository;
-    @Autowired CommentReportRepository commentReportRepository;
+    private final ProfileRepository profileRepository;
+    private final CourseRepository courseRepository;
+    private final CourseRatingRepository courseRatingRepository;
+    private final BookmarkRepository bookmarkRepository;
+    private final CommentRepository commentRepository;
+    private final CommentRatingRepository commentRatingRepository;
+    private final CommentLikeRepository commentLikeRepository;
+    private final CommentReportRepository commentReportRepository;
 
     /* 강의 검색 서비스 */
     public List<?> searchCourse(String keyword, String order, int page, Principal principal)
@@ -329,6 +331,10 @@ public class CourseService
         if(dto.getReview().length() < 50)
             throw new AppException(ErrorCode.SHORT_COMMENT_REVIEW, dto.getReview().length());
 
+        // 강의평 상세 내용이 3000자 이하인지 확인
+        if(dto.getReview().length() > 3000)
+            throw new AppException(ErrorCode.LONG_COMMENT_REVIEW, dto.getReview().length());
+
         // 새로운 강의평 평점 엔티티 생성 후, 저장
         CommentRating newCommentRating = CommentRating.builder()
                 .rating(dto.getRating())
@@ -464,6 +470,10 @@ public class CourseService
         if(dto.getReview().length() < 50)
             throw new AppException(ErrorCode.SHORT_COMMENT_REVIEW, dto.getReview().length());
 
+        // 강의평 상세 내용이 3000자 이하인지 확인
+        if(dto.getReview().length() > 3000)
+            throw new AppException(ErrorCode.LONG_COMMENT_REVIEW, dto.getReview().length());
+
         // 강의 엔티티의 강의평 개수
         int count = course.getCOUNT_comments();
 
@@ -539,18 +549,18 @@ public class CourseService
     @Transactional
     public Long deleteComment(Principal principal, CommentDto.Delete dto)
     {
-        // 강의평 작성 수정 요청을 보낸 사용자의 계정 이메일
+        // 강의평 작성 삭제 요청을 보낸 사용자의 계정 이메일
         String email = principal.getName();
 
-        // 강의평 작성 수정 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
+        // 강의평 작성 삭제 요청을 보낸 사용자의 계정이 존재하지 않으면 예외 처리
         Profile profile = profileRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
 
-        // 사용자가 삭제할 강의평이 존재하지 않으면 예외 처리
+        // 삭제할 강의평이 존재하지 않으면 예외 처리
         Comment comment = commentRepository.findById(dto.getComment_id())
                 .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND, dto.getComment_id()));
 
-        // 사용자가 강의평을 삭제할 강의가 존재하지 않으면 예외 처리
+        // 삭제할 강의평이 작성된 강의가 존재하지 않으면 예외 처리
         Course course = courseRepository.findById(comment.getCourse_id().getCourse_id())
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, comment.getCourse_id().getCourse_id()));
 
