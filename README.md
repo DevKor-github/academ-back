@@ -4,7 +4,7 @@ Academ Back-end repository 입니다.
 ---
 
 ### 프로젝트 구조
-( 최신화 : v1.1.2 )
+( 최신화 : v1.1.3 )
 ```
 │
 ├── .github

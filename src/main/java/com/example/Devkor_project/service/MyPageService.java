@@ -324,7 +324,7 @@ public class MyPageService
         Profile unknownProfile = profileRepository.getUnknownProfile()
                 .orElseThrow(() -> new AppException(ErrorCode.UNKNOWN_NOT_FOUND, null));
 
-        // 해당 사용자의 모든 강의평 삭제
+        // 해당 사용자의 모든 강의평 작성자 수정
         comments.forEach(comment -> {
 
             // 해당 강의평이 해당 사용자가 작성한 강의평이 아니라면, 예외 처리
