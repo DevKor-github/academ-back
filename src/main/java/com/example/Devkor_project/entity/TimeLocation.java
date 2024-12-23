@@ -23,7 +23,7 @@ public class TimeLocation
     private Course course_id;
 
     @Column(nullable = true) private String day;
-    @Column(nullable = true) private int startPeriod;
-    @Column(nullable = true) private int endPeriod;
+    @Column(nullable = true) private Integer startPeriod;
+    @Column(nullable = true) private Integer endPeriod;
     @Column(nullable = true) private String location;
 }

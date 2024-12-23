@@ -40,19 +40,27 @@ public class TimeLocationParser {
         String[] lines = timeLocations.split("\\n");
 
         // Regular expression to extract start and end periods
-        Pattern pattern = Pattern.compile("([가-힣])\\((\\d+)(?:-(\\d+))?\\)(?:\\s(.+))?|([가-힣])");
+        Pattern pattern = Pattern.compile("([가-힣])\\((\\d+)(?:-(\\d+))?\\)(?:\\s(.+))?|([가-힣])\\s?(\\S.*)?|\\((\\d+)-(\\d+)\\)");
 
         for (String line : lines) {
             Matcher matcher = pattern.matcher(line.trim());
 
             if (matcher.find()) {
-                String day = matcher.group(1) != null ? matcher.group(1) : matcher.group(5);
+                String day = matcher.group(1) != null ? matcher.group(1) : matcher.group(5);  // 요일 추출
                 String start = matcher.group(2);
                 String end = matcher.group(3);
-                String location = matcher.group(4);
+                String location = matcher.group(4) != null ? matcher.group(4) : matcher.group(6);  // 강의실 추출
+
+                // "요일"과 "시작교시-끝교시"가 모두 없는 경우 처리 (예: (8-10) 형태)
+                if (matcher.group(7) != null) {
+                    start = matcher.group(7);
+                    end = matcher.group(8);
+                    day = null;
+                    location = null;
+                }
 
                 Integer startPeriod = (start != null) ? Integer.parseInt(start) : null;
-                Integer endPeriod = (end != null) ? Integer.valueOf(Integer.parseInt(end)) : startPeriod;
+                Integer endPeriod = (start != null && end != null) ? Integer.valueOf(Integer.parseInt(end)) : startPeriod;
 
                 CourseDto.TimeLocation timeLocation = CourseDto.TimeLocation.builder()
                         .day(day)
@@ -63,7 +71,7 @@ public class TimeLocationParser {
 
                 timeLocationList.add(timeLocation);
             } else {
-                throw new AppException(ErrorCode.INVALID_TIME_LOCATION, "Invalid format: " + line);
+                throw new AppException(ErrorCode.INVALID_TIME_LOCATION, "Invalid format: " + timeLocations);
             }
         }
 

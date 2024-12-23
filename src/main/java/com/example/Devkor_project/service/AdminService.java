@@ -21,8 +21,11 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.Principal;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.util.*;
+
+import static com.example.Devkor_project.util.TimeLocationParser.parseTimeLocation;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +40,7 @@ public class AdminService
     private final CommentReportRepository commentReportRepository;
     private final ProfileRepository profileRepository;
     private final TrafficRepository trafficRepository;
+    private final TimeLocationRepository timeLocationRepository;
 
     private final CourseService courseService;
 
@@ -398,5 +402,34 @@ public class AdminService
 
         // 해당 엔티티를 데이터베이스에 저장
         profileRepository.save(profile);
+    }
+
+    /* 강의 시간 및 장소 동기화 서비스 */
+    @Transactional
+    public void checkTimeLocationSynchronization(CrawlingDto.Synchronization dto)
+    {
+        // 현재 데이터베이스에 존재하는 해당 연도와 학기의 모든 강의 정보
+        List<Course> allCourseInDatabase = courseRepository.findCourseByYearAndSemester(dto.getYear(), dto.getSemester());
+
+        for(Course course:allCourseInDatabase)
+        {
+            // 해당 강의의 time_location 정보를 CourseDto.TimeLocation 리스트로 변환
+            List<CourseDto.TimeLocation> timeLocations = parseTimeLocation(course.getTime_location());
+
+            // TimeLocation 엔티티 추가
+            if (timeLocations != null && !timeLocations.isEmpty()) {
+                for (CourseDto.TimeLocation timeLocationDto : timeLocations) {
+                    TimeLocation timeLocation = TimeLocation.builder()
+                            .course_id(course)
+                            .day(timeLocationDto.getDay())
+                            .startPeriod(timeLocationDto.getStartPeriod())
+                            .endPeriod(timeLocationDto.getEndPeriod())
+                            .location(timeLocationDto.getLocation())
+                            .build();
+
+                    timeLocationRepository.save(timeLocation);
+                }
+            }
+        }
     }
 }
