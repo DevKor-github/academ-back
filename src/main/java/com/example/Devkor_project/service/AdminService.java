@@ -51,7 +51,7 @@ public class AdminService
         int delete_count = 0;      // 삭제한 강의 정보 개수
 
         // 현재 데이터베이스에 존재하는 해당 연도와 학기의 모든 강의 정보
-        // 현재 데이터베이스에는 존재하지만, 크롤링한 데이터에는 존재하지 않는 강의 정보를 데이터베이스에서 삭제하지 위함
+        // 현재 데이터베이스에는 존재하지만, 크롤링한 데이터에는 존재하지 않는 강의 정보를 데이터베이스에서 삭제하기 위함
         // 즉, 삭제할 강의 리스트
         List<Course> allCourseInDatabase = courseRepository.findCourseByYearAndSemester(dto.getYear(), dto.getSemester());
 
