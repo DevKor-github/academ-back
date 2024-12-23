@@ -1,5 +1,5 @@
 # Academ (Back-end)
-Academ Back-end repository 입니다.
+Academ Back-end repository입니다.
 
 ---
 

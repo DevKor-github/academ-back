@@ -207,4 +207,27 @@ public class AdminController
                         );
         }
 
+        /* 강의 시간 및 장소 정보 동기화 컨트톨러 */
+        @PostMapping("/api/admin/course-time-location-synchronization")
+        @Operation(summary = "강의 시간 및 장소 정보 동기화")
+        @Parameters(value = {
+                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}"),
+        })
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200"),
+        })
+        public ResponseEntity<ResponseDto.Success> checkTimeLocationSynchronization(@Valid @RequestBody CrawlingDto.Synchronization dto)
+        {
+                adminService.checkTimeLocationSynchronization(dto);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(
+                                ResponseDto.Success.builder()
+                                        .message("강의 시간 및 장소 동기화를 성공적으로 수행하였습니다.")
+                                        .data(null)
+                                        .version(versionProvider.getVersion())
+                                        .build()
+                        );
+        }
+
 }
