@@ -307,6 +307,23 @@ public class CourseDto
         private int delete_count;
     }
 
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @ToString
+    @Builder
+    public static class TimeLocation
+    {
+        @Schema(description = "요일")
+        private String day;
+        @Schema(description = "시작 교시")
+        private Integer startPeriod;
+        @Schema(description = "끝 교시")
+        private Integer endPeriod;
+        @Schema(description = "강의실")
+        private String location;
+    }
+
     public static CourseDto.Basic entityToBasic(Course course, CourseRating courseRating, Boolean isBookmark) {
         return Basic.builder()
                 .course_id(course.getCourse_id())
