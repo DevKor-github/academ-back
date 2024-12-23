@@ -1,13 +1,9 @@
 package com.example.Devkor_project.util;
 
 import com.example.Devkor_project.dto.CourseDto;
-import com.example.Devkor_project.exception.AppException;
-import com.example.Devkor_project.exception.ErrorCode;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TimeLocationParser {
 
@@ -31,48 +27,71 @@ public class TimeLocationParser {
      * @param timeLocations The time_location string to parse.
      * @return List<CourseDto.TimeLocation> representing List of { day, startPeriod, endPeriod, location }.
      */
-    public static List<CourseDto.TimeLocation> parseTimeLocation(String timeLocations)
-    {
-        if (timeLocations == null || timeLocations.isBlank())
+    public static List<CourseDto.TimeLocation> parseTimeLocation(String timeLocations) {
+        if (timeLocations == null || timeLocations.isBlank()) {
             return null;
+        }
 
         List<CourseDto.TimeLocation> timeLocationList = new ArrayList<>();
         String[] lines = timeLocations.split("\\n");
 
-        // Regular expression to extract start and end periods
-        Pattern pattern = Pattern.compile("([가-힣])\\((\\d+)(?:-(\\d+))?\\)(?:\\s(.+))?|([가-힣])\\s?(\\S.*)?|\\((\\d+)-(\\d+)\\)");
-
         for (String line : lines) {
-            Matcher matcher = pattern.matcher(line.trim());
 
-            if (matcher.find()) {
-                String day = matcher.group(1) != null ? matcher.group(1) : matcher.group(5);  // 요일 추출
-                String start = matcher.group(2);
-                String end = matcher.group(3);
-                String location = matcher.group(4) != null ? matcher.group(4) : matcher.group(6);  // 강의실 추출
+            String day = null;
+            Integer startPeriod = null;
+            Integer endPeriod = null;
+            String location = null;
 
-                // "요일"과 "시작교시-끝교시"가 모두 없는 경우 처리 (예: (8-10) 형태)
-                if (matcher.group(7) != null) {
-                    start = matcher.group(7);
-                    end = matcher.group(8);
-                    day = null;
-                    location = null;
+            // 첫 글자가 괄호가 아닐 때
+            if (line.charAt(0) != '(') {
+                // 첫 글자가 요일이 아니라면, 전체 문자열을 강의실로 간주
+                // 첫 글자가 요일이라면, 요일 정보를 추출
+                if(line.charAt(0) != '일' && line.charAt(0) != '월' && line.charAt(0) != '화' && line.charAt(0) != '수' && line.charAt(0) != '목' && line.charAt(0) != '금' && line.charAt(0) != '토') {
+                    location = line;
+                    line = "";
+                } else {
+                    day = String.valueOf(line.charAt(0));
+                    line = line.substring(1);
                 }
+            }
 
-                Integer startPeriod = (start != null) ? Integer.parseInt(start) : null;
-                Integer endPeriod = (start != null && end != null) ? Integer.valueOf(Integer.parseInt(end)) : startPeriod;
+            // 요일을 추출한 후의 로직 처리
+            if(!line.isEmpty()) {
+                if(line.charAt(0) != '(') {
+                    // 요일을 추출한 후에도 괄호가 없다면, 남은 문자열을 강의실로 간주
+                    location = line;
+                } else {
+                    // 요일을 추출한 후에 괄호가 있다면, 남은 문자열을 (시작교시-끝교시)와 강의실 두 부분으로 분할
+                    String[] parts = line.split(" ", 2);
 
-                CourseDto.TimeLocation timeLocation = CourseDto.TimeLocation.builder()
-                        .day(day)
+                    // (시작교시-끝교시)에서 앞뒤 괄호 제거
+                    parts[0] = parts[0].substring(1, parts[0].length() - 1);
+
+                    // 시작교시와 끝교시 추출
+                    if(parts[0].contains("-")) {
+                        String[] subparts = parts[0].split("-", 2);
+                        startPeriod = Integer.parseInt(subparts[0]);
+                        endPeriod = Integer.parseInt(subparts[1]);
+                    } else {
+                        startPeriod = Integer.parseInt(parts[0]);
+                        endPeriod = Integer.parseInt(parts[0]);
+                    }
+
+                    // 강의실 추출
+                    if(!parts[1].isEmpty()) {
+                        location = parts[1];
+                    }
+                }
+            }
+
+            CourseDto.TimeLocation timeLocation = CourseDto.TimeLocation.builder()
+                        .day(day) // 요일 (없으면 null)
                         .startPeriod(startPeriod)
                         .endPeriod(endPeriod)
-                        .location(location)
+                        .location(location) // 강의실 (없으면 null)
                         .build();
 
-                timeLocationList.add(timeLocation);
-            } else {
-                throw new AppException(ErrorCode.INVALID_TIME_LOCATION, "Invalid format: " + timeLocations);
-            }
+            timeLocationList.add(timeLocation);
         }
 
         return timeLocationList;
