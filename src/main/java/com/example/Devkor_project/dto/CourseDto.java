@@ -25,6 +25,9 @@ public class CourseDto
         @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
         @Schema(description = "학수번호")
         private String course_code;
+        @NotBlank(message = "class_number는 빈 문자열일 수 없습니다.")
+        @Schema(description = "분반")
+        private String class_number;
         @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
         @Schema(description = "대학원")
         private String graduate_school;
@@ -111,6 +114,9 @@ public class CourseDto
         @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
         @Schema(description = "학수번호")
         private String course_code;
+        @NotBlank(message = "class_number는 빈 문자열일 수 없습니다.")
+        @Schema(description = "분반")
+        private String class_number;
         @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
         @Schema(description = "대학원")
         private String graduate_school;
@@ -153,6 +159,9 @@ public class CourseDto
         @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
         @Schema(description = "학수번호")
         private String course_code;
+        @NotBlank(message = "class_number는 빈 문자열일 수 없습니다.")
+        @Schema(description = "분반")
+        private String class_number;
         @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
         @Schema(description = "대학원")
         private String graduate_school;
@@ -242,6 +251,9 @@ public class CourseDto
         @NotBlank(message = "course_code는 빈 문자열일 수 없습니다.")
         @Schema(description = "학수번호")
         private String course_code;
+        @NotBlank(message = "class_number는 빈 문자열일 수 없습니다.")
+        @Schema(description = "분반")
+        private String class_number;
         @NotBlank(message = "graduate_school은 빈 문자열일 수 없습니다.")
         @Schema(description = "대학원")
         private String graduate_school;
@@ -271,10 +283,52 @@ public class CourseDto
         private Boolean isBookmark;
     }
 
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @ToString
+    @Builder
+    public static class CheckSynchronization
+    {
+        @NotBlank(message = "year은 빈 문자열일 수 없습니다.")
+        @Schema(description = "연도")
+        private String year;
+        @NotBlank(message = "semester은 빈 문자열일 수 없습니다.")
+        @Schema(description = "학기")
+        private String semester;
+        @NotNull(message = "insert_count는 null일 수 없습니다.")
+        @Schema(description = "insert_count")
+        private int insert_count;
+        @NotNull(message = "update_count null일 수 없습니다.")
+        @Schema(description = "update_count")
+        private int update_count;
+        @NotNull(message = "delete_count null일 수 없습니다.")
+        @Schema(description = "delete_count")
+        private int delete_count;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @ToString
+    @Builder
+    public static class TimeLocation
+    {
+        @Schema(description = "요일")
+        private String day;
+        @Schema(description = "시작 교시")
+        private Integer startPeriod;
+        @Schema(description = "끝 교시")
+        private Integer endPeriod;
+        @Schema(description = "강의실")
+        private String location;
+    }
+
     public static CourseDto.Basic entityToBasic(Course course, CourseRating courseRating, Boolean isBookmark) {
         return Basic.builder()
                 .course_id(course.getCourse_id())
                 .course_code(course.getCourse_code())
+                .class_number(course.getClass_number())
                 .graduate_school(course.getGraduate_school())
                 .department(course.getDepartment())
                 .year(course.getYear())
@@ -306,6 +360,7 @@ public class CourseDto
         return ExpiredBasic.builder()
                 .course_id(course.getCourse_id())
                 .course_code(course.getCourse_code())
+                .class_number(course.getClass_number())
                 .graduate_school(course.getGraduate_school())
                 .department(course.getDepartment())
                 .year(course.getYear())
@@ -327,6 +382,7 @@ public class CourseDto
         return Detail.builder()
                 .course_id(course.getCourse_id())
                 .course_code(course.getCourse_code())
+                .class_number(course.getClass_number())
                 .graduate_school(course.getGraduate_school())
                 .department(course.getDepartment())
                 .year(course.getYear())
@@ -361,6 +417,7 @@ public class CourseDto
         return ExpiredDetail.builder()
                 .course_id(course.getCourse_id())
                 .course_code(course.getCourse_code())
+                .class_number(course.getClass_number())
                 .graduate_school(course.getGraduate_school())
                 .department(course.getDepartment())
                 .year(course.getYear())

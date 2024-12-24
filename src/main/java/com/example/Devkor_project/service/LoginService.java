@@ -13,6 +13,7 @@ import com.example.Devkor_project.security.JwtUtil;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -29,16 +30,17 @@ import java.util.Objects;
 import java.util.Random;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class LoginService
 {
-    @Autowired ProfileRepository profileRepository;
-    @Autowired CodeRepository codeRepository;
-    @Autowired BCryptPasswordEncoder encoder;
-    @Autowired JavaMailSender javaMailSender;
-    @Autowired JwtUtil jwtUtil;
-    @Autowired CustomUserDetailsService customUserDetailService;
-    @Autowired RedisTemplate<String, String> redisTemplate;
+    private final ProfileRepository profileRepository;
+    private final CodeRepository codeRepository;
+    private final BCryptPasswordEncoder encoder;
+    private final JavaMailSender javaMailSender;
+    private final JwtUtil jwtUtil;
+    private final CustomUserDetailsService customUserDetailService;
+    private final RedisTemplate<String, String> redisTemplate;
 
     /* 회원가입 서비스 */
     @Transactional

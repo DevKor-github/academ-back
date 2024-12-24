@@ -1,10 +1,10 @@
 # Academ (Back-end)
-Academ Back-end repository 입니다.
+Academ Back-end repository입니다.
 
 ---
 
 ### 프로젝트 구조
-( 최신화 : v1.1.1 )
+( 최신화 : v1.1.3 )
 ```
 │
 ├── .github
@@ -41,6 +41,7 @@ Academ Back-end repository 입니다.
         │   ├── dto
         │   │   ├── CommentDto          // 강의평 관련 dto
         │   │   ├── CourseDto           // 강의 관련 dto
+        │   │   ├── CrawlingDto         // 웹 크롤링 관련 dto
         │   │   ├── ProfileDto          // 계정 관련 dto
         │   │   ├── ResponseDto         // 응답 dto
         │   │   └── TokenDto            // access token, refresh token dto

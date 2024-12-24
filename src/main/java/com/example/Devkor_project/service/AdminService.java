@@ -1,95 +1,263 @@
 package com.example.Devkor_project.service;
 
-import com.example.Devkor_project.dto.CommentDto;
-import com.example.Devkor_project.dto.TrafficDto;
+import com.example.Devkor_project.dto.*;
 import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.sql.Time;
+import java.time.LocalDate;
+import java.util.*;
+
+import static com.example.Devkor_project.util.TimeLocationParser.parseTimeLocation;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class AdminService
 {
-    @Autowired CourseRepository courseRepository;
-    @Autowired CourseRatingRepository courseRatingRepository;
-    @Autowired CommentRepository commentRepository;
-    @Autowired CommentReportRepository commentReportRepository;
-    @Autowired TrafficRepository trafficRepository;
+    private final BCryptPasswordEncoder encoder;
 
-    @Autowired CourseService courseService;
+    private final CourseRepository courseRepository;
+    private final CourseRatingRepository courseRatingRepository;
+    private final CommentRepository commentRepository;
+    private final CommentReportRepository commentReportRepository;
+    private final ProfileRepository profileRepository;
+    private final TrafficRepository trafficRepository;
+    private final TimeLocationRepository timeLocationRepository;
 
-    /* 대학원 강의 데이터베이스 추가 서비스 */
+    private final CourseService courseService;
+
+    /* 강의 정보 동기화 서비스 */
     @Transactional
-    @SuppressWarnings("unchecked")  // Object가 Map 형식이 아닐 수도 있다는 경고 무시
-    public void insertCourseDatabase(Map<String,Object> data)
+    public CourseDto.CheckSynchronization checkCourseSynchronization(CrawlingDto.Synchronization dto)
     {
-        for(String graduateSchool : data.keySet())
-        {
-            Map<String,Object> value1 = (Map<String,Object>)data.get(graduateSchool);
-            for(String department : value1.keySet())
+        WebClient webClient = WebClient.builder().build();  // HTTP 요청을 보내기 위한 WebClient 인스턴스
+        ObjectMapper objectMapper = new ObjectMapper();     // 문자열을 dto로 변환하기 위한 ObjectMapper
+        int insert_count = 0;      // 추가한 강의 정보 개수
+        int update_count = 0;      // 수정한 강의 정보 개수
+        int delete_count = 0;      // 삭제한 강의 정보 개수
+
+        // 현재 데이터베이스에 존재하는 해당 연도와 학기의 모든 강의 정보
+        // 현재 데이터베이스에는 존재하지만, 크롤링한 데이터에는 존재하지 않는 강의 정보를 데이터베이스에서 삭제하기 위함
+        // 즉, 삭제할 강의 리스트
+        List<Course> allCourseInDatabase = courseRepository.findCourseByYearAndSemester(dto.getYear(), dto.getSemester());
+
+        // 대학원 리스트를 요청한 후, 응답을 문자열로 저장
+        String response = webClient.post()
+                .uri("https://sugang.korea.ac.kr/view?attribute=combo&fake=1712483560986")
+                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .header("Referer", "https://sugang.korea.ac.kr/graduate/core?attribute=coreMain&flagx=X&fake=1712483556643")
+                .accept(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromFormData("obj", "pColCd")
+                        .with("args", "KOR")
+                        .with("args", dto.getYear())
+                        .with("args", dto.getSemester())
+                        .with("args", "1"))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+        try {
+            // 대학원 리스트 응답 문자열을 dto로 변환
+            CrawlingDto.Response_GraduateSchool response_graduateSchool = objectMapper.readValue(response, CrawlingDto.Response_GraduateSchool.class);
+            List<CrawlingDto.GraduateSchool> graduateSchools = response_graduateSchool.getData();
+
+            for(CrawlingDto.GraduateSchool graduateSchool:graduateSchools)
             {
-                Map<String,Object> dataArray = (Map<String,Object>)value1.get(department);
-                List<Map<String, String>> dataList = (List<Map<String, String>>) dataArray.get("data");
+                // 학과 리스트를 요청한 후, 응답을 문자열로 저장
+                response = webClient.post()
+                        .uri("https://sugang.korea.ac.kr/view?attribute=combo&fake=1712483560986")
+                        .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                        .header("Referer", "https://sugang.korea.ac.kr/graduate/core?attribute=coreMain&flagx=X&fake=1712483556643")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .body(BodyInserters.fromFormData("obj", "pDeptCd")
+                                .with("args", "KOR")
+                                .with("args", dto.getYear())
+                                .with("args", dto.getSemester())
+                                .with("args", graduateSchool.getCode())
+                                .with("args", "1"))
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
 
-                for(Map<String, String> courseInfo : dataList)
-                {
-                    String credit = null;
-                    String time_location = null;
+                try {
+                    // 학과 리스트 응답 문자열을 dto로 변환
+                    CrawlingDto.Response_Department response_department = objectMapper.readValue(response, CrawlingDto.Response_Department.class);
+                    List<CrawlingDto.Department> departments = response_department.getData();
 
-                    if (!courseInfo.get("time").isEmpty())
-                        credit = courseInfo.get("time").replaceAll("\\(.*?\\)", "");
+                    for(CrawlingDto.Department department:departments)
+                    {
+                        // 강의 리스트를 요청한 후, 응답을 문자열로 저장
+                        response = webClient.post()
+                                .uri("https://sugang.korea.ac.kr/graduate/view?attribute=lectGradData&fake=1712483595039")
+                                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                                .header("Referer", "https://sugang.korea.ac.kr/graduate/core?attribute=coreMain&flagx=X&fake=1712483556643")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .body(BodyInserters.fromFormData("pYear", dto.getYear())
+                                        .with("pTerm", dto.getSemester())
+                                        .with("pCampus", "1")
+                                        .with("pColCd", graduateSchool.getCode())
+                                        .with("pDeptCd", department.getCode()))
+                                .retrieve()
+                                .bodyToMono(String.class)
+                                .block();
 
-                    if (!courseInfo.get("time_room").isEmpty())
-                        time_location = courseInfo.get("time_room").replaceAll("<.*?>", "");
+                        try {
+                            // 강의 리스트 응답 문자열을 dto로 변환
+                            CrawlingDto.Response_Course response_course = objectMapper.readValue(response, CrawlingDto.Response_Course.class);
+                            List<CrawlingDto.Course> courses = response_course.getData();
 
-                    CourseRating courseRating = CourseRating.builder()
-                            .AVG_rating(0.0)
-                            .AVG_r1_amount_of_studying(0.0)
-                            .AVG_r2_difficulty(0.0)
-                            .AVG_r3_delivery_power(0.0)
-                            .AVG_r4_grading(0.0)
-                            .COUNT_teach_t1_theory(0)
-                            .COUNT_teach_t2_practice(0)
-                            .COUNT_teach_t3_seminar(0)
-                            .COUNT_teach_t4_discussion(0)
-                            .COUNT_teach_t5_presentation(0)
-                            .COUNT_learn_t1_theory(0)
-                            .COUNT_learn_t2_thesis(0)
-                            .COUNT_learn_t3_exam(0)
-                            .COUNT_learn_t4_industry(0)
-                            .build();
+                            for(CrawlingDto.Course course:courses)
+                            {
+                                // 해당 크롤링 강의 데이터와 일치하는 데이터를 데이터베이스에서 조회
+                                Course courseInDatabase = courseRepository.compareWithCrawlingData(
+                                        course.getCour_cd(),
+                                        course.getCour_cls(),
+                                        dto.getYear(),
+                                        dto.getSemester()
+                                );
 
-                    courseRatingRepository.save(courseRating);
+                                // 현재 데이터베이스에 해당 강의 정보가 존재하지 않는다면, 강의 평점 데이터와 함께 추가
+                                // 현재 데이터베이스에 해당 강의 정보가 존재한다면, 정보가 일치하는지 확인하고 일치하지 않는다면 수정
+                                if(courseInDatabase == null)
+                                {
+                                    // 추가한 횟수 증가
+                                    insert_count++;
 
-                    Course course = Course.builder()
-                            .courseRating_id(courseRating)
-                            .name(courseInfo.get("cour_nm"))
-                            .course_code(courseInfo.get("cour_cd"))
-                            .professor(courseInfo.get("prof_nm"))
-                            .graduate_school(graduateSchool)
-                            .department(department)
-                            .year(courseInfo.get("year"))
-                            .semester(courseInfo.get("term"))
-                            .credit(credit)
-                            .time_location(time_location)
-                            .COUNT_comments(0)
-                            .build();
+                                    String credit = null;           // 학점
+                                    String time_location = null;    // 강의 시간, 강의실
 
-                    courseRepository.save(course);
+                                    if(!course.getTime().isEmpty())
+                                        credit = course.getTime().replaceAll("\\(.*?\\)", "");
+
+                                    if(!course.getTime_room().isEmpty())
+                                        time_location = course.getTime_room().replaceAll("<.*?>", "");
+
+                                    // 강의 평점 데이터 추가
+                                    CourseRating courseRating = CourseRating.builder()
+                                            .AVG_rating(0.0)
+                                            .AVG_r1_amount_of_studying(0.0)
+                                            .AVG_r2_difficulty(0.0)
+                                            .AVG_r3_delivery_power(0.0)
+                                            .AVG_r4_grading(0.0)
+                                            .COUNT_teach_t1_theory(0)
+                                            .COUNT_teach_t2_practice(0)
+                                            .COUNT_teach_t3_seminar(0)
+                                            .COUNT_teach_t4_discussion(0)
+                                            .COUNT_teach_t5_presentation(0)
+                                            .COUNT_learn_t1_theory(0)
+                                            .COUNT_learn_t2_thesis(0)
+                                            .COUNT_learn_t3_exam(0)
+                                            .COUNT_learn_t4_industry(0)
+                                            .build();
+
+                                    courseRatingRepository.save(courseRating);
+
+                                    // 강의 데이터 추가
+                                    Course newCourse = Course.builder()
+                                            .courseRating_id(courseRating)
+                                            .name(course.getCour_nm())
+                                            .course_code(course.getCour_cd())
+                                            .class_number(course.getCour_cls())
+                                            .professor(course.getProf_nm())
+                                            .graduate_school(graduateSchool.getName())
+                                            .department(department.getName())
+                                            .year(course.getYear())
+                                            .semester(course.getTerm())
+                                            .credit(credit)
+                                            .time_location(time_location)
+                                            .COUNT_comments(0)
+                                            .build();
+
+                                    courseRepository.save(newCourse);
+                                }
+                                else
+                                {
+                                    // 수정을 했는지에 대한 여부
+                                    boolean isUpdate = false;
+
+                                    // 현재 데이터베이스에 존재하는 해당 강의 정보와 크롤링해온 데이터가 일치하는지 확인 후, 일치하지 않는다면 동기화
+                                    if(!Objects.equals(courseInDatabase.getGraduate_school(), graduateSchool.getName())) {
+                                        courseInDatabase.setGraduate_school(graduateSchool.getName());
+                                        isUpdate = true;
+                                    }
+                                    if(!Objects.equals(courseInDatabase.getDepartment(), department.getName())) {
+                                        courseInDatabase.setDepartment(department.getName());
+                                        isUpdate = true;
+                                    }
+                                    if(!Objects.equals(courseInDatabase.getName(), course.getCour_nm())) {
+                                        courseInDatabase.setName(course.getCour_nm());
+                                        isUpdate = true;
+                                    }
+                                    if(!Objects.equals(courseInDatabase.getProfessor(), course.getProf_nm())) {
+                                        courseInDatabase.setProfessor(course.getProf_nm());
+                                        isUpdate = true;
+                                    }
+                                    if(!Objects.equals(courseInDatabase.getCredit(), course.getTime().isEmpty() ? null : course.getTime().replaceAll("\\(.*?\\)", ""))) {
+                                        courseInDatabase.setCredit(course.getTime().isEmpty() ? null : course.getTime().replaceAll("\\(.*?\\)", ""));
+                                        isUpdate = true;
+                                    }
+                                    if(!Objects.equals(courseInDatabase.getTime_location(), course.getTime_room().isEmpty() ? null : course.getTime_room().replaceAll("<.*?>", ""))) {
+                                        courseInDatabase.setTime_location(course.getTime_room().isEmpty() ? null : course.getTime_room().replaceAll("<.*?>", ""));
+                                        isUpdate = true;
+                                    }
+
+                                    // 수정한 횟수 증가
+                                    if(isUpdate)
+                                        update_count++;
+
+                                    // 변경사항 반영
+                                    courseRepository.save(courseInDatabase);
+
+                                    // 삭제할 강의 리스트에서 해당 강의 제외
+                                    allCourseInDatabase.remove(courseInDatabase);
+                                }
+                            }
+                        } catch (Exception error) {
+                            throw new RuntimeException(error);
+                        }
+                    }
+                } catch (Exception error) {
+                    throw new RuntimeException(error);
                 }
             }
+        } catch (Exception error) {
+            throw new RuntimeException(error);
         }
+
+        // 크롤링해온 강의 정보에 존재하지 않는 정보들은 전부 삭제
+        for(Course unknownCourse: allCourseInDatabase)
+        {
+            CourseRating courseRating = unknownCourse.getCourseRating_id();
+            courseRepository.delete(unknownCourse);
+            courseRatingRepository.delete(courseRating);
+            delete_count++;
+        }
+
+        return CourseDto.CheckSynchronization.builder()
+                .year(dto.getYear())
+                .semester(dto.getSemester())
+                .insert_count(insert_count)
+                .update_count(update_count)
+                .delete_count(delete_count)
+                .build();
     }
 
     /* 강의평 신고 내역 조회 서비스 */
@@ -205,5 +373,34 @@ public class AdminService
         }
 
         return data;
+    }
+
+    /* 테스트 계정 생성 서비스 */
+    @Transactional
+    public void createTestAccount(ProfileDto.CreateTestAccount dto)
+    {
+        // 이메일 중복 체크
+        profileRepository.findByEmail(dto.getEmail())
+                .ifPresent(user -> {
+                    throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail());
+                });
+
+        // Profile 엔티티 생성
+        Profile profile = Profile.builder()
+                .email(dto.getEmail())
+                .password(encoder.encode(dto.getPassword()))
+                .username("테스트")
+                .student_id("0000000")
+                .degree("MASTER")
+                .semester(1)
+                .department("컴퓨터학과")
+                .role("ROLE_ADMIN")
+                .point(10000000)
+                .access_expiration_date(LocalDate.now().plusYears(100))
+                .created_at(LocalDate.now())
+                .build();
+
+        // 해당 엔티티를 데이터베이스에 저장
+        profileRepository.save(profile);
     }
 }

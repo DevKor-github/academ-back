@@ -1,5 +1,5 @@
 academ:
-  version: "v1.1.1"
+  version: "v1.1.3"
 
 spring:
 
@@ -16,12 +16,8 @@ spring:
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
-    show-sql: true
     hibernate:
       ddl-auto: update # update 수정 필요
-    properties:
-      hibernate:
-        format_sql: true  # JPA 로그 이쁘게 구조화
 
   ## Google SMTP server
   mail:
@@ -42,16 +38,6 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-
-## JPA 로깅 설정
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: debug        # 디버그 레벨로 쿼리 출력
-        orm:
-          jdbc:
-            bind: trace   # 쿼리의 파라미터 출력
 
 ## JWT 설정
 jwt:
