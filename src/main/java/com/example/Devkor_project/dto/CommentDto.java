@@ -1,15 +1,13 @@
 package com.example.Devkor_project.dto;
 
-import com.example.Devkor_project.entity.Comment;
-import com.example.Devkor_project.entity.CommentRating;
-import com.example.Devkor_project.entity.Course;
-import com.example.Devkor_project.entity.CourseRating;
+import com.example.Devkor_project.entity.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class CommentDto
 {
@@ -268,7 +266,7 @@ public class CommentDto
         @Schema(description = "학점")
         private String credit;
         @Schema(description = "시간, 장소")
-        private String time_location;
+        private List<CourseDto.TimeLocation> time_locations;
         @NotNull(message = "COUNT_comments는 null일 수 없습니다.")
         @Schema(description = "강의평 개수")
         private int COUNT_comments;
@@ -566,7 +564,7 @@ public class CommentDto
         @Schema(description = "학점")
         private String credit;
         @Schema(description = "시간, 장소")
-        private String time_location;
+        private List<CourseDto.TimeLocation> time_locations;
 
         @NotBlank(message = "[review] cannot be blank.")
         @Schema(description = "강의평 내용")
@@ -629,10 +627,13 @@ public class CommentDto
         private boolean learn_t4_industry;
     }
 
-    public static CommentDto.StartUpdate entityToStartUpdate(Course course,
-                                                             CourseRating courseRating,
-                                                             com.example.Devkor_project.entity.Comment comment,
-                                                             CommentRating commentRating)
+    public static CommentDto.StartUpdate entityToStartUpdate(
+            Course course,
+            CourseRating courseRating,
+            com.example.Devkor_project.entity.Comment comment,
+            CommentRating commentRating,
+            List<TimeLocation> timeLocations
+    )
     {
         return StartUpdate.builder()
                 .course_id(course.getCourse_id())
@@ -645,7 +646,18 @@ public class CommentDto
                 .name(course.getName())
                 .professor(course.getProfessor())
                 .credit(course.getCredit())
-                .time_location(course.getTime_location())
+                .time_locations(
+                        timeLocations.stream().map(
+                                        timeLocation -> {
+                                            return CourseDto.TimeLocation.builder()
+                                                    .day(timeLocation.getDay())
+                                                    .startPeriod(timeLocation.getStartPeriod())
+                                                    .endPeriod(timeLocation.getEndPeriod())
+                                                    .location(timeLocation.getLocation())
+                                                    .build();
+                                        })
+                                .toList()
+                )
                 .COUNT_comments(course.getCOUNT_comments())
                 .AVG_rating(courseRating.getAVG_rating())
                 .AVG_r1_amount_of_studying(courseRating.getAVG_r1_amount_of_studying())
@@ -680,9 +692,12 @@ public class CommentDto
                 .build();
     }
 
-    public static CommentDto.MyPage entityToMyPage(com.example.Devkor_project.entity.Comment comment,
-                                                   Course course,
-                                                   CommentRating commentRating)
+    public static CommentDto.MyPage entityToMyPage(
+            com.example.Devkor_project.entity.Comment comment,
+            Course course,
+            CommentRating commentRating,
+            List<TimeLocation> timeLocations
+    )
     {
         return MyPage.builder()
                 .comment_id(comment.getComment_id())
@@ -696,7 +711,18 @@ public class CommentDto
                 .name(course.getName())
                 .professor(course.getProfessor())
                 .credit(course.getCredit())
-                .time_location(course.getTime_location())
+                .time_locations(
+                        timeLocations.stream().map(
+                                        timeLocation -> {
+                                            return CourseDto.TimeLocation.builder()
+                                                    .day(timeLocation.getDay())
+                                                    .startPeriod(timeLocation.getStartPeriod())
+                                                    .endPeriod(timeLocation.getEndPeriod())
+                                                    .location(timeLocation.getLocation())
+                                                    .build();
+                                        })
+                                .toList()
+                )
                 .review(comment.getReview())
                 .likes(comment.getLikes())
                 .created_at(comment.getCreated_at())

@@ -182,11 +182,25 @@ public class AdminService
                                             .year(course.getYear())
                                             .semester(course.getTerm())
                                             .credit(credit)
-                                            .time_location(time_location)
                                             .COUNT_comments(0)
                                             .build();
 
                                     courseRepository.save(newCourse);
+
+                                    // 강의 시간 및 장소 데이터 추가
+                                    List<CourseDto.TimeLocation> timeLocations = parseTimeLocation(time_location);
+                                    if (timeLocations != null && !timeLocations.isEmpty()) {
+                                        for (CourseDto.TimeLocation timeLocationDto : timeLocations) {
+                                            TimeLocation timeLocation = TimeLocation.builder()
+                                                    .course_id(newCourse)
+                                                    .day(timeLocationDto.getDay())
+                                                    .startPeriod(timeLocationDto.getStartPeriod())
+                                                    .endPeriod(timeLocationDto.getEndPeriod())
+                                                    .location(timeLocationDto.getLocation())
+                                                    .build();
+                                            timeLocationRepository.save(timeLocation);
+                                        }
+                                    }
                                 }
                                 else
                                 {
@@ -214,8 +228,69 @@ public class AdminService
                                         courseInDatabase.setCredit(course.getTime().isEmpty() ? null : course.getTime().replaceAll("\\(.*?\\)", ""));
                                         isUpdate = true;
                                     }
-                                    if(!Objects.equals(courseInDatabase.getTime_location(), course.getTime_room().isEmpty() ? null : course.getTime_room().replaceAll("<.*?>", ""))) {
-                                        courseInDatabase.setTime_location(course.getTime_room().isEmpty() ? null : course.getTime_room().replaceAll("<.*?>", ""));
+
+                                    // 실제 강의 시간 및 장소 정보
+                                    List<CourseDto.TimeLocation> realTimeLocations = parseTimeLocation(course.getTime_room().replaceAll("<.*?>", ""));
+                                    // 현재 데이터베이스에 저장되어 있는 강의 시간 및 장소 정보
+                                    List<TimeLocation> savedTimeLocations = timeLocationRepository.findByCourseId(courseInDatabase.getCourse_id());
+                                    boolean timeLocationIsDifferent = false;
+
+                                    // 실제 강의 시간 및 장소 정보와 현재 데이터베이스에 저장되어 있는 강의 시간 및 장소 정보가 동일한지 확인
+                                    if(realTimeLocations == null && savedTimeLocations == null)
+                                        timeLocationIsDifferent = false;
+                                    else if(realTimeLocations != null && savedTimeLocations == null)
+                                        timeLocationIsDifferent = true;
+                                    else if(realTimeLocations == null)
+                                        timeLocationIsDifferent = true;
+                                    else if(realTimeLocations.size() != savedTimeLocations.size())
+                                        timeLocationIsDifferent = true;
+                                    else
+                                    {
+                                        for(CourseDto.TimeLocation realTimeLocation : realTimeLocations)
+                                        {
+                                            boolean isDifferent = true;
+
+                                            for(TimeLocation savedTimeLocation : savedTimeLocations)
+                                            {
+                                                if(Objects.equals(savedTimeLocation.getDay(), realTimeLocation.getDay()) &&
+                                                        Objects.equals(savedTimeLocation.getStartPeriod(), realTimeLocation.getStartPeriod()) &&
+                                                        Objects.equals(savedTimeLocation.getEndPeriod(), realTimeLocation.getEndPeriod()) &&
+                                                        Objects.equals(savedTimeLocation.getLocation(), realTimeLocation.getLocation()))
+                                                {
+                                                    isDifferent = false;
+                                                    break;
+                                                }
+                                            }
+
+                                            if(isDifferent)
+                                            {
+                                                timeLocationIsDifferent = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    // 실제 강의 시간 및 장소 정보와 현재 데이터베이스에 저장되어 있는 강의 시간 및 장소 정보가 다를 때
+                                    // 현재 데이터베이스에 저장되어 있는 강의 시간 및 장소 정보를 전부 삭제
+                                    // 그 후, 실제 강의 시간 및 장소 정보를 저장
+                                    if(timeLocationIsDifferent)
+                                    {
+                                        if(savedTimeLocations != null)
+                                            timeLocationRepository.deleteAll(savedTimeLocations);
+
+                                        if(realTimeLocations != null) {
+                                            for (CourseDto.TimeLocation timeLocationDto : realTimeLocations) {
+                                                TimeLocation timeLocation = TimeLocation.builder()
+                                                        .course_id(courseInDatabase)
+                                                        .day(timeLocationDto.getDay())
+                                                        .startPeriod(timeLocationDto.getStartPeriod())
+                                                        .endPeriod(timeLocationDto.getEndPeriod())
+                                                        .location(timeLocationDto.getLocation())
+                                                        .build();
+                                                timeLocationRepository.save(timeLocation);
+                                            }
+                                        }
+
                                         isUpdate = true;
                                     }
 
