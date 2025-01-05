@@ -2,6 +2,7 @@ package com.example.Devkor_project.dto;
 
 import com.example.Devkor_project.entity.Course;
 import com.example.Devkor_project.entity.CourseRating;
+import com.example.Devkor_project.entity.TimeLocation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -49,7 +50,7 @@ public class CourseDto
         @Schema(description = "학점")
         private String credit;
         @Schema(description = "시간, 장소")
-        private String time_location;
+        private List<CourseDto.TimeLocation> time_locations;
         @NotNull(message = "COUNT_comments는 null일 수 없습니다.")
         @Schema(description = "강의평 개수")
         private int COUNT_comments;
@@ -138,7 +139,7 @@ public class CourseDto
         @Schema(description = "학점")
         private String credit;
         @Schema(description = "시간, 장소")
-        private String time_location;
+        private List<CourseDto.TimeLocation> time_locations;
         @NotNull(message = "COUNT_comments는 null일 수 없습니다.")
         @Schema(description = "강의평 개수")
         private int COUNT_comments;
@@ -183,7 +184,7 @@ public class CourseDto
         @Schema(description = "학점")
         private String credit;
         @Schema(description = "시간, 장소")
-        private String time_location;
+        private List<CourseDto.TimeLocation> time_locations;
         @NotNull(message = "COUNT_comments는 null일 수 없습니다.")
         @Schema(description = "강의평 개수")
         private int COUNT_comments;
@@ -275,7 +276,7 @@ public class CourseDto
         @Schema(description = "학점")
         private String credit;
         @Schema(description = "시간, 장소")
-        private String time_location;
+        private List<CourseDto.TimeLocation> time_locations;
         @NotNull(message = "COUNT_comments는 null일 수 없습니다.")
         @Schema(description = "강의평 개수")
         private int COUNT_comments;
@@ -324,7 +325,13 @@ public class CourseDto
         private String location;
     }
 
-    public static CourseDto.Basic entityToBasic(Course course, CourseRating courseRating, Boolean isBookmark) {
+    public static CourseDto.Basic entityToBasic(
+            Course course,
+            CourseRating courseRating,
+            List<com.example.Devkor_project.entity.TimeLocation> timeLocations,
+            Boolean isBookmark
+    )
+    {
         return Basic.builder()
                 .course_id(course.getCourse_id())
                 .course_code(course.getCourse_code())
@@ -336,7 +343,18 @@ public class CourseDto
                 .name(course.getName())
                 .professor(course.getProfessor())
                 .credit(course.getCredit())
-                .time_location(course.getTime_location())
+                .time_locations(
+                        timeLocations.stream().map(
+                                        timeLocation -> {
+                                            return CourseDto.TimeLocation.builder()
+                                                    .day(timeLocation.getDay())
+                                                    .startPeriod(timeLocation.getStartPeriod())
+                                                    .endPeriod(timeLocation.getEndPeriod())
+                                                    .location(timeLocation.getLocation())
+                                                    .build();
+                                        })
+                                .toList()
+                )
                 .COUNT_comments(course.getCOUNT_comments())
                 .isBookmark(isBookmark)
                 .AVG_rating(courseRating.getAVG_rating())
@@ -356,7 +374,12 @@ public class CourseDto
                 .build();
     }
 
-    public static CourseDto.ExpiredBasic entityToExpiredBasic(Course course, Boolean isBookmark) {
+    public static CourseDto.ExpiredBasic entityToExpiredBasic(
+            Course course,
+            List<com.example.Devkor_project.entity.TimeLocation> timeLocations,
+            Boolean isBookmark
+    )
+    {
         return ExpiredBasic.builder()
                 .course_id(course.getCourse_id())
                 .course_code(course.getCourse_code())
@@ -368,16 +391,30 @@ public class CourseDto
                 .name(course.getName())
                 .professor(course.getProfessor())
                 .credit(course.getCredit())
-                .time_location(course.getTime_location())
+                .time_locations(
+                        timeLocations.stream().map(
+                        timeLocation -> {
+                            return CourseDto.TimeLocation.builder()
+                                    .day(timeLocation.getDay())
+                                    .startPeriod(timeLocation.getStartPeriod())
+                                    .endPeriod(timeLocation.getEndPeriod())
+                                    .location(timeLocation.getLocation())
+                                    .build();
+                        })
+                        .toList()
+                )
                 .COUNT_comments(course.getCOUNT_comments())
                 .isBookmark(isBookmark)
                 .build();
     }
 
-    public static CourseDto.Detail entityToDetail(Course course,
-                                                  CourseRating courseRating,
-                                                  List<CommentDto.Detail> commentDtos,
-                                                  Boolean isBookmark)
+    public static CourseDto.Detail entityToDetail(
+            Course course,
+            CourseRating courseRating,
+            List<CommentDto.Detail> commentDtos,
+            List<com.example.Devkor_project.entity.TimeLocation> timeLocations,
+            Boolean isBookmark
+    )
     {
         return Detail.builder()
                 .course_id(course.getCourse_id())
@@ -390,7 +427,18 @@ public class CourseDto
                 .name(course.getName())
                 .professor(course.getProfessor())
                 .credit(course.getCredit())
-                .time_location(course.getTime_location())
+                .time_locations(
+                        timeLocations.stream().map(
+                                        timeLocation -> {
+                                            return CourseDto.TimeLocation.builder()
+                                                    .day(timeLocation.getDay())
+                                                    .startPeriod(timeLocation.getStartPeriod())
+                                                    .endPeriod(timeLocation.getEndPeriod())
+                                                    .location(timeLocation.getLocation())
+                                                    .build();
+                                        })
+                                .toList()
+                )
                 .COUNT_comments(course.getCOUNT_comments())
                 .isBookmark(isBookmark)
                 .AVG_rating(courseRating.getAVG_rating())
@@ -411,8 +459,11 @@ public class CourseDto
                 .build();
     }
 
-    public static CourseDto.ExpiredDetail entityToExpiredDetail(Course course,
-                                                                Boolean isBookmark)
+    public static CourseDto.ExpiredDetail entityToExpiredDetail(
+            Course course,
+            List<com.example.Devkor_project.entity.TimeLocation> timeLocations,
+            Boolean isBookmark
+    )
     {
         return ExpiredDetail.builder()
                 .course_id(course.getCourse_id())
@@ -425,7 +476,18 @@ public class CourseDto
                 .name(course.getName())
                 .professor(course.getProfessor())
                 .credit(course.getCredit())
-                .time_location(course.getTime_location())
+                .time_locations(
+                        timeLocations.stream().map(
+                                        timeLocation -> {
+                                            return CourseDto.TimeLocation.builder()
+                                                    .day(timeLocation.getDay())
+                                                    .startPeriod(timeLocation.getStartPeriod())
+                                                    .endPeriod(timeLocation.getEndPeriod())
+                                                    .location(timeLocation.getLocation())
+                                                    .build();
+                                        })
+                                .toList()
+                )
                 .COUNT_comments(course.getCOUNT_comments())
                 .isBookmark(isBookmark)
                 .build();
