@@ -31,6 +31,7 @@ public class MyPageService
     private final CommentRepository commentRepository;
     private final CourseRatingRepository courseRatingRepository;
     private final CommentRatingRepository commentRatingRepository;
+    private final TimeLocationRepository timeLocationRepository;
     private final BCryptPasswordEncoder encoder;
 
     /* 마이페이지 기본 정보 서비스 */
@@ -142,8 +143,9 @@ public class MyPageService
 
                     Course course = comment.getCourse_id();                         // 강의 정보
                     CommentRating commentRating = comment.getCommentRating_id();    // 강의평 평점 정보
+                    List<TimeLocation> timeLocations = timeLocationRepository.findByCourseId(course.getCourse_id()); // 강의 시간 및 장소 정보
 
-                    return CommentDto.entityToMyPage(comment, course, commentRating);
+                    return CommentDto.entityToMyPage(comment, course, commentRating, timeLocations);
 
                 })
                 .toList();
@@ -191,11 +193,12 @@ public class MyPageService
 
                     Course course = bookmark.getCourse_id();                    // 강의 정보
                     CourseRating courseRating = course.getCourseRating_id();    // 강의 평점 정보
+                    List<TimeLocation> timeLocations = timeLocationRepository.findByCourseId(course.getCourse_id()); // 강의 시간 및 장소 정보
 
                     // 사용자의 해당 강의 북마크 여부
                     boolean isBookmark = !bookmarkRepository.searchBookmark(profile.getProfile_id(), course.getCourse_id()).isEmpty();
 
-                    return CourseDto.entityToBasic(course, courseRating, isBookmark);
+                    return CourseDto.entityToBasic(course, courseRating, timeLocations, isBookmark);
 
                 })
                 .toList();

@@ -32,6 +32,7 @@ public class CourseService
     private final CommentRatingRepository commentRatingRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final CommentReportRepository commentReportRepository;
+    private final TimeLocationRepository timeLocationRepository;
 
     /* 강의 검색 서비스 */
     public List<?> searchCourse(String keyword, String order, int page, Principal principal)
@@ -65,7 +66,11 @@ public class CourseService
             // Course 엔티티 리스트 -> courseDto.ExpiredBasic 리스트
             List<CourseDto.ExpiredBasic> courseDtos = courses.stream()
                     .map(course -> {
-                        return CourseDto.entityToExpiredBasic(course, false);
+
+                        // 강의 시간 및 장소 정보
+                        List<TimeLocation> timeLocations = timeLocationRepository.findByCourseId(course.getCourse_id());
+
+                        return CourseDto.entityToExpiredBasic(course, timeLocations, false);
                     })
                     .toList();
 
@@ -90,10 +95,13 @@ public class CourseService
                             // 해당 강의의 평점 데이터
                             CourseRating courseRating = course.getCourseRating_id();
 
+                            // 강의 시간 및 장소 정보
+                            List<TimeLocation> timeLocations = timeLocationRepository.findByCourseId(course.getCourse_id());
+
                             // 사용자의 해당 강의 북마크 여부
                             boolean isBookmark = !bookmarkRepository.searchBookmark(profile_id, course.getCourse_id()).isEmpty();
 
-                            return CourseDto.entityToBasic(course, courseRating, isBookmark);
+                            return CourseDto.entityToBasic(course, courseRating, timeLocations, isBookmark);
                         })
                         .toList();
 
@@ -105,10 +113,13 @@ public class CourseService
                 List<CourseDto.ExpiredBasic> courseDtos = courses.stream()
                         .map(course -> {
 
+                            // 강의 시간 및 장소 정보
+                            List<TimeLocation> timeLocations = timeLocationRepository.findByCourseId(course.getCourse_id());
+
                             // 사용자의 해당 강의 북마크 여부
                             boolean isBookmark = !bookmarkRepository.searchBookmark(profile_id, course.getCourse_id()).isEmpty();
 
-                            return CourseDto.entityToExpiredBasic(course, isBookmark);
+                            return CourseDto.entityToExpiredBasic(course, timeLocations, isBookmark);
                         })
                         .toList();
 
@@ -141,11 +152,14 @@ public class CourseService
         Course course = courseRepository.findById(course_id)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id));
 
+        // 강의 시간 및 장소 정보
+        List<TimeLocation> timeLocations = timeLocationRepository.findByCourseId(course.getCourse_id());
+
         // 비로그인 시, 평점 데이터와 강의평 리스트를 전달하지 않으며, 북마크 여부가 항상 false
         if(principal == null)
         {
             // CourseDto.ExpiredDetail 반환
-            return CourseDto.entityToExpiredDetail(course, false);
+            return CourseDto.entityToExpiredDetail(course, timeLocations, false);
         }
         else
         {
@@ -228,7 +242,7 @@ public class CourseService
                 boolean isBookmark = !bookmarkRepository.searchBookmark(principalProfile_id, course.getCourse_id()).isEmpty();
 
                 // course 엔티티와 강의평 dto 리스트로 CourseDto.Detail 만들어서 반환
-                return CourseDto.entityToDetail(course, courseRating, commentDtos, isBookmark);
+                return CourseDto.entityToDetail(course, courseRating, commentDtos, timeLocations, isBookmark);
             }
             else
             {
@@ -236,7 +250,7 @@ public class CourseService
                 boolean isBookmark = !bookmarkRepository.searchBookmark(principalProfile_id, course.getCourse_id()).isEmpty();
 
                 // CourseDto.ExpiredDetail 반환
-                return CourseDto.entityToExpiredDetail(course, isBookmark);
+                return CourseDto.entityToExpiredDetail(course, timeLocations, isBookmark);
             }
         }
     }
@@ -289,6 +303,9 @@ public class CourseService
         Course course = courseRepository.findById(course_id)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, course_id));
 
+        // 강의 시간 및 장소 정보
+        List<TimeLocation> timeLocations = timeLocationRepository.findByCourseId(course.getCourse_id());
+
         // 해당 사용자가 이미 해당 강의에 강의평을 달았다면, 예외 처리
         List<Comment> comment = commentRepository.searchComment(profile.getProfile_id(), course_id);
         if(!comment.isEmpty())
@@ -300,7 +317,7 @@ public class CourseService
         // 사용자의 해당 강의 북마크 여부
         boolean isBookmark = !bookmarkRepository.searchBookmark(profile.getProfile_id(), course.getCourse_id()).isEmpty();
 
-        return CourseDto.entityToBasic(course, courseRating, isBookmark);
+        return CourseDto.entityToBasic(course, courseRating, timeLocations, isBookmark);
     }
 
     /* 강의평 작성 완료 및 등록 서비스 */
@@ -428,13 +445,16 @@ public class CourseService
         // 강의 평점 정보
         CourseRating courseRating = course.getCourseRating_id();
 
+        // 강의 시간 및 장소 정보
+        List<TimeLocation> timeLocations = timeLocationRepository.findByCourseId(course.getCourse_id());
+
         // 해당 강의평이 해당 사용자가 작성한 강의평이 아니라면, 예외 처리
         if(!Objects.equals(comment.getProfile_id().getProfile_id(), profile.getProfile_id()))
             throw new AppException(ErrorCode.NOT_COMMENT_BY_USER, null);
 
         CommentRating commentRating = comment.getCommentRating_id();
 
-        return CommentDto.entityToStartUpdate(course, courseRating, comment, commentRating);
+        return CommentDto.entityToStartUpdate(course, courseRating, comment, commentRating, timeLocations);
     }
 
     /* 강의평 수정 완료 서비스 */
