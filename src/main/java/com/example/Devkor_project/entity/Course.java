@@ -35,5 +35,6 @@ public class Course
     @Column(nullable = false) private String year;
     @Column(nullable = false) private String semester;
     @Column private String credit;
+    @Column private String time_location;
     @Column(nullable = false) private int COUNT_comments;
 }

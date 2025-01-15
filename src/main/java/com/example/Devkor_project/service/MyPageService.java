@@ -27,11 +27,7 @@ public class MyPageService
 {
     private final ProfileRepository profileRepository;
     private final BookmarkRepository bookmarkRepository;
-    private final CourseRepository courseRepository;
     private final CommentRepository commentRepository;
-    private final CourseRatingRepository courseRatingRepository;
-    private final CommentRatingRepository commentRatingRepository;
-    private final TimeLocationRepository timeLocationRepository;
     private final BCryptPasswordEncoder encoder;
 
     /* 마이페이지 기본 정보 서비스 */
@@ -118,7 +114,7 @@ public class MyPageService
     }
 
     /* 내가 작성한 강의평 정보 조회 서비스 */
-    public List<CommentDto.MyPage> myComments(Principal principal, int page)
+    public List<CommentDto.NOT_UPDATED_MyPage> myComments(Principal principal, int page)
     {
         // 요청을 보낸 사용자의 계정 이메일
         String email = principal.getName();
@@ -138,15 +134,12 @@ public class MyPageService
             throw new AppException(ErrorCode.NO_RESULT, page + 1);
 
         // 강의평 엔티티 페이지를 강의평 dto 리스트로 변환
-        List<CommentDto.MyPage> commentDtos = comments.stream()
+        List<CommentDto.NOT_UPDATED_MyPage> commentDtos = comments.stream()
                 .map(comment -> {
-
                     Course course = comment.getCourse_id();                         // 강의 정보
                     CommentRating commentRating = comment.getCommentRating_id();    // 강의평 평점 정보
-                    List<TimeLocation> timeLocations = timeLocationRepository.findByCourseId(course.getCourse_id()); // 강의 시간 및 장소 정보
 
-                    return CommentDto.entityToMyPage(comment, course, commentRating, timeLocations);
-
+                    return CommentDto.NOT_UPDATED_entityToMyPage(comment, course, commentRating);
                 })
                 .toList();
 
@@ -168,7 +161,7 @@ public class MyPageService
     }
 
     /* 내가 북마크한 강의 정보 조회 서비스 */
-    public List<CourseDto.Basic> myBookmarks(Principal principal, int page)
+    public List<CourseDto.NOT_UPDATED_Basic> myBookmarks(Principal principal, int page)
     {
         // 요청을 보낸 사용자의 계정 이메일
         String email = principal.getName();
@@ -188,18 +181,15 @@ public class MyPageService
             throw new AppException(ErrorCode.NO_RESULT, page + 1);
 
         // 강의 엔티티 페이지를 강의 dto 리스트로 변환
-        List<CourseDto.Basic> courseDtos = bookmarks.stream()
+        List<CourseDto.NOT_UPDATED_Basic> courseDtos = bookmarks.stream()
                 .map(bookmark -> {
-
                     Course course = bookmark.getCourse_id();                    // 강의 정보
                     CourseRating courseRating = course.getCourseRating_id();    // 강의 평점 정보
-                    List<TimeLocation> timeLocations = timeLocationRepository.findByCourseId(course.getCourse_id()); // 강의 시간 및 장소 정보
 
                     // 사용자의 해당 강의 북마크 여부
                     boolean isBookmark = !bookmarkRepository.searchBookmark(profile.getProfile_id(), course.getCourse_id()).isEmpty();
 
-                    return CourseDto.entityToBasic(course, courseRating, timeLocations, isBookmark);
-
+                    return CourseDto.NOT_UPDATED_entityToBasic(course, courseRating, isBookmark);
                 })
                 .toList();
 
