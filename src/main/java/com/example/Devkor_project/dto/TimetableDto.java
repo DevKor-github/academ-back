@@ -18,10 +18,6 @@ public class TimetableDto {
     @Schema(description = "Timetable ID")
     private Long id;
 
-    @NotNull(message = "[profile_id] cannot be null.")
-    @Schema(description = "Profile ID")
-    private Long profileId;
-
     @NotBlank(message = "[name] cannot be blank.")
     @Schema(description = "시간표 이름 (예: 25-1학기)")
     private String name;

@@ -17,7 +17,8 @@ public class PrivacyDto {
     @Schema(description = "Privacy ID")
     private Long id;
 
-    @NotNull(message = "[timetableId] cannot be null.")
+//    @NotNull(message = "[timetableId] cannot be null... 널이어도 되나? 되는듯")
+
     @Schema(description = "Timetable IDs") // Timetable과 연결된 ID
     private List<Long> timetableIds;
 

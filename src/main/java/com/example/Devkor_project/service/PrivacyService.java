@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,17 +20,34 @@ public class PrivacyService {
     private final PrivacyRepository privacyRepository;
     private final TimetableRepository timetableRepository;
 
+    // 특정 시간표의 개인일정 조회
     @Transactional
-    public List<PrivacyDto> getAllPrivacy(Long timetableId) {
+    public List<PrivacyDto> getPrivacyByTimetable(Long timetableId, Principal principal) {
+        validateTimetableOwnership(timetableId, principal);
         return privacyRepository.findByTimetables_Id(timetableId).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
+    // 사용자의 모든 개인일정 조회
     @Transactional
-    public PrivacyDto createPrivacy(PrivacyDto privacyDto) {
-        // 해당하는 모든 Timetable 가져오기
-        List<Timetable> timetables = timetableRepository.findAllById(privacyDto.getTimetableIds());
+    public List<PrivacyDto> getAllPrivacy(Principal principal) {
+        String userEmail = principal.getName();
+
+        List<Long> timetableIds = timetableRepository.findAllByProfile_Email(userEmail)
+                .stream()
+                .map(Timetable::getId)
+                .collect(Collectors.toList());
+
+        return privacyRepository.findByTimetables_IdIn(timetableIds).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    // 개인일정 생성
+    @Transactional
+    public PrivacyDto createPrivacy(PrivacyDto privacyDto, Principal principal) {
+        List<Timetable> timetables = validateTimetablesOwnership(privacyDto.getTimetableIds(), principal);
 
         Privacy privacy = Privacy.builder()
                 .timetables(timetables)
@@ -41,14 +58,18 @@ public class PrivacyService {
                 .location(privacyDto.getLocation())
                 .build();
 
-        Privacy savedPrivacy = privacyRepository.save(privacy);
-        return convertToDto(savedPrivacy);
+        return convertToDto(privacyRepository.save(privacy));
     }
 
+    // 개인일정 수정
     @Transactional
-    public PrivacyDto updatePrivacy(Long id, PrivacyDto privacyDto) {
+    public PrivacyDto updatePrivacy(Long id, PrivacyDto privacyDto, Principal principal) {
         Privacy privacy = privacyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Privacy not found"));
+
+        validateTimetablesOwnership(privacy.getTimetables().stream()
+                .map(Timetable::getId)
+                .collect(Collectors.toList()), principal);
 
         List<Timetable> timetables = timetableRepository.findAllById(privacyDto.getTimetableIds());
         privacy.setName(privacyDto.getName());
@@ -56,23 +77,29 @@ public class PrivacyService {
         privacy.setStartTime(privacyDto.getStartTime());
         privacy.setFinishTime(privacyDto.getFinishTime());
         privacy.setLocation(privacyDto.getLocation());
+        privacy.setTimetables(timetables);
 
-        Privacy updatedPrivacy = privacyRepository.save(privacy);
-        return convertToDto(updatedPrivacy);
+        return convertToDto(privacyRepository.save(privacy));
     }
 
+    // 개인일정 삭제
     @Transactional
-    public void deletePrivacy(Long id) {
+    public void deletePrivacy(Long id, Principal principal) {
+        Privacy privacy = privacyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Privacy not found"));
+
+        validateTimetablesOwnership(privacy.getTimetables().stream()
+                .map(Timetable::getId)
+                .collect(Collectors.toList()), principal);
+
         privacyRepository.deleteById(id);
     }
 
+    // 특정 시간표에 개인일정 추가
     @Transactional
-    public PrivacyDto addPrivacyToTimetable(Long timetableId, PrivacyDto privacyDto) {
-        // timetableId로 Timetable을 조회
-        Timetable timetable = timetableRepository.findById(timetableId)
-                .orElseThrow(() -> new RuntimeException("Timetable not found"));
+    public PrivacyDto addPrivacyToTimetable(Long timetableId, PrivacyDto privacyDto, Principal principal) {
+        Timetable timetable = validateTimetableOwnership(timetableId, principal);
 
-        // Privacy 객체 생성
         Privacy privacy = Privacy.builder()
                 .name(privacyDto.getName())
                 .day(privacyDto.getDay())
@@ -81,36 +108,48 @@ public class PrivacyService {
                 .location(privacyDto.getLocation())
                 .build();
 
-        // Privacy 객체에 Timetable 추가
         privacy.getTimetables().add(timetable);
-
-        // Privacy 저장
-        Privacy savedPrivacy = privacyRepository.save(privacy);
-
-        // PrivacyDto로 변환하여 반환
-        return convertToDto(savedPrivacy);
+        return convertToDto(privacyRepository.save(privacy));
     }
 
+    // 특정 시간표에서 개인일정 삭제
     @Transactional
-    public void removePrivacyFromTimetable(Long timetableId, Long privacyId) {
-        // Privacy 조회
+    public void removePrivacyFromTimetable(Long timetableId, Long privacyId, Principal principal) {
+        validateTimetableOwnership(timetableId, principal);
+
         Privacy privacy = privacyRepository.findById(privacyId)
                 .orElseThrow(() -> new RuntimeException("Privacy not found"));
 
-        // 특정 Timetable과 Privacy의 관계를 끊기
         privacy.getTimetables().removeIf(timetable -> timetable.getId().equals(timetableId));
-
-        // 변경 사항 저장
         privacyRepository.save(privacy);
     }
 
+    // 시간표 소유권 확인
+    private Timetable validateTimetableOwnership(Long timetableId, Principal principal) {
+        return timetableRepository.findById(timetableId)
+                .filter(timetable -> timetable.getProfile().getEmail().equals(principal.getName()))
+                .orElseThrow(() -> new RuntimeException("You do not have access to this timetable"));
+    }
+
+    // 여러 시간표 소유권 확인
+    private List<Timetable> validateTimetablesOwnership(List<Long> timetableIds, Principal principal) {
+        List<Timetable> timetables = timetableRepository.findAllById(timetableIds);
+        boolean isOwner = timetables.stream()
+                .allMatch(timetable -> timetable.getProfile().getEmail().equals(principal.getName()));
+
+        if (!isOwner) {
+            throw new RuntimeException("You do not have access to one or more timetables");
+        }
+
+        return timetables;
+    }
 
     private PrivacyDto convertToDto(Privacy privacy) {
         return PrivacyDto.builder()
                 .id(privacy.getId())
                 .timetableIds(privacy.getTimetables().stream()
                         .map(Timetable::getId)
-                .collect(Collectors.toList()))
+                        .collect(Collectors.toList()))
                 .name(privacy.getName())
                 .day(privacy.getDay())
                 .startTime(privacy.getStartTime())

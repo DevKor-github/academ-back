@@ -19,4 +19,11 @@ public interface TimetableRepository extends JpaRepository<Timetable, Long> {
     @Query("SELECT t FROM Timetable t WHERE t.id = :timetableId AND t.profile.profile_id = :profileId")
     Timetable findByIdAndProfile_profileId(@Param("timetableId") Long timetableId, @Param("profileId") Long profileId);
 
+    // Profile 이메일을 기반으로 모든 시간표 조회
+    List<Timetable> findAllByProfile_Email(String email);
+
+    @Query("SELECT t FROM Timetable t WHERE t.profile.email = :email")
+    List<Timetable> findTimetablesByEmail(@Param("email") String email);
+
+
 }

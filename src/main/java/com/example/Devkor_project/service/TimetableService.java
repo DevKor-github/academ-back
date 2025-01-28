@@ -1,20 +1,27 @@
 package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.PrivacyDto;
+import com.example.Devkor_project.dto.ResponseDto;
+import com.example.Devkor_project.dto.TimetableDto;
 import com.example.Devkor_project.entity.Course;
 import com.example.Devkor_project.entity.Privacy;
 import com.example.Devkor_project.entity.Profile;
 import com.example.Devkor_project.entity.Timetable;
+import com.example.Devkor_project.exception.AppException;
+import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.CourseRepository;
 import com.example.Devkor_project.repository.PrivacyRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
 import com.example.Devkor_project.repository.TimetableRepository;
-import lombok.RequiredArgsConstructor;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,66 +32,88 @@ public class TimetableService {
     private final PrivacyRepository privacyRepository;
     private final ProfileRepository profileRepository;
 
+    /** 🟢 로그인된 사용자의 시간표 생성 */
     @Transactional
-    public Timetable createTimetableForProfile(String username) {
-        // username으로 Profile을 찾음
-        Profile profile = profileRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Profile not found"));
+    public Timetable createTimetableForProfile(TimetableDto timetableDto, Principal principal) {
+        // Principal에서 사용자 이메일 추출
+        String email = principal.getName();
 
-        // 새로운 Timetable 생성
+        // 이메일로 Profile 조회
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND, email));
+
+        // Timetable 생성
         Timetable timetable = Timetable.builder()
-                .profile(profile)  // 프로필과 연결된 시간표 생성
+                .profile(profile)  // Profile 연관
+                .name(timetableDto.getName())  // 요청 데이터에서 이름 설정
                 .build();
 
-        // 시간표 저장
         return timetableRepository.save(timetable);
     }
 
+
+    /** 🟢 시간표에 강의 추가 */
     @Transactional
-    public void addCourseToTimetable(Long timetableId, Long courseId) {
-        Timetable timetable = timetableRepository.findById(timetableId)
-                .orElseThrow(() -> new RuntimeException("Timetable not found"));
+    public ResponseEntity<?> addCourseToTimetable(Long timetableId, Long courseId, Principal principal) {
+        Timetable timetable = validateProfileOwnership(timetableId, principal);
+        Course course = courseRepository.findById(courseId).orElse(null);
 
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
-
-        // Course와 Timetable 간의 연관 관계 추가
-        if (!course.getTimetables().contains(timetable)) {
-            course.getTimetables().add(timetable);
-        }
-        if (!timetable.getCourses().contains(course)) {
-            timetable.getCourses().add(course);
+        if (course == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ResponseDto.Error.builder()
+                            .code("NOT_FOUND")
+                            .message("해당 강의를 찾을 수 없습니다.")
+                            .version("v1.1.4")
+                            .build());
         }
 
-        // 변경 사항 저장
-        courseRepository.save(course);
+        timetable.getCourses().add(course);
+        course.getTimetables().add(timetable);
+
         timetableRepository.save(timetable);
+        courseRepository.save(course);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .message("강의가 시간표에 추가되었습니다.")
+                        .version("v1.1.4")
+                        .build());
     }
 
+    /** 🟢 시간표에서 강의 제거 */
     @Transactional
-    public void removeCourseFromTimetable(Long timetableId, Long courseId) {
-        Timetable timetable = timetableRepository.findById(timetableId)
-                .orElseThrow(() -> new RuntimeException("Timetable not found"));
+    public ResponseEntity<?> removeCourseFromTimetable(Long timetableId, Long courseId, Principal principal) {
+        Timetable timetable = validateProfileOwnership(timetableId, principal);
+        Course course = courseRepository.findById(courseId).orElse(null);
 
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
+        if (course == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ResponseDto.Error.builder()
+                            .code("NOT_FOUND")
+                            .message("해당 강의를 찾을 수 없습니다.")
+                            .version("v1.1.4")
+                            .build());
+        }
 
-        // Course와 Timetable 간의 연관 관계 제거
-        course.getTimetables().remove(timetable);
         timetable.getCourses().remove(course);
+        course.getTimetables().remove(timetable);
 
-        // 변경 사항 저장
-        courseRepository.save(course);
         timetableRepository.save(timetable);
+        courseRepository.save(course);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .message("강의가 시간표에서 제거되었습니다.")
+                        .version("v1.1.4")
+                        .build());
     }
 
+    /** 🟢 시간표에 개인 일정 추가 */
     @Transactional
-    public void addPrivacyToTimetable(Long timetableId, PrivacyDto privacyDto) {
-        Timetable timetable = timetableRepository.findById(timetableId)
-                .orElseThrow(() -> new RuntimeException("Timetable not found"));
+    public ResponseEntity<ResponseDto.Success> addPrivacyToTimetable(Long timetableId, PrivacyDto privacyDto, Principal principal) {
+        Timetable timetable = validateProfileOwnership(timetableId, principal);
 
         Privacy privacy = Privacy.builder()
-                .timetable(timetable)
                 .name(privacyDto.getName())
                 .day(privacyDto.getDay())
                 .startTime(privacyDto.getStartTime())
@@ -92,36 +121,27 @@ public class TimetableService {
                 .location(privacyDto.getLocation())
                 .build();
 
+        privacy.getTimetables().add(timetable);
         privacyRepository.save(privacy);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .message("개인 일정이 시간표에 추가되었습니다.")
+                        .data(privacy)
+                        .version("v1.1.4")
+                        .build());
     }
 
-    @Transactional
-    public void removePrivacyFromTimetable(Long timetableId, Long privacyId) {
-        Privacy privacy = privacyRepository.findById(privacyId)
-                .orElseThrow(() -> new RuntimeException("Privacy not found"));
+    /** 🔹 Helper Method: Principal을 이용해 Profile 조회 */
+    private Profile getProfileByPrincipal(Principal principal) {
+        return profileRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    }
 
-        // timetableId가 privacy의 timetables 리스트에 포함되어 있는지 검사
-        boolean isLinkedToTimetable = privacy.getTimetables().stream()
-                .anyMatch(timetable -> timetable.getId().equals(timetableId));
-
-        if (!isLinkedToTimetable) {
-            throw new RuntimeException("Privacy does not belong to this Timetable");
-        }
-
-        // Timetable과 Privacy 간의 연관 관계 해제
-        privacy.getTimetables().removeIf(timetable -> timetable.getId().equals(timetableId));
-        privacyRepository.save(privacy);
-        }
-
-    // profileId로 timetable 조회
-    public List<Timetable> getTimetableByProfileId(Long profileId) {
-        List<Timetable> timetables = timetableRepository.findByProfile_profileId(profileId);
-
-        // timetable이 없다면 적절한 메시지를 반환
-        if (timetables.isEmpty()) {
-            throw new RuntimeException("해당 프로필에 대한 timetable이 없습니다. 새로 만들어보세요!");
-        }
-
-        return timetables;
+    /** 🔹 Helper Method: 주어진 시간표 ID가 현재 로그인된 사용자의 것인지 검증 */
+    private Timetable validateProfileOwnership(Long timetableId, Principal principal) {
+        return timetableRepository.findById(timetableId)
+                .filter(timetable -> timetable.getProfile().getEmail().equals(principal.getName()))
+                .orElseThrow(() -> new RuntimeException("접근 권한이 없습니다."));
     }
 }
