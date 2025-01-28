@@ -14,6 +14,9 @@ import java.util.List;
 @Builder
 @Schema(description = "응답 성공 DTO")
 public class TimetableDto {
+    @NotBlank(message = "[profileId] cannot be blank.")
+    @Schema(description = "profile ID")
+    private Long profileId;
 
     @Schema(description = "Timetable ID")
     private Long id;
