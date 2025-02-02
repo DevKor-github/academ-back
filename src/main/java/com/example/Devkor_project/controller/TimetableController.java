@@ -44,27 +44,27 @@ public class TimetableController {
     }
 
     /** 🟢 강의 추가 */
-    @PostMapping("/{timetableId}/course")
+    @PostMapping("/{timetableId}/course/{courseId}")
     @Operation(summary = "시간표에 강의 추가")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-    public ResponseEntity<?> addCourseToTimetable(@PathVariable Long timetableId, @Valid @RequestBody CourseAssignmentDto requestDto, Principal principal) {
-        return timetableService.addCourseToTimetable(timetableId, requestDto, principal);
+    public ResponseEntity<?> addCourseToTimetable(@PathVariable("timetableId") Long timetableId, @PathVariable("courseId") Long courseId, Principal principal) {
+        return timetableService.addCourseToTimetable(timetableId, courseId, principal);
     }
 
     /** 🟢 강의 제거 */
     @DeleteMapping("/{timetableId}/course/{courseId}")
     @Operation(summary = "시간표에서 강의 제거")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-    public ResponseEntity<?> removeCourseFromTimetable(@PathVariable Long timetableId, @PathVariable Long courseId, Principal principal) {
+    public ResponseEntity<?> removeCourseFromTimetable(@PathVariable("timetableId") Long timetableId, @PathVariable ("courseId")Long courseId, Principal principal) {
         return timetableService.removeCourseFromTimetable(timetableId, courseId, principal);
     }
 
     /** 🟢 개인 일정 추가 */
-    @PostMapping("/{timetableId}/privacy")
+    @PostMapping("/{timetableId}/privacy/{privacyId}")
     @Operation(summary = "시간표에 개인 일정 추가(이렇게 추후에 추가해도 되고, privacy 애초에 POST할때 시간표 id지정해서 넣어주는 것도 가능")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-    public ResponseEntity<ResponseDto.Success> addPrivacyToTimetable(@PathVariable Long timetableId, @Valid @RequestBody PrivacyAssignmentDto requestDto, Principal principal) {
-        return timetableService.addPrivacyToTimetable(timetableId, requestDto, principal);
+    public ResponseEntity<ResponseDto.Success> addPrivacyToTimetable(@PathVariable("timetableId") Long timetableId, @PathVariable("privacyId") Long privacyId, Principal principal) {
+        return timetableService.addPrivacyToTimetable(timetableId, privacyId, principal);
     }
 
 //    /** 🟢 로그인된 사용자의 모든 시간표 조회 */
@@ -88,7 +88,7 @@ public class TimetableController {
     @GetMapping("/{timetableId}")
     @Operation(summary = "특정 시간표 조회")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-    public ResponseEntity<ResponseDto.Success> getTimetableById(@PathVariable Long timetableId, Principal principal) {
+    public ResponseEntity<ResponseDto.Success> getTimetableById(@PathVariable("timetableId") Long timetableId, Principal principal) {
         return timetableService.getTimetableByIdWithDetails(timetableId, principal);
     }
 
@@ -97,8 +97,8 @@ public class TimetableController {
     @Operation(summary = "시간표에서 개인 일정 제거")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
     public ResponseEntity<ResponseDto.Success> removePrivacyFromTimetable(
-            @PathVariable Long timetableId,
-            @PathVariable Long privacyId,
+            @PathVariable ("timetableId")Long timetableId,
+            @PathVariable ("privacyId")Long privacyId,
             Principal principal
     ) {
         return timetableService.removePrivacyFromTimetable(timetableId, privacyId, principal);
@@ -110,7 +110,7 @@ public class TimetableController {
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
     @Parameter(in = ParameterIn.PATH, name = "timetableId", description = "이름을 변경할 시간표 ID")
     public ResponseEntity<ResponseDto.Success> updateTimetableName(
-            @PathVariable Long timetableId,
+            @PathVariable ("timetableId") Long timetableId,
             @RequestBody TimetableDto timetableDto,
             Principal principal
     ) {

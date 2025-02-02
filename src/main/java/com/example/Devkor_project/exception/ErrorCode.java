@@ -46,7 +46,9 @@ public enum ErrorCode
     TIMETABLE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 시간표를 찾을 수 없습니다."),
     PRIVACY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 개인 일정을 찾을 수 없습니다."),
     DUPLICATE_ENTRY(HttpStatus.BAD_REQUEST, "이미 추가된 일정입니다."),
-    SCHEDULE_CONFLICT(HttpStatus.CONFLICT, "다른 일정과 시간이 겹칩니다.");
+    SCHEDULE_CONFLICT(HttpStatus.CONFLICT, "다른 일정과 시간이 겹칩니다."),
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+    ;
 
 
     private final HttpStatus httpStatus;

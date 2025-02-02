@@ -4,9 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 @Builder
 @Schema(description = "시간표에 개인 일정을 추가하기 위한 요청 DTO")
 public class PrivacyAssignmentDto {

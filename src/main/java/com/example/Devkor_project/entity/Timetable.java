@@ -61,4 +61,6 @@ public class Timetable
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+
 }

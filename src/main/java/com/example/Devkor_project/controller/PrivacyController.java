@@ -38,7 +38,7 @@ public class PrivacyController {
     @Operation(summary = "특정 시간표의 개인일정 조회")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
     @Parameter(in = ParameterIn.PATH, name = "timetableId", description = "조회할 시간표 ID")
-    public List<PrivacyDto> getPrivacyByTimetable(@PathVariable Long timetableId, Principal principal) {
+    public List<PrivacyDto> getPrivacyByTimetable(@PathVariable ("timetableId")Long timetableId, Principal principal) {
         return privacyService.getPrivacyByTimetable(timetableId, principal);
     }
 
@@ -51,7 +51,7 @@ public class PrivacyController {
 //    }
 
     @PostMapping
-    @Operation(summary = "개인일정 생성")
+    @Operation(summary = "개인일정 생성(요일이름 반드시 한글자로 할것!!! ex. 월, 수, 토)")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
     public ResponseEntity<ResponseDto.Success> createPrivacy(@Valid @RequestBody PrivacyDto privacyDto, Principal principal) {
         PrivacyDto createdPrivacy = privacyService.createPrivacy(privacyDto, principal);
@@ -69,15 +69,21 @@ public class PrivacyController {
     @Operation(summary = "개인일정 수정 (이름 & 장소만 변경 가능)")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
     @Parameter(in = ParameterIn.PATH, name = "privacyId", description = "수정할 개인일정 ID")
-    public ResponseEntity<ResponseDto.Success> updatePrivacy(@PathVariable Long privacyId, @Valid @RequestBody PrivacyUpdateDto privacyUpdateDto, Principal principal) {
+    public ResponseEntity<ResponseDto.Success> updatePrivacy(@PathVariable ("privacyId")Long privacyId, @Valid @RequestBody PrivacyUpdateDto privacyUpdateDto, Principal principal) {
         return privacyService.updatePrivacy(privacyId, privacyUpdateDto, principal);
     }
 
     @DeleteMapping("/{privacyId}")
     @Operation(summary = "개인일정 삭제")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-    public void deletePrivacy(@PathVariable Long privacyId, Principal principal) {
+    public ResponseEntity<ResponseDto.Success> deletePrivacy(@PathVariable ("privacyId")Long privacyId, Principal principal) {
         privacyService.deletePrivacy(privacyId, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .message("개인 일정이 성공적으로 삭제되었습니다.")
+                        .version("v1.2.1-alpha")
+                        .build());
+
     }
 
 //    @PostMapping("/{timetableId}/privacy")

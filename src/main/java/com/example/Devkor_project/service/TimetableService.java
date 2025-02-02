@@ -1,16 +1,15 @@
 package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.*;
-import com.example.Devkor_project.entity.Course;
-import com.example.Devkor_project.entity.Privacy;
-import com.example.Devkor_project.entity.Profile;
-import com.example.Devkor_project.entity.Timetable;
+import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.CourseRepository;
 import com.example.Devkor_project.repository.PrivacyRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
 import com.example.Devkor_project.repository.TimetableRepository;
+import com.example.Devkor_project.repository.TimeLocationRepository;
+import com.example.Devkor_project.util.TimeLocationUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 public class TimetableService {
 
     private final TimetableRepository timetableRepository;
+    private final TimeLocationRepository timeLocationRepository;
     private final CourseRepository courseRepository;
     private final PrivacyRepository privacyRepository;
     private final ProfileRepository profileRepository;
@@ -115,11 +116,42 @@ public class TimetableService {
      * 시간표에 강의 추가
      */
     @Transactional
-    public ResponseEntity<ResponseDto.Success> addCourseToTimetable(Long timetableId, CourseAssignmentDto requestDto, Principal principal) {
+    public ResponseEntity<ResponseDto.Success> addCourseToTimetable(Long timetableId, Long courseId, Principal principal) {
         Timetable timetable = validateProfileOwnership(timetableId, principal);
-        Course course = courseRepository.findById(requestDto.getCourseId())
+
+        if (courseId == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "courseId는 null일 수 없습니다.");
+        }
+
+        Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, "해당 강의를 찾을 수 없습니다."));
 
+        if (timetable.getCourses() == null) {
+            timetable.setCourses(new ArrayList<>()); // 🛠️ Null 체크 후 리스트 초기화
+        }
+        if (course.getTimetables() == null) {
+            course.setTimetables(new ArrayList<>()); // 🛠️ Null 체크 후 리스트 초기화
+        }
+
+        if (timetable.getCourses().contains(course)) {
+            throw new AppException(ErrorCode.DUPLICATE_ENTRY, "해당 강의는 이미 추가되어 있습니다.");
+        }
+
+        // ⏳ 기존 시간표의 강의 및 개인 일정 시간 정보 가져오기
+        List<TimeLocationDto> existingTimeLocations = TimeLocationUtil.extractFromTimetable(timetable, timeLocationRepository);
+
+        // 🕒 새 강의의 시간표 정보 가져오기
+        List<TimeLocationDto> newCourseTimeLocations = timeLocationRepository.findByCourseIds(List.of(course.getCourse_id()))
+                .stream()
+                .map(tl -> new TimeLocationDto(tl.getDay(), tl.getStartPeriod(), tl.getEndPeriod(), tl.getLocation()))
+                .toList();
+
+        // ⚠️ 기존 일정과 새 강의 시간이 겹치는지 확인
+        if (TimeLocationUtil.hasScheduleConflict(existingTimeLocations, newCourseTimeLocations)) {
+            throw new AppException(ErrorCode.SCHEDULE_CONFLICT, "시간표에 이미 같은 시간에 다른 강의 또는 개인 일정이 있습니다.");
+        }
+
+        // 📌 겹치지 않으면 추가 진행
         timetable.getCourses().add(course);
         course.getTimetables().add(timetable);
 
@@ -129,9 +161,10 @@ public class TimetableService {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("강의가 시간표에 추가되었습니다.")
-                        .version("v1.1.4")
+                        .version("v1.2.1-alpha")
                         .build());
     }
+
 
     /**
      * 시간표에서 강의 제거
@@ -157,18 +190,42 @@ public class TimetableService {
 
     /** 🟢 시간표에 개인 일정 추가 (중복은 방지되도록 코드 수정 완) */
     @Transactional
-    public ResponseEntity<ResponseDto.Success> addPrivacyToTimetable(
-            Long timetableId, PrivacyAssignmentDto requestDto, Principal principal) {
-
+    public ResponseEntity<ResponseDto.Success> addPrivacyToTimetable(Long timetableId, Long privacyId, Principal principal) {
         Timetable timetable = validateProfileOwnership(timetableId, principal);
-        Privacy privacy = privacyRepository.findById(requestDto.getPrivacyId())
+
+        if (privacyId == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "privacyId는 null일 수 없습니다.");
+        }
+
+        Privacy privacy = privacyRepository.findById(privacyId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRIVACY_NOT_FOUND, "해당 개인 일정을 찾을 수 없습니다."));
+
+        if (timetable.getPrivacies() == null) {
+            timetable.setPrivacies(new ArrayList<>()); // 🛠️ Null 체크 후 리스트 초기화
+        }
+        if (privacy.getTimetables() == null) {
+            privacy.setTimetables(new ArrayList<>()); // 🛠️ Null 체크 후 리스트 초기화
+        }
 
         if (timetable.getPrivacies().contains(privacy)) {
             throw new AppException(ErrorCode.DUPLICATE_ENTRY, "해당 개인 일정은 이미 추가되어 있습니다.");
         }
 
-        // 시간표에 개인 일정 추가
+        // ⏳ 기존 시간표의 강의 및 개인 일정 시간 정보 가져오기
+        List<TimeLocationDto> existingTimeLocations = TimeLocationUtil.extractFromTimetable(timetable, timeLocationRepository);
+
+        // 🕒 새 개인 일정의 시간표 정보 생성
+        List<TimeLocationDto> newPrivacyTimeLocations = List.of(
+                new TimeLocationDto(privacy.getDay(), privacy.getStartTime().getHour(),
+                        privacy.getFinishTime().getHour(), privacy.getLocation())
+        );
+
+        // ⚠️ 기존 일정과 새 일정 시간이 겹치는지 확인
+        if (TimeLocationUtil.hasScheduleConflict(existingTimeLocations, newPrivacyTimeLocations)) {
+            throw new AppException(ErrorCode.SCHEDULE_CONFLICT, "시간표에 이미 같은 시간에 다른 강의 또는 개인 일정이 있습니다.");
+        }
+
+        // 📌 겹치지 않으면 추가 진행
         timetable.getPrivacies().add(privacy);
         privacy.getTimetables().add(timetable);
 
@@ -178,9 +235,10 @@ public class TimetableService {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("개인 일정이 시간표에 추가되었습니다.")
-                        .version("v1.1.4")
+                        .version("v1.2.1-alpha")
                         .build());
     }
+
 
 
     /**

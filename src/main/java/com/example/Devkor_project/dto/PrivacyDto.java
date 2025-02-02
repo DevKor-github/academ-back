@@ -4,8 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import com.example.Devkor_project.entity.Privacy;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalTime;
 import java.time.LocalDateTime;
@@ -13,6 +12,9 @@ import java.util.List;
 
 @Getter
 @Builder
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PrivacyDto {
 
     @Schema(description = "Privacy ID")
