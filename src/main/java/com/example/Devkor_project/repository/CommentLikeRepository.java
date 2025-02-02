@@ -5,9 +5,11 @@ import com.example.Devkor_project.entity.CommentLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface CommentLikeRepository extends JpaRepository<CommentLike, Long>
 {
     // profile_id, comment_id로 CommentLike 조회

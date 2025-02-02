@@ -27,11 +27,11 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class LoginService
 {
     private final ProfileRepository profileRepository;
@@ -46,15 +46,15 @@ public class LoginService
     @Transactional
     public void signUp(ProfileDto.Signup dto)
     {
-        // 해당 이메일로 발송된 인증번호가 있는지 체크
+        // 해당 이메일로 발송된 인증번호가 없는 경우, 예외 처리
         Code code = codeRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, dto.getEmail()));
 
-        // 입력한 인증번호가 맞는지 체크
+        // 입력한 인증번호가 틀린 경우, 예외 처리
         if(!Objects.equals(dto.getCode(), code.getCode()))
             throw new AppException(ErrorCode.WRONG_CODE, dto.getEmail());
 
-        // 이메일 중복 체크
+        // 이메일이 중복된 경우, 예외 처리
         profileRepository.findByEmail(dto.getEmail())
                 .ifPresent(user -> {
                     throw new AppException(ErrorCode.EMAIL_DUPLICATED, dto.getEmail());
@@ -94,11 +94,8 @@ public class LoginService
         if(dto.getUsername().isEmpty() || dto.getUsername().length() > 10)
             throw new AppException(ErrorCode.INVALID_USERNAME, dto.getUsername());
 
-        // 닉네임 중복 체크
-        profileRepository.findByUsername(dto.getUsername())
-                .ifPresent(user -> {
-                    throw new AppException(ErrorCode.USERNAME_DUPLICATED, dto.getUsername());
-                });
+        // 닉네임이 중복된 경우, 예외 처리
+        checkUsername(dto.getUsername());
 
         // 학위가 'MASTER' 또는 'DEGREE'인지 체크
         if(!Objects.equals(dto.getDegree(), "MASTER") && !Objects.equals(dto.getDegree(), "DOCTOR"))
@@ -127,10 +124,11 @@ public class LoginService
     @Transactional
     public void sendAuthenticationNumber(String email, String purpose)
     {
-        // 고려대 이메일인지 확인
+        // 고려대 이메일이 아닌 경우, 예외 처리
         if(!email.endsWith("@korea.ac.kr"))
             throw new AppException(ErrorCode.EMAIL_NOT_KOREA, email);
 
+        // purpose 형식이 잘못된 경우, 예외 처리
         if(!purpose.equals("SIGN_UP") && !purpose.equals("RESET_PASSWORD"))
             throw new AppException(ErrorCode.INVALID_PURPOSE, purpose);
 
@@ -213,12 +211,11 @@ public class LoginService
                 );
 
                 // 이미 인증번호가 발송된 이메일인 경우, 데이터베이스에서 인증번호 정보 삭제
-                Code code = codeRepository.findByEmail(email).orElse(null);
-                if(code != null)
-                    codeRepository.delete(code);
+                Optional<Code> existingCode = codeRepository.findByEmail(email);
+                existingCode.ifPresent(codeRepository::delete);
 
                 // 인증번호를 데이터베이스에 저장
-                code = Code.builder()
+                Code code = Code.builder()
                         .email(email)
                         .code(authenticationNumber)
                         .created_at(LocalDate.now())
@@ -247,19 +244,19 @@ public class LoginService
     @Transactional
     public void checkAuthenticationNumber(String email, String code)
     {
-        // 고려대 이메일인지 확인
+        // 고려대 이메일이 아닌 경우, 예외 처리
         if (!email.endsWith("@korea.ac.kr"))
             throw new AppException(ErrorCode.EMAIL_NOT_KOREA, email);
 
-        // 해당 이메일로 발송된 인증번호가 있는지 체크
+        // 해당 이메일로 발송된 인증번호가 없는 경우, 예외 처리
         Code actualCode = codeRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.CODE_NOT_FOUND, email));
 
-        // 입력한 인증번호가 맞는지 체크
+        // 입력한 인증번호가 틀린 경우, 예외 처리
         if(!Objects.equals(code, actualCode.getCode()))
             throw new AppException(ErrorCode.WRONG_CODE, email);
 
-        // 이메일 중복 체크
+        // 이메일 중복된 경우, 예외 처리
         profileRepository.findByEmail(email)
                 .ifPresent(user -> {
                     throw new AppException(ErrorCode.EMAIL_DUPLICATED, email);
@@ -280,7 +277,7 @@ public class LoginService
     @Transactional
     public void resetPassword(ProfileDto.ResetPassword dto)
     {
-        // 고려대 이메일인지 확인
+        // 고려대 이메일이 아닌 경우
         if (!dto.getEmail().endsWith("@korea.ac.kr"))
             throw new AppException(ErrorCode.EMAIL_NOT_KOREA, dto.getEmail());
 
@@ -368,7 +365,7 @@ public class LoginService
                 .build();
     }
 
-    /* access token 재발급 서비스 */
+    /* Access token 재발급 서비스 */
     @Transactional
     public String refreshToken(HttpServletRequest request)
     {
