@@ -877,6 +877,18 @@ public class CourseDto
                 .isBookmark(isBookmark)
                 .build();
     }
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @ToString
+    @Builder
+    public static class Basic {  // ✅ 내부 static 클래스로 선언되어 있어야 함
+        private Long course_id;
+        private String course_code;
+        private String name;
+        private String professor;
+    }
+
     public static CourseDto.Basic fromCourse(Course course) {
         return CourseDto.Basic.builder()
                 .course_id(course.getCourse_id())
