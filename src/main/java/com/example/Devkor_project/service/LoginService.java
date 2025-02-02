@@ -95,10 +95,7 @@ public class LoginService
             throw new AppException(ErrorCode.INVALID_USERNAME, dto.getUsername());
 
         // 닉네임이 중복된 경우, 예외 처리
-        profileRepository.findByUsername(dto.getUsername())
-                .ifPresent(user -> {
-                    throw new AppException(ErrorCode.USERNAME_DUPLICATED, dto.getUsername());
-                });
+        checkUsername(dto.getUsername());
 
         // 학위가 'MASTER' 또는 'DEGREE'인지 체크
         if(!Objects.equals(dto.getDegree(), "MASTER") && !Objects.equals(dto.getDegree(), "DOCTOR"))
@@ -280,7 +277,7 @@ public class LoginService
     @Transactional
     public void resetPassword(ProfileDto.ResetPassword dto)
     {
-        // 고려대 이메일인지 확인
+        // 고려대 이메일이 아닌 경우
         if (!dto.getEmail().endsWith("@korea.ac.kr"))
             throw new AppException(ErrorCode.EMAIL_NOT_KOREA, dto.getEmail());
 
@@ -368,7 +365,7 @@ public class LoginService
                 .build();
     }
 
-    /* access token 재발급 서비스 */
+    /* Access token 재발급 서비스 */
     @Transactional
     public String refreshToken(HttpServletRequest request)
     {

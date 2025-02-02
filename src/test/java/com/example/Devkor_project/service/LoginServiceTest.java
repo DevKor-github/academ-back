@@ -6,30 +6,43 @@ import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.CodeRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @Transactional
 class LoginServiceTest
 {
+    @Autowired MockMvc mockMvc;
     @Autowired(required = false) LoginService loginService;
 
     @Autowired ProfileRepository profileRepository;
@@ -38,7 +51,6 @@ class LoginServiceTest
     @MockBean JavaMailSender javaMailSender;
 
     private String email;
-    private String purpose;
     private ProfileDto.Signup profileDto;
     private MimeMessage mimeMessage;
 
@@ -46,44 +58,52 @@ class LoginServiceTest
     @BeforeEach
     void conditionalSetUp(TestInfo testInfo)
     {
-        if (testInfo.getDisplayName().startsWith("회원가입"))
-        {
-            email = "test1234@korea.ac.kr";
-            purpose = "SIGN_UP";
-            profileDto = ProfileDto.Signup.builder()
-                    .email("test1234@korea.ac.kr")
-                    .password("test1234")
-                    .username("test1234")
-                    .student_id("1234567")
-                    .degree("MASTER")
-                    .semester(1)
-                    .department("test")
-                    .build();
-            mimeMessage = mock(MimeMessage.class);
-
-        }
+        email = "test1234@korea.ac.kr";
+        profileDto = ProfileDto.Signup.builder()
+                .email(email)
+                .password("test1234")
+                .username("test1234")
+                .student_id("1234567")
+                .degree("MASTER")
+                .semester(1)
+                .department("test")
+                .build();
+        mimeMessage = mock(MimeMessage.class);
     }
 
-    @Test
-    @DisplayName("회원가입 프로세스 성공")
-    void join_process_success()
+    // profileDto에 해당하는 계정 생성
+    void createAccount(String email)
     {
-        // Given
         given(javaMailSender.createMimeMessage())
                 .willReturn(mimeMessage);
 
-        // When
-        loginService.sendAuthenticationNumber(email, purpose);
+        loginService.sendAuthenticationNumber(email, "SIGN_UP");
 
         String code = codeRepository.findByEmail(email).get().getCode();
         loginService.checkAuthenticationNumber(email, code);
 
+        profileDto.setEmail(email);
         profileDto.setCode(code);
         loginService.signUp(profileDto);
+    }
+
+    @Test
+    @DisplayName("회원가입 프로세스 성공")
+    void join_process_success() throws Exception
+    {
+        // Given
+        createAccount(email);
 
         // Then
         verify(javaMailSender, times(1)).send(mimeMessage);
         assertThat(profileRepository.findByEmail(email).isPresent()).isTrue();
+
+        mockMvc.perform(post("/api/login")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("email", profileDto.getEmail())
+                        .param("password", profileDto.getPassword())
+                        .param("remember-me", "true"))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -96,7 +116,7 @@ class LoginServiceTest
         // When & Then
         AppException exception = assertThrows(
                 AppException.class,
-                () -> loginService.sendAuthenticationNumber(email, purpose)
+                () -> loginService.sendAuthenticationNumber(email, "SIGN_UP")
         );
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EMAIL_NOT_KOREA);
     }
@@ -105,13 +125,10 @@ class LoginServiceTest
     @DisplayName("회원가입 프로세스 실패 2 : purpose 형식이 잘못된 경우")
     void join_process_failure_2()
     {
-        // Given
-        purpose = "wrong_purpose";
-
         // When & Then
         AppException exception = assertThrows(
                 AppException.class,
-                () -> loginService.sendAuthenticationNumber(email, purpose)
+                () -> loginService.sendAuthenticationNumber(email, "wrong_purpose")
         );
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_PURPOSE);
     }
@@ -158,7 +175,7 @@ class LoginServiceTest
                 .willReturn(mimeMessage);
 
         // When & Then
-        loginService.sendAuthenticationNumber(email, purpose);
+        loginService.sendAuthenticationNumber(email, "SIGN_UP");
         AppException exception = assertThrows(
                 AppException.class,
                 () -> loginService.checkAuthenticationNumber(email, code)
@@ -175,22 +192,9 @@ class LoginServiceTest
                 .willReturn(mimeMessage);
 
         // When & Then
-        loginService.sendAuthenticationNumber(email, purpose);
+        loginService.sendAuthenticationNumber(email, "SIGN_UP");
 
-        Profile profile = Profile.builder()
-                .email("test1234@korea.ac.kr")
-                .password("test1234")
-                .username("test1234")
-                .student_id("1234567")
-                .degree("MASTER")
-                .semester(1)
-                .department("test")
-                .point(0)
-                .access_expiration_date(LocalDate.now())
-                .created_at(LocalDate.now())
-                .role("ROLE_USER")
-                .build();
-        profileRepository.save(profile);
+        createAccount(email);
 
         String code = codeRepository.findByEmail(email).get().getCode();
 
@@ -222,7 +226,7 @@ class LoginServiceTest
                 .willReturn(mimeMessage);
 
         // When & Then
-        loginService.sendAuthenticationNumber(email, purpose);
+        loginService.sendAuthenticationNumber(email, "SIGN_UP");
 
         String code = codeRepository.findByEmail(email).get().getCode();
         loginService.checkAuthenticationNumber(email, code);
@@ -244,25 +248,13 @@ class LoginServiceTest
                 .willReturn(mimeMessage);
 
         // When & Then
-        loginService.sendAuthenticationNumber(email, purpose);
+        loginService.sendAuthenticationNumber(email, "SIGN_UP");
 
         String code = codeRepository.findByEmail(email).get().getCode();
         loginService.checkAuthenticationNumber(email, code);
 
-        Profile profile = Profile.builder()
-                .email("test1234@korea.ac.kr")
-                .password("test1234")
-                .username("test1234")
-                .student_id("1234567")
-                .degree("MASTER")
-                .semester(1)
-                .department("test")
-                .point(0)
-                .access_expiration_date(LocalDate.now())
-                .created_at(LocalDate.now())
-                .role("ROLE_USER")
-                .build();
-        profileRepository.save(profile);
+        createAccount(email);
+        code = codeRepository.findByEmail(email).get().getCode();
 
         profileDto.setCode(code);
         AppException exception = assertThrows(
@@ -283,7 +275,7 @@ class LoginServiceTest
                 .willReturn(mimeMessage);
 
         // When & Then
-        loginService.sendAuthenticationNumber(email, purpose);
+        loginService.sendAuthenticationNumber(email, "SIGN_UP");
 
         String code = codeRepository.findByEmail(email).get().getCode();
         loginService.checkAuthenticationNumber(email, code);
@@ -313,7 +305,7 @@ class LoginServiceTest
                 .willReturn(mimeMessage);
 
         // When & Then
-        loginService.sendAuthenticationNumber(email, purpose);
+        loginService.sendAuthenticationNumber(email, "SIGN_UP");
 
         String code = codeRepository.findByEmail(email).get().getCode();
         loginService.checkAuthenticationNumber(email, code);
@@ -337,7 +329,7 @@ class LoginServiceTest
                 .willReturn(mimeMessage);
 
         // When & Then
-        loginService.sendAuthenticationNumber(email, purpose);
+        loginService.sendAuthenticationNumber(email, "SIGN_UP");
 
         String code = codeRepository.findByEmail(email).get().getCode();
         loginService.checkAuthenticationNumber(email, code);
@@ -355,30 +347,19 @@ class LoginServiceTest
     void join_process_failure_13()
     {
         // Given
-        Profile profile = Profile.builder()
-                .email("another@korea.ac.kr")
-                .password("test1234")
-                .username("test1234")
-                .student_id("1234567")
-                .degree("MASTER")
-                .semester(1)
-                .department("test")
-                .point(0)
-                .access_expiration_date(LocalDate.now())
-                .created_at(LocalDate.now())
-                .role("ROLE_USER")
-                .build();
-        profileRepository.save(profile);
-
         given(javaMailSender.createMimeMessage())
                 .willReturn(mimeMessage);
 
+        profileDto.setEmail("another_email@korea.ac.kr");
+        createAccount("another_email@korea.ac.kr");
+
         // When & Then
-        loginService.sendAuthenticationNumber(email, purpose);
+        loginService.sendAuthenticationNumber(email, "SIGN_UP");
 
         String code = codeRepository.findByEmail(email).get().getCode();
         loginService.checkAuthenticationNumber(email, code);
 
+        profileDto.setEmail(email);
         profileDto.setCode(code);
         AppException exception = assertThrows(
                 AppException.class,
@@ -398,7 +379,7 @@ class LoginServiceTest
                 .willReturn(mimeMessage);
 
         // When & Then
-        loginService.sendAuthenticationNumber(email, purpose);
+        loginService.sendAuthenticationNumber(email, "SIGN_UP");
 
         String code = codeRepository.findByEmail(email).get().getCode();
         loginService.checkAuthenticationNumber(email, code);
@@ -409,5 +390,165 @@ class LoginServiceTest
                 () -> loginService.signUp(profileDto)
         );
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_DEGREE);
+    }
+
+    @Test
+    @DisplayName("임시 비밀번호 발급 프로세스 성공")
+    void resetPassword_process_success() throws Exception
+    {
+        // Given
+        createAccount(email);
+
+        // When & Then
+        mockMvc.perform(post("/api/login")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("email", profileDto.getEmail())
+                        .param("password", profileDto.getPassword())
+                        .param("remember-me", "true"))
+                .andExpect(status().isOk());
+
+        loginService.sendAuthenticationNumber(email, "RESET_PASSWORD");
+
+        String code = codeRepository.findByEmail(email).get().getCode();
+        loginService.resetPassword(
+                ProfileDto.ResetPassword.builder()
+                    .email(profileDto.getEmail())
+                    .code(code)
+                    .build()
+        );
+
+        mockMvc.perform(post("/api/login")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("email", profileDto.getEmail())
+                        .param("password", profileDto.getPassword())
+                        .param("remember-me", "true"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("임시 비밀번호 발급 프로세스 실패 1 : 해당 이메일의 계정이 존재하지 않는 경우")
+    void resetPassword_process_failure_1() throws Exception
+    {
+        // Given
+        given(javaMailSender.createMimeMessage())
+                .willReturn(mimeMessage);
+
+        // When
+        loginService.sendAuthenticationNumber(email, "RESET_PASSWORD");
+
+        // Then
+        assertThat(codeRepository.findByEmail(email)).isEqualTo(Optional.empty());
+    }
+
+    @Test
+    @DisplayName("임시 비밀번호 발급 프로세스 실패 2 : 인증번호가 틀린 경우")
+    void resetPassword_process_failure_2() throws Exception
+    {
+        // Given
+        createAccount(email);
+
+        // When & Then
+        mockMvc.perform(post("/api/login")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("email", profileDto.getEmail())
+                        .param("password", profileDto.getPassword())
+                        .param("remember-me", "true"))
+                .andExpect(status().isOk());
+
+        loginService.sendAuthenticationNumber(email, "RESET_PASSWORD");
+
+        AppException exception = assertThrows(
+                AppException.class,
+                () -> loginService.resetPassword(
+                        ProfileDto.ResetPassword.builder()
+                                .email(profileDto.getEmail())
+                                .code("wrong_code")
+                                .build()
+                )
+        );
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WRONG_CODE);
+    }
+
+    @Test
+    @DisplayName("로그인 여부 확인 성공")
+    void checkLogin_success()
+    {
+        // Given
+        createAccount(email);
+
+        Principal mockPrincipal = mock(Principal.class);
+        given(mockPrincipal.getName()).willReturn(email);
+
+        // When
+        ProfileDto.CheckLogin result = loginService.checkLogin(mockPrincipal);
+
+        // Then
+        assertThat(result.getEmail()).isEqualTo(email);
+    }
+
+    @Test
+    @DisplayName("로그인 여부 확인 실패 : 계정이 존재하지 않는 경우")
+    void checkLogin_failure()
+    {
+        // Given
+        Principal mockPrincipal = mock(Principal.class);
+        given(mockPrincipal.getName()).willReturn("does_not_exist@naver.com");
+
+        // When & Then
+        AppException exception = assertThrows(
+                AppException.class,
+                () -> loginService.checkLogin(mockPrincipal)
+        );
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EMAIL_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("Access token 재발급 성공")
+    void refreshToken_success() throws Exception
+    {
+        // Given
+        createAccount(email);
+
+        MvcResult loginResult = mockMvc.perform(post("/api/login")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("email", profileDto.getEmail())
+                        .param("password", profileDto.getPassword())
+                        .param("remember-me", "true"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jsonResponse = loginResult.getResponse().getContentAsString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> responseMap = objectMapper.readValue(jsonResponse, new TypeReference<>() {});
+        Map<String, String> dataMap = (Map<String, String>) responseMap.get("data");
+
+        String refreshToken = dataMap.get("refreshToken");
+
+        HttpServletRequest mockHttpServletRequest = mock(HttpServletRequest.class);
+        given(mockHttpServletRequest.getHeader("Authorization")).willReturn("Bearer " + refreshToken);
+
+        // When
+        String newAccessToken = loginService.refreshToken(mockHttpServletRequest);
+
+        // Then
+        assertThat(newAccessToken).isNotEmpty();
+        assertThat(newAccessToken).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Access token 재발급 실패 : 올바르지 않은 refresh token")
+    void refreshToken_failure()
+    {
+        // Given
+        String refreshToken = "thisIsNotOfficialRefreshToken";
+
+        HttpServletRequest mockHttpServletRequest = mock(HttpServletRequest.class);
+        given(mockHttpServletRequest.getHeader("Authorization")).willReturn("Bearer " + refreshToken);
+
+        // When & Then
+        assertThrows(
+                AppException.class,
+                () -> loginService.refreshToken(mockHttpServletRequest)
+        );
     }
 }
