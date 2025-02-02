@@ -278,6 +278,27 @@ public class TimetableService {
                         .version("v1.1.4")
                         .build());
     }
+    /**
+     * 🟢 시간표 삭제
+     */
+    @Transactional
+    public ResponseEntity<ResponseDto.Success> deleteTimetable(Long timetableId, Principal principal) {
+        Timetable timetable = validateProfileOwnership(timetableId, principal);
+
+        // 📌 시간표에서 모든 강의 및 개인 일정 관계 해제
+        timetable.getCourses().forEach(course -> course.getTimetables().remove(timetable));
+        timetable.getPrivacies().forEach(privacy -> privacy.getTimetables().remove(timetable));
+
+        // 📌 시간표 삭제
+        timetableRepository.delete(timetable);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .message("시간표가 성공적으로 삭제되었습니다.")
+                        .version("v1.2.1-alpha")
+                        .build());
+    }
+
 
     /**
      * Helper Method: Principal을 이용해 Profile 조회

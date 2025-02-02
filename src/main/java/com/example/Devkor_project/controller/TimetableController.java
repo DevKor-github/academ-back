@@ -116,4 +116,13 @@ public class TimetableController {
     ) {
         return timetableService.updateTimetableName(timetableId, timetableDto, principal);
     }
+
+    /** 🟢 시간표 삭제 */
+    @DeleteMapping("/{timetableId}")
+    @Operation(summary = "시간표 삭제")
+    @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
+    @Parameter(in = ParameterIn.PATH, name = "timetableId", description = "삭제할 시간표 ID")
+    public ResponseEntity<ResponseDto.Success> deleteTimetable(@PathVariable ("timetableId") Long timetableId, Principal principal) {
+        return timetableService.deleteTimetable(timetableId, principal);
+    }
 }
