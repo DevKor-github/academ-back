@@ -79,9 +79,6 @@ public class PrivacyService {
 
         // 기존 일정 정보 업데이트
         privacy.setName(updateDto.getName());
-        privacy.setDay(updateDto.getDay());
-        privacy.setStartTime(updateDto.getStartTime());
-        privacy.setFinishTime(updateDto.getFinishTime());
         privacy.setLocation(updateDto.getLocation());
 
         privacyRepository.save(privacy);

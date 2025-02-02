@@ -66,7 +66,7 @@ public class PrivacyController {
     }
 
     @PutMapping("/{privacyId}")
-    @Operation(summary = "개인일정 수정")
+    @Operation(summary = "개인일정 수정 (이름 & 장소만 변경 가능)")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
     @Parameter(in = ParameterIn.PATH, name = "privacyId", description = "수정할 개인일정 ID")
     public ResponseEntity<ResponseDto.Success> updatePrivacy(@PathVariable Long privacyId, @Valid @RequestBody PrivacyUpdateDto privacyUpdateDto, Principal principal) {
