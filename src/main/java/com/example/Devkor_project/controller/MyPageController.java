@@ -91,14 +91,14 @@ public class MyPageController {
             @Parameter(name = "page", description = "페이지 번호 ( 1부터 시작 )")
     })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "CommentDto.MyPage 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = CommentDto.MyPage.class))),
+            @ApiResponse(responseCode = "200", description = "CommentDto.MyPage 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = CommentDto.NOT_UPDATED_MyPage.class))),
             @ApiResponse(responseCode = "실패: 401 (UNAUTHORIZED)", description = "로그인하지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 404 (EMAIL_NOT_FOUND)", description = "요청을 보낸 사용자 계정이 존재하지 않는 경우 (이메일을 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 404 (NO_RESULT)", description = "결과가 없는 경우 (요청으로 보낸 page를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
     })
     public ResponseEntity<ResponseDto.Success> myComments(@RequestParam("page") int page, Principal principal)
     {
-        List<CommentDto.MyPage> my_comments = myPageService.myComments(principal, page - 1);
+        List<CommentDto.NOT_UPDATED_MyPage> my_comments = myPageService.myComments(principal, page - 1);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
@@ -143,14 +143,14 @@ public class MyPageController {
             @Parameter(name = "page", description = "페이지 번호 ( 1부터 시작 )")
     })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "CourseDto.Basic 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = CourseDto.Basic.class))),
+            @ApiResponse(responseCode = "200", description = "CourseDto.Basic 리스트를 반환합니다.", content = @Content(schema = @Schema(implementation = CourseDto.NOT_UPDATED_Basic.class))),
             @ApiResponse(responseCode = "실패: 401 (UNAUTHORIZED)", description = "로그인하지 않은 경우", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 404 (EMAIL_NOT_FOUND)", description = "요청을 보낸 사용자 계정이 존재하지 않는 경우 (이메일을 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
             @ApiResponse(responseCode = "실패: 404 (NO_RESULT)", description = "결과가 없는 경우 (요청으로 보낸 page를 반환)", content = @Content(schema = @Schema(implementation = ResponseDto.Error.class))),
     })
     public ResponseEntity<ResponseDto.Success> myBookmarks(@RequestParam("page") int page, Principal principal)
     {
-        List<CourseDto.Basic> my_bookmarks = myPageService.myBookmarks(principal, page - 1);
+        List<CourseDto.NOT_UPDATED_Basic> my_bookmarks = myPageService.myBookmarks(principal, page - 1);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
