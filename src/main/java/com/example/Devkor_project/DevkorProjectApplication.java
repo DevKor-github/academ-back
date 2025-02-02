@@ -10,7 +10,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
 @EnableScheduling	// SchedulerService를 위한 Annotation
-@EnableAsync		// 비동기 처리 허용
 public class DevkorProjectApplication {
 
 	public static void main(String[] args) {

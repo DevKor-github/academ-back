@@ -18,10 +18,9 @@ import java.util.Optional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
-
-    @Autowired
-    private ProfileRepository profileRepository;
+public class CustomUserDetailsService implements UserDetailsService
+{
+    private final ProfileRepository profileRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

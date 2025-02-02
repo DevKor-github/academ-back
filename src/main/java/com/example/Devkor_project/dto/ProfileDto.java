@@ -68,6 +68,8 @@ public class ProfileDto
     @AllArgsConstructor
     @ToString
     @Getter
+    @Setter
+    @Builder
     public static class Signup
     {
         @NotBlank(message = "[email] cannot be blank.")
