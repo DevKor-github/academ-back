@@ -1,6 +1,7 @@
 package com.example.Devkor_project.controller;
 
 import com.example.Devkor_project.dto.PrivacyDto;
+import com.example.Devkor_project.dto.PrivacyUpdateDto;
 import com.example.Devkor_project.dto.ResponseDto;
 import com.example.Devkor_project.service.PrivacyService;
 import com.example.Devkor_project.configuration.VersionProvider;
@@ -68,8 +69,8 @@ public class PrivacyController {
     @Operation(summary = "개인일정 수정")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
     @Parameter(in = ParameterIn.PATH, name = "privacyId", description = "수정할 개인일정 ID")
-    public PrivacyDto updatePrivacy(@PathVariable Long privacyId, @Valid @RequestBody PrivacyDto privacyDto, Principal principal) {
-        return privacyService.updatePrivacy(privacyId, privacyDto, principal);
+    public ResponseEntity<ResponseDto.Success> updatePrivacy(@PathVariable Long privacyId, @Valid @RequestBody PrivacyUpdateDto privacyUpdateDto, Principal principal) {
+        return privacyService.updatePrivacy(privacyId, privacyUpdateDto, principal);
     }
 
     @DeleteMapping("/{privacyId}")
@@ -79,17 +80,17 @@ public class PrivacyController {
         privacyService.deletePrivacy(privacyId, principal);
     }
 
-    @PostMapping("/{timetableId}/privacy")
-    @Operation(summary = "특정 시간표에 개인일정 추가")
-    @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-    public PrivacyDto addPrivacyToTimetable(@PathVariable Long timetableId, @Valid @RequestBody PrivacyDto privacyDto, Principal principal) {
-        return privacyService.addPrivacyToTimetable(timetableId, privacyDto, principal);
-    }
+//    @PostMapping("/{timetableId}/privacy")
+//    @Operation(summary = "특정 시간표에 개인일정 추가(아래 timetable쪽에 똑같은 api있어서 삭제)")
+//    @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
+//    public PrivacyDto addPrivacyToTimetable(@PathVariable Long timetableId, @Valid @RequestBody PrivacyDto privacyDto, Principal principal) {
+//        return privacyService.addPrivacyToTimetable(timetableId, privacyDto, principal);
+//    }
 
-    @DeleteMapping("/{timetableId}/privacy/{privacyId}")
-    @Operation(summary = "특정 시간표에서 개인일정 삭제")
-    @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-    public void removePrivacyFromTimetable(@PathVariable Long timetableId, @PathVariable Long privacyId, Principal principal) {
-        privacyService.removePrivacyFromTimetable(timetableId, privacyId, principal);
-    }
+//    @DeleteMapping("/{timetableId}/privacy/{privacyId}")
+//    @Operation(summary = "특정 시간표에서 개인일정 삭제(아래 timetable쪽에 똑같은 api있어서 삭제)")
+//    @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
+//    public void removePrivacyFromTimetable(@PathVariable Long timetableId, @PathVariable Long privacyId, Principal principal) {
+//        privacyService.removePrivacyFromTimetable(timetableId, privacyId, principal);
+//    }
 }

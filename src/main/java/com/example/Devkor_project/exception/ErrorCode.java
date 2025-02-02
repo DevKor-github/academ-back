@@ -44,7 +44,11 @@ public enum ErrorCode
     INVALID_PERIOD(HttpStatus.BAD_REQUEST, "해당 교시는 유효하지 않습니다."),
     INVALID_TIME_LOCATION(HttpStatus.BAD_REQUEST, "해당 시간 및 장소 정보는 유효하지 않습니다."),
     TIMETABLE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 시간표를 찾을 수 없습니다."),
-    PRIVACY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 개인 일정을 찾을 수 없습니다.");
+    PRIVACY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 개인 일정을 찾을 수 없습니다."),
+    DUPLICATE_ENTRY(HttpStatus.BAD_REQUEST, "이미 추가된 일정입니다."),
+    SCHEDULE_CONFLICT(HttpStatus.CONFLICT, "다른 일정과 시간이 겹칩니다.");
+
+
     private final HttpStatus httpStatus;
     private final String message;
 }

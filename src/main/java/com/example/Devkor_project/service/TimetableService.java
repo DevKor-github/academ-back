@@ -1,8 +1,6 @@
 package com.example.Devkor_project.service;
 
-import com.example.Devkor_project.dto.PrivacyDto;
-import com.example.Devkor_project.dto.ResponseDto;
-import com.example.Devkor_project.dto.TimetableDto;
+import com.example.Devkor_project.dto.*;
 import com.example.Devkor_project.entity.Course;
 import com.example.Devkor_project.entity.Privacy;
 import com.example.Devkor_project.entity.Profile;
@@ -73,7 +71,7 @@ public class TimetableService {
         Profile profile = getProfileByPrincipal(principal);
 
         List<TimetableDto> timetableDtos = timetableRepository.findByProfile_profileId(profile.getProfile_id()).stream()
-                .map(t -> new TimetableDto(null, t.getId(), t.getName()))
+                .map(t -> new TimetableDto(t.getId(), t.getName()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -85,27 +83,41 @@ public class TimetableService {
     }
 
     /**
-     * 특정 시간표 조회
+     * 특정 시간표 조회 (상세 정보 포함)
      */
     @Transactional
-    public ResponseEntity<ResponseDto.Success> getTimetableById(Long timetableId, Principal principal) {
+    public ResponseEntity<ResponseDto.Success> getTimetableByIdWithDetails(Long timetableId, Principal principal) {
         Timetable timetable = validateProfileOwnership(timetableId, principal);
+
+        // DTO 변환
+        TimetableWithDetailsDto dto = TimetableWithDetailsDto.builder()
+                .id(timetable.getId())
+                .profileId(timetable.getProfile().getProfile_id())
+                .name(timetable.getName())
+                .courses(timetable.getCourses().stream()
+                        .map(CourseDto::fromCourse)  // ✅ CourseDto 변환 메서드 사용
+                        .collect(Collectors.toList()))
+                .privacies(timetable.getPrivacies().stream()
+                        .map(PrivacyDto::fromPrivacy)  // ✅ PrivacyDto 변환 메서드 사용
+                        .collect(Collectors.toList()))
+                .build();
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("특정 시간표를 성공적으로 조회하였습니다.")
-                        .data(timetable)
+                        .data(dto)
                         .version("v1.1.4")
                         .build());
     }
+
 
     /**
      * 시간표에 강의 추가
      */
     @Transactional
-    public ResponseEntity<ResponseDto.Success> addCourseToTimetable(Long timetableId, Long courseId, Principal principal) {
+    public ResponseEntity<ResponseDto.Success> addCourseToTimetable(Long timetableId, CourseAssignmentDto requestDto, Principal principal) {
         Timetable timetable = validateProfileOwnership(timetableId, principal);
-        Course course = courseRepository.findById(courseId)
+        Course course = courseRepository.findById(requestDto.getCourseId())
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND, "해당 강의를 찾을 수 없습니다."));
 
         timetable.getCourses().add(course);
@@ -143,31 +155,33 @@ public class TimetableService {
                         .build());
     }
 
-    /**
-     * 시간표에 개인 일정 추가
-     */
+    /** 🟢 시간표에 개인 일정 추가 (중복은 방지되도록 코드 수정 완) */
     @Transactional
-    public ResponseEntity<ResponseDto.Success> addPrivacyToTimetable(Long timetableId, PrivacyDto privacyDto, Principal principal) {
+    public ResponseEntity<ResponseDto.Success> addPrivacyToTimetable(
+            Long timetableId, PrivacyAssignmentDto requestDto, Principal principal) {
+
         Timetable timetable = validateProfileOwnership(timetableId, principal);
+        Privacy privacy = privacyRepository.findById(requestDto.getPrivacyId())
+                .orElseThrow(() -> new AppException(ErrorCode.PRIVACY_NOT_FOUND, "해당 개인 일정을 찾을 수 없습니다."));
 
-        Privacy privacy = Privacy.builder()
-                .name(privacyDto.getName())
-                .day(privacyDto.getDay())
-                .startTime(privacyDto.getStartTime())
-                .finishTime(privacyDto.getFinishTime())
-                .location(privacyDto.getLocation())
-                .build();
+        if (timetable.getPrivacies().contains(privacy)) {
+            throw new AppException(ErrorCode.DUPLICATE_ENTRY, "해당 개인 일정은 이미 추가되어 있습니다.");
+        }
 
+        // 시간표에 개인 일정 추가
+        timetable.getPrivacies().add(privacy);
         privacy.getTimetables().add(timetable);
+
+        timetableRepository.save(timetable);
         privacyRepository.save(privacy);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("개인 일정이 시간표에 추가되었습니다.")
-                        .data(privacy)
                         .version("v1.1.4")
                         .build());
     }
+
 
     /**
      * 시간표에서 개인 일정 제거
@@ -202,7 +216,7 @@ public class TimetableService {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("시간표 이름이 성공적으로 변경되었습니다.")
-                        .data(timetable)
+                        .data(new TimetableDto(timetable.getId(), timetable.getName()))
                         .version("v1.1.4")
                         .build());
     }

@@ -1,8 +1,6 @@
 package com.example.Devkor_project.controller;
 
-import com.example.Devkor_project.dto.PrivacyDto;
-import com.example.Devkor_project.dto.TimetableDto;
-import com.example.Devkor_project.dto.ResponseDto;
+import com.example.Devkor_project.dto.*;
 import com.example.Devkor_project.entity.Timetable;
 import com.example.Devkor_project.service.TimetableService;
 import com.example.Devkor_project.configuration.VersionProvider;
@@ -49,8 +47,8 @@ public class TimetableController {
     @PostMapping("/{timetableId}/course")
     @Operation(summary = "시간표에 강의 추가")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-    public ResponseEntity<?> addCourseToTimetable(@PathVariable Long timetableId, @RequestParam Long courseId, Principal principal) {
-        return timetableService.addCourseToTimetable(timetableId, courseId, principal);
+    public ResponseEntity<?> addCourseToTimetable(@PathVariable Long timetableId, @Valid @RequestBody CourseAssignmentDto requestDto, Principal principal) {
+        return timetableService.addCourseToTimetable(timetableId, requestDto, principal);
     }
 
     /** 🟢 강의 제거 */
@@ -63,24 +61,24 @@ public class TimetableController {
 
     /** 🟢 개인 일정 추가 */
     @PostMapping("/{timetableId}/privacy")
-    @Operation(summary = "시간표에 개인 일정 추가")
+    @Operation(summary = "시간표에 개인 일정 추가(이렇게 추후에 추가해도 되고, privacy 애초에 POST할때 시간표 id지정해서 넣어주는 것도 가능")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-    public ResponseEntity<ResponseDto.Success> addPrivacyToTimetable(@PathVariable Long timetableId, @Valid @RequestBody PrivacyDto privacyDto, Principal principal) {
-        return timetableService.addPrivacyToTimetable(timetableId, privacyDto, principal);
+    public ResponseEntity<ResponseDto.Success> addPrivacyToTimetable(@PathVariable Long timetableId, @Valid @RequestBody PrivacyAssignmentDto requestDto, Principal principal) {
+        return timetableService.addPrivacyToTimetable(timetableId, requestDto, principal);
     }
 
-    /** 🟢 로그인된 사용자의 모든 시간표 조회 */
-    @GetMapping
-    @Operation(summary = "로그인된 사용자의 모든 시간표 조회")
-    @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-
-    public ResponseEntity<ResponseDto.Success> getAllTimetablesForUser(Principal principal) {
-        return timetableService.getAllTimetablesForUser(principal);
-    }
+//    /** 🟢 로그인된 사용자의 모든 시간표 조회 */
+//    @GetMapping
+//    @Operation(summary = "로그인된 사용자의 정보와 시간표들 조회(너무 복잡. 잘안쓰일듯)")
+//    @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
+//
+//    public ResponseEntity<ResponseDto.Success> getAllTimetablesForUser(Principal principal) {
+//        return timetableService.getAllTimetablesForUser(principal);
+//    }
 
     /** 🟢 로그인된 사용자의 시간표 이름과 ID 조회 */
     @GetMapping("/names-and-ids")
-    @Operation(summary = "로그인된 사용자의 시간표 이름과 ID 조회")
+    @Operation(summary = "로그인된 사용자의 시간표 이름과 ID 조회(이게 목록 불러오기임)")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
     public ResponseEntity<ResponseDto.Success> getTimetableNamesAndIds(Principal principal) {
         return timetableService.getTimetableNamesAndIds(principal);
@@ -91,7 +89,7 @@ public class TimetableController {
     @Operation(summary = "특정 시간표 조회")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
     public ResponseEntity<ResponseDto.Success> getTimetableById(@PathVariable Long timetableId, Principal principal) {
-        return timetableService.getTimetableById(timetableId, principal);
+        return timetableService.getTimetableByIdWithDetails(timetableId, principal);
     }
 
     /** 🟢 시간표에서 개인 일정 제거 */

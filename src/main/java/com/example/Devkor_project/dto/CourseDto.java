@@ -492,4 +492,12 @@ public class CourseDto
                 .isBookmark(isBookmark)
                 .build();
     }
+    public static CourseDto.Basic fromCourse(Course course) {
+        return CourseDto.Basic.builder()
+                .course_id(course.getCourse_id())
+                .course_code(course.getCourse_code())
+                .name(course.getName())
+                .professor(course.getProfessor())
+                .build();
+    }
 }

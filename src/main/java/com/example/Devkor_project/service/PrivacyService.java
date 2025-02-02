@@ -1,12 +1,18 @@
 package com.example.Devkor_project.service;
 
 import com.example.Devkor_project.dto.PrivacyDto;
+import com.example.Devkor_project.dto.PrivacyUpdateDto;
+import com.example.Devkor_project.dto.ResponseDto;
 import com.example.Devkor_project.entity.Privacy;
 import com.example.Devkor_project.entity.Timetable;
+import com.example.Devkor_project.exception.AppException;
+import com.example.Devkor_project.exception.ErrorCode;
 import com.example.Devkor_project.repository.PrivacyRepository;
 import com.example.Devkor_project.repository.TimetableRepository;
 import lombok.RequiredArgsConstructor;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -63,24 +69,31 @@ public class PrivacyService {
 
     // 개인일정 수정
     @Transactional
-    public PrivacyDto updatePrivacy(Long id, PrivacyDto privacyDto, Principal principal) {
-        Privacy privacy = privacyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Privacy not found"));
+    public ResponseEntity<ResponseDto.Success> updatePrivacy(Long privacyId, PrivacyUpdateDto updateDto, Principal principal) {
+        Privacy privacy = privacyRepository.findById(privacyId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRIVACY_NOT_FOUND, "해당 개인 일정을 찾을 수 없습니다."));
 
         validateTimetablesOwnership(privacy.getTimetables().stream()
                 .map(Timetable::getId)
                 .collect(Collectors.toList()), principal);
 
-        List<Timetable> timetables = timetableRepository.findAllById(privacyDto.getTimetableIds());
-        privacy.setName(privacyDto.getName());
-        privacy.setDay(privacyDto.getDay());
-        privacy.setStartTime(privacyDto.getStartTime());
-        privacy.setFinishTime(privacyDto.getFinishTime());
-        privacy.setLocation(privacyDto.getLocation());
-        privacy.setTimetables(timetables);
+        // 기존 일정 정보 업데이트
+        privacy.setName(updateDto.getName());
+        privacy.setDay(updateDto.getDay());
+        privacy.setStartTime(updateDto.getStartTime());
+        privacy.setFinishTime(updateDto.getFinishTime());
+        privacy.setLocation(updateDto.getLocation());
 
-        return convertToDto(privacyRepository.save(privacy));
+        privacyRepository.save(privacy);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .message("개인 일정이 성공적으로 수정되었습니다.")
+                        .data(convertToDto(privacy))
+                        .version("v1.1.4")
+                        .build());
     }
+
 
     // 개인일정 삭제
     @Transactional

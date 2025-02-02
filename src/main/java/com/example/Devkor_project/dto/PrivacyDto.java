@@ -3,6 +3,7 @@ package com.example.Devkor_project.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import com.example.Devkor_project.entity.Privacy;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -46,4 +47,15 @@ public class PrivacyDto {
 
     @Schema(description = "수정 시간")
     private LocalDateTime updatedAt;
+
+    public static PrivacyDto fromPrivacy(Privacy privacy) {
+        return PrivacyDto.builder()
+                .id(privacy.getId())
+                .name(privacy.getName())
+                .day(privacy.getDay())
+                .startTime(privacy.getStartTime())
+                .finishTime(privacy.getFinishTime())
+                .location(privacy.getLocation())
+                .build();
+    }
 }
