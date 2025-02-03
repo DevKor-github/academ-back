@@ -30,17 +30,29 @@ public class PrivacyController {
     @GetMapping
     @Operation(summary = "해당 사용자의 모든 개인일정 조회")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
-    public List<PrivacyDto> getAllPrivacy(Principal principal) {
-        return privacyService.getAllPrivacy(principal);
+    public ResponseEntity<ResponseDto.Success> getAllPrivacy(Principal principal) {
+        List<PrivacyDto> privacyList = privacyService.getAllPrivacy(principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseDto.Success.builder()
+                        .message("사용자의 모든 개인일정을 조회하였습니다.")
+                        .data(privacyList)
+                        .version(versionProvider.getVersion())
+                        .build());
     }
 
-    @GetMapping("/timetable/{timetableId}")
+        @GetMapping("/timetable/{timetableId}")
     @Operation(summary = "특정 시간표의 개인일정 조회")
     @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {access token}")
     @Parameter(in = ParameterIn.PATH, name = "timetableId", description = "조회할 시간표 ID")
-    public List<PrivacyDto> getPrivacyByTimetable(@PathVariable ("timetableId")Long timetableId, Principal principal) {
-        return privacyService.getPrivacyByTimetable(timetableId, principal);
-    }
+        public ResponseEntity<ResponseDto.Success> getPrivacyByTimetable(@PathVariable("timetableId") Long timetableId, Principal principal) {
+            List<PrivacyDto> privacyList = privacyService.getPrivacyByTimetable(timetableId, principal);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ResponseDto.Success.builder()
+                            .message("특정 시간표의 개인일정을 조회하였습니다.")
+                            .data(privacyList)
+                            .version(versionProvider.getVersion())
+                            .build());
+        }
 
 
 //    @PostMapping
@@ -81,7 +93,7 @@ public class PrivacyController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("개인 일정이 성공적으로 삭제되었습니다.")
-                        .version("v1.2.1-alpha")
+                        .version(versionProvider.getVersion())
                         .build());
 
     }

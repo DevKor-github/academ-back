@@ -74,6 +74,8 @@ public class AccessAuthFilter extends OncePerRequestFilter {
                 "/api/course/update-comment",
                 "/api/course/delete-comment",
                 "/api/course/my-comments",
+                "/api/privacy",
+                "/api/timetables",
                 "/api/is-secure",
                 "/swagger-ui",
                 "/v3/api-docs"

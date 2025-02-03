@@ -4,6 +4,7 @@ import com.example.Devkor_project.dto.*;
 import com.example.Devkor_project.entity.*;
 import com.example.Devkor_project.exception.AppException;
 import com.example.Devkor_project.exception.ErrorCode;
+import com.example.Devkor_project.configuration.VersionProvider;
 import com.example.Devkor_project.repository.CourseRepository;
 import com.example.Devkor_project.repository.PrivacyRepository;
 import com.example.Devkor_project.repository.ProfileRepository;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +32,7 @@ public class TimetableService {
     private final CourseRepository courseRepository;
     private final PrivacyRepository privacyRepository;
     private final ProfileRepository profileRepository;
+    private final VersionProvider versionProvider;
 
     /**
      * 로그인된 사용자의 시간표 생성
@@ -79,7 +82,7 @@ public class TimetableService {
                 .body(ResponseDto.Success.builder()
                         .message("시간표 이름과 ID를 성공적으로 조회하였습니다.")
                         .data(timetableDtos)
-                        .version("v1.1.4")
+                        .version(versionProvider.getVersion())
                         .build());
     }
 
@@ -90,14 +93,41 @@ public class TimetableService {
     public ResponseEntity<ResponseDto.Success> getTimetableByIdWithDetails(Long timetableId, Principal principal) {
         Timetable timetable = validateProfileOwnership(timetableId, principal);
 
+        // ✅ 시간표에 포함된 강의 조회
+        List<Course> courses = timetable.getCourses();
+
+        // ✅ 강의 ID 리스트 추출
+        List<Long> courseIds = courses.stream().map(Course::getCourse_id).toList();
+
+        // ✅ 레포지토리에서 TimeLocation 정보 가져오기
+        List<TimeLocation> timeLocations = courseIds.isEmpty() ? List.of() : timeLocationRepository.findByCourseIds(courseIds);
+
+        // ✅ 강의 ID별로 TimeLocation 매핑
+        Map<Long, List<CourseDto.TimeLocation>> timeLocationMap = timeLocations.stream()
+                .collect(Collectors.groupingBy(
+                        tl -> tl.getCourse_id().getCourse_id(),
+                        Collectors.mapping(
+                                tl -> new CourseDto.TimeLocation(
+                                        tl.getDay(),
+                                        tl.getStartPeriod(),
+                                        tl.getEndPeriod(),
+                                        tl.getLocation()
+                                ),
+                                Collectors.toList()
+                        )
+                ));
+
+        // ✅ DTO 변환 (TimeLocation 포함)
+        List<CourseDto.Simple> courseDtos = courses.stream()
+                .map(course -> CourseDto.fromCourse(course, timeLocationMap.getOrDefault(course.getCourse_id(), List.of())))
+                .collect(Collectors.toList());
+
         // DTO 변환
         TimetableWithDetailsDto dto = TimetableWithDetailsDto.builder()
                 .id(timetable.getId())
                 .profileId(timetable.getProfile().getProfile_id())
                 .name(timetable.getName())
-                .courses(timetable.getCourses().stream()
-                        .map(CourseDto::fromCourse)  // ✅ CourseDto 변환 메서드 사용
-                        .collect(Collectors.toList()))
+                .courses(courseDtos)  // ✅ CourseDto 변환 메서드 사용
                 .privacies(timetable.getPrivacies().stream()
                         .map(PrivacyDto::fromPrivacy)  // ✅ PrivacyDto 변환 메서드 사용
                         .collect(Collectors.toList()))
@@ -107,7 +137,7 @@ public class TimetableService {
                 .body(ResponseDto.Success.builder()
                         .message("특정 시간표를 성공적으로 조회하였습니다.")
                         .data(dto)
-                        .version("v1.1.4")
+                        .version(versionProvider.getVersion())
                         .build());
     }
 
@@ -161,7 +191,7 @@ public class TimetableService {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("강의가 시간표에 추가되었습니다.")
-                        .version("v1.2.1-alpha")
+                        .version(versionProvider.getVersion())
                         .build());
     }
 
@@ -184,7 +214,7 @@ public class TimetableService {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("강의가 시간표에서 제거되었습니다.")
-                        .version("v1.1.4")
+                        .version(versionProvider.getVersion())
                         .build());
     }
 
@@ -235,7 +265,7 @@ public class TimetableService {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("개인 일정이 시간표에 추가되었습니다.")
-                        .version("v1.2.1-alpha")
+                        .version(versionProvider.getVersion())
                         .build());
     }
 
@@ -260,7 +290,7 @@ public class TimetableService {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("시간표에서 개인 일정이 성공적으로 제거되었습니다.")
-                        .version("v1.1.4")
+                        .version(versionProvider.getVersion())
                         .build());
     }
     @Transactional
@@ -275,7 +305,7 @@ public class TimetableService {
                 .body(ResponseDto.Success.builder()
                         .message("시간표 이름이 성공적으로 변경되었습니다.")
                         .data(new TimetableDto(timetable.getId(), timetable.getName()))
-                        .version("v1.1.4")
+                        .version(versionProvider.getVersion())
                         .build());
     }
     /**
@@ -295,7 +325,7 @@ public class TimetableService {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("시간표가 성공적으로 삭제되었습니다.")
-                        .version("v1.2.1-alpha")
+                        .version(versionProvider.getVersion())
                         .build());
     }
 

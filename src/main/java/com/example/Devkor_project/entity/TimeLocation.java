@@ -1,5 +1,6 @@
 package com.example.Devkor_project.entity;
 
+import com.example.Devkor_project.dto.TimeLocationDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -26,4 +27,6 @@ public class TimeLocation
     @Column(nullable = true) private Integer startPeriod;
     @Column(nullable = true) private Integer endPeriod;
     @Column(nullable = true) private String location;
+
+
 }
