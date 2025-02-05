@@ -173,7 +173,7 @@ public class TimetableService {
         // 🕒 새 강의의 시간표 정보 가져오기
         List<TimeLocationDto> newCourseTimeLocations = timeLocationRepository.findByCourseIds(List.of(course.getCourse_id()))
                 .stream()
-                .map(tl -> new TimeLocationDto(tl.getDay(), tl.getStartPeriod(), tl.getEndPeriod(), tl.getLocation()))
+                .map(tl -> new TimeLocationDto(tl.getDay(), tl.getStartPeriod() != null ? tl.getStartPeriod() : 0, tl.getEndPeriod()!= null ? tl.getEndPeriod() : 0, tl.getLocation()))
                 .toList();
 
         // ⚠️ 기존 일정과 새 강의 시간이 겹치는지 확인
@@ -230,12 +230,10 @@ public class TimetableService {
         Privacy privacy = privacyRepository.findById(privacyId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRIVACY_NOT_FOUND, "해당 개인 일정을 찾을 수 없습니다."));
 
-        if (timetable.getPrivacies() == null) {
-            timetable.setPrivacies(new ArrayList<>()); // 🛠️ Null 체크 후 리스트 초기화
-        }
-        if (privacy.getTimetables() == null) {
-            privacy.setTimetables(new ArrayList<>()); // 🛠️ Null 체크 후 리스트 초기화
-        }
+//        if (timetable.getPrivacies() == null) {
+//            timetable.setPrivacies(new ArrayList<>()); // 🛠️ Null 체크 후 리스트 초기화
+//        }
+
 
         if (timetable.getPrivacies().contains(privacy)) {
             throw new AppException(ErrorCode.DUPLICATE_ENTRY, "해당 개인 일정은 이미 추가되어 있습니다.");
@@ -265,6 +263,7 @@ public class TimetableService {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.Success.builder()
                         .message("개인 일정이 시간표에 추가되었습니다.")
+                        .data(PrivacyDto.fromPrivacy(privacy))
                         .version(versionProvider.getVersion())
                         .build());
     }
