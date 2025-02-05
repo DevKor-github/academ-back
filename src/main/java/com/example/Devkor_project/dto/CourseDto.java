@@ -2,6 +2,7 @@ package com.example.Devkor_project.dto;
 
 import com.example.Devkor_project.entity.Course;
 import com.example.Devkor_project.entity.CourseRating;
+import com.example.Devkor_project.dto.TimeLocationDto;
 import com.example.Devkor_project.entity.TimeLocation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CourseDto
 {
@@ -877,4 +879,30 @@ public class CourseDto
                 .isBookmark(isBookmark)
                 .build();
     }
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @ToString
+    @Builder
+    public static class Simple {  // ✅ 내부 static 클래스로 선언되어 있어야 함
+        private Long course_id;
+        private String course_code;
+        private String name;
+        private String professor;
+        private List<TimeLocationDto> timeLocations;
+    }
+        public static CourseDto.Simple fromCourse(Course course, List<TimeLocation> timeLocations) {
+            return CourseDto.Simple.builder()
+                    .course_id(course.getCourse_id())
+                    .course_code(course.getCourse_code())
+                    .name(course.getName())
+                    .professor(course.getProfessor())
+                    .timeLocations(
+                            timeLocations.stream()
+                                    .map(tl -> new TimeLocationDto(tl.getDay(), tl.getStartPeriod(), tl.getEndPeriod(), tl.getLocation()))
+                                    .toList()
+                    )
+                    .build();
+        }
+
 }

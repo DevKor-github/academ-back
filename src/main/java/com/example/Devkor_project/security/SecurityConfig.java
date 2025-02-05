@@ -70,6 +70,9 @@ public class SecurityConfig
                                 .requestMatchers("/api/course/report-comment").hasAnyRole("USER", "ADMIN")
                                 // 마이페이지
                                 .requestMatchers("/api/mypage/**").hasAnyRole("USER", "ADMIN")
+                                //시간표, 개인일정
+                                .requestMatchers("/api/privacy/**").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/timetables/**").hasAnyRole("USER", "ADMIN")
                                 // 기타
                                 .requestMatchers("/").permitAll()
                                 .requestMatchers("/api/is-secure").permitAll()

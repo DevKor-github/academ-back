@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -37,4 +39,8 @@ public class Course
     @Column private String credit;
     @Column private String time_location;
     @Column(nullable = false) private int COUNT_comments;
+
+    // Timetable와의 N:N 관계 추가
+    @ManyToMany(mappedBy = "courses") // Timetable에서 설정한 필드명
+    private List<Timetable> timetables = new ArrayList<>();
 }
